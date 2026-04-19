@@ -1,158 +1,37 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZapCaderno Ultra Pro</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Ajuste dos botões para não travar no celular */
-        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; }
-        .btn-plus { background: #4f46e5 !important; color: white !important; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; outline: none; }
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        
-        #telaLogin { position: fixed; inset: 0; background: white; z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .progress-bar { height: 10px; border-radius: 5px; background: #e2e8f0; overflow: hidden; margin: 10px 0; }
-        .progress-fill { height: 100%; background: #4f46e5; width: 0%; transition: 0.8s; }
-    </style>
-</head>
-<body class="pb-32">
+window.salvarVenda = async () => {
+    const nomeInput = document.getElementById('nome');
+    const valorInput = document.getElementById('valor');
+    const whatsappInput = document.getElementById('whatsapp');
+    const produtoInput = document.getElementById('produto');
 
-    <div id="telaLogin">
-        <h1 class="text-2xl font-bold mb-6 text-indigo-600">ZapCaderno Pro</h1>
-        <input type="email" id="logEmail" placeholder="E-mail" class="w-full p-4 border rounded-xl mb-3 outline-none">
-        <input type="password" id="logSenha" placeholder="Senha" class="w-full p-4 border rounded-xl mb-4 outline-none">
-        <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl">ENTRAR</button>
-    </div>
+    // Substitui a vírgula por ponto para o banco de dados entender como número
+    const valorFormatado = valorInput.value.replace(',', '.');
+    
+    if(!nomeInput.value || !valorFormatado) return alert("Preencha os campos!");
 
-    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg text-center">
-        <h1 class="text-xl font-bold uppercase tracking-widest">ZapCaderno Ultra</h1>
-    </header>
-
-    <main class="p-4 -mt-8">
-        <section id="dashboard" class="tab-content active">
-            <div class="card">
-                <p class="text-[10px] font-bold text-indigo-500 uppercase">Total a Receber</p>
-                <p id="totalReceber" class="text-3xl font-black text-gray-800">R$ 0,00</p>
-                <div class="progress-bar"><div id="progressoVendas" class="progress-fill"></div></div>
-            </div>
-            <div id="listaDividas" class="space-y-4"></div>
-        </section>
-
-        <section id="novo" class="tab-content">
-            <div class="card">
-                <h2 class="text-lg font-bold mb-6">Nova Venda</h2>
-                <div class="space-y-4">
-                    <input type="text" id="nome" placeholder="Nome do Cliente" class="w-full p-4 border rounded-xl outline-none">
-                    <input type="number" id="valor" placeholder="Valor (Ex: 50.00)" class="w-full p-4 border rounded-xl outline-none font-bold">
-                    <button onclick="salvarVenda()" class="w-full bg-indigo-600 text-white font-bold py-5 rounded-2xl shadow-lg border-none">SALVAR NO FIREBASE</button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <nav class="nav-bar">
-        <button onclick="showTab('dashboard')" class="text-indigo-600 bg-transparent border-none p-4"><i class="fas fa-home text-xl"></i></button>
-        <button onclick="showTab('novo')" class="btn-plus"><i class="fas fa-plus text-xl"></i></button>
-        <button onclick="logout()" class="text-gray-400 bg-transparent border-none p-4"><i class="fas fa-sign-out-alt text-xl"></i></button>
-    </nav>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
-            authDomain: "zapcaderno.firebaseapp.com",
-            projectId: "zapcaderno",
-            storageBucket: "zapcaderno.firebasestorage.app",
-            messagingSenderId: "446641643061",
-            appId: "1:446641643061:web:daf768922b53614f229b7c"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        window.fazerLogin = () => {
-            const e = document.getElementById('logEmail').value;
-            const s = document.getElementById('logSenha').value;
-            signInWithEmailAndPassword(auth, e, s).catch(err => alert("Erro: " + err.message));
-        };
-
-        window.logout = () => signOut(auth);
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('telaLogin').style.display = 'none';
-                carregarDados(user.uid);
-            } else {
-                document.getElementById('telaLogin').style.display = 'flex';
-            }
+    try {
+        await addDoc(collection(db, "vendas"), {
+            uid: auth.currentUser.uid,
+            nome: nomeInput.value,
+            whatsapp: whatsappInput.value,
+            produto: produtoInput.value,
+            valor: parseFloat(valorFormatado),
+            pago: false,
+            data: new Date()
         });
+        
+        alert("Venda registrada!");
 
-        window.salvarVenda = async () => {
-            const n = document.getElementById('nome').value;
-            const v = document.getElementById('valor').value;
-            if(!n || !v) return alert("Preencha os campos!");
+        // --- FUNÇÃO DE LIMPEZA: Limpa os dados antigos dos campos ---
+        nomeInput.value = '';
+        valorInput.value = '';
+        whatsappInput.value = '';
+        produtoInput.value = '';
 
-            try {
-                await addDoc(collection(db, "vendas"), {
-                    uid: auth.currentUser.uid,
-                    nome: n,
-                    valor: parseFloat(v),
-                    pago: false,
-                    data: new Date()
-                });
-                alert("Venda registrada!");
-                document.getElementById('nome').value = '';
-                document.getElementById('valor').value = '';
-                showTab('dashboard');
-            } catch (e) { alert("Erro ao salvar!"); }
-        };
+        showTab('dashboard');
+    } catch (e) { 
+        alert("Erro ao salvar!"); 
+    }
+};
 
-        function carregarDados(uid) {
-            const q = query(collection(db, "vendas"), where("uid", "==", uid));
-            onSnapshot(q, (snap) => {
-                const lista = document.getElementById('listaDividas');
-                let total = 0; let pago = 0;
-                lista.innerHTML = '';
-                snap.forEach(v => {
-                    const d = v.data();
-                    if(d.pago) pago += d.valor;
-                    else {
-                        total += d.valor;
-                        lista.innerHTML += `
-                        <div class="card border-l-4 border-indigo-500 flex justify-between items-center">
-                            <div><p class="font-bold">${d.nome}</p></div>
-                            <div class="text-right">
-                                <p class="text-red-500 font-bold">R$ ${d.valor.toFixed(2)}</p>
-                                <button onclick="baixar('${v.id}')" class="text-[10px] text-indigo-600 font-bold uppercase">Recebi</button>
-                            </div>
-                        </div>`;
-                    }
-                });
-                document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
-                const perc = (pago / (total + pago)) * 100 || 0;
-                document.getElementById('progressoVendas').style.width = perc + "%";
-            });
-        }
-
-        window.baixar = (id) => updateDoc(doc(db, "vendas", id), { pago: true });
-
-        // Função de troca de aba simplificada para NÃO TRAVAR
-        window.showTab = (id) => {
-            document.getElementById('dashboard').classList.remove('active');
-            document.getElementById('novo').classList.remove('active');
-            document.getElementById(id).classList.add('active');
-        };
-    </script>
-</body>
-</html>
+<p class="text-red-500 font-bold">R$ ${d.valor.toFixed(2).replace('.', ',')}</p>
