@@ -3,124 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZapCaderno Ultra Pro</title>
+    <title>ZapCaderno Pro</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; transition: 0.3s; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; -webkit-tap-highlight-color: transparent; }
         .dark-mode { background-color: #0f172a; color: #f1f5f9; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        #telaLogin, #bloqueioPagamento, #carregando {
-            position: fixed; inset: 0; background: white; z-index: 99999;
-            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center;
-        }
-        #bloqueioPagamento { background: #1e1b4b; color: white; }
-        .dark-mode #telaLogin { background: #0f172a; }
-
-        .nav-bar {
-            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px;
-            background: white; border-radius: 25px; display: flex; 
-            justify-content: space-around; align-items: center; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100;
-        }
-        .dark-mode .nav-bar { background: #1e293b; border: 1px solid #334155; }
-        .btn-plus {
-            background: #4f46e5; color: white; width: 55px; height: 55px;
-            border-radius: 18px; display: flex; align-items: center; justify-content: center;
-            margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none;
-        }
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .tab-content.active { display: block; }
+        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; background: white; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; }
+        .dark-mode .nav-bar { background: #1e293b; }
+        .btn-plus { background: #4f46e5; color: white; width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-top: -35px; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4); }
+        .card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; }
         .dark-mode .card { background: #1e293b; }
-        input { border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; outline: none; width: 100%; }
-        .dark-mode input { background: #1e293b; border-color: #334155; color: white; }
+        #telaLogin { position: fixed; inset: 0; background: white; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .dark-mode #telaLogin { background: #0f172a; }
     </style>
 </head>
-<body class="pb-32">
-
-    <div id="carregando" style="display: flex;">
-        <i class="fas fa-circle-notch fa-spin text-4xl text-indigo-600"></i>
-    </div>
+<body class="pb-24">
 
     <div id="telaLogin">
-        <i class="fas fa-wallet text-5xl text-indigo-600 mb-6"></i>
-        <h1 class="text-2xl font-bold mb-6">ZapCaderno Pro</h1>
-        <input type="email" id="logEmail" placeholder="E-mail" class="mb-3">
-        <input type="password" id="logSenha" placeholder="Senha" class="mb-4">
-        <button onclick="authAcesso()" class="w-full max-w-xs bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg">ENTRAR / CADASTRAR</button>
+        <h1 class="text-2xl font-bold mb-6">ZapCaderno</h1>
+        <input type="email" id="email" placeholder="E-mail" class="w-full p-4 border rounded-xl mb-3 dark:bg-gray-800">
+        <input type="password" id="senha" placeholder="Senha" class="w-full p-4 border rounded-xl mb-4 dark:bg-gray-800">
+        <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold">ENTRAR / CADASTRAR</button>
     </div>
 
-    <div id="bloqueioPagamento">
-        <i class="fas fa-lock text-5xl text-yellow-400 mb-6"></i>
-        <h2 class="text-2xl font-bold mb-2">Assinatura Expirada</h2>
-        <p class="mb-8 opacity-70">Renove sua assinatura para continuar gerindo suas vendas.</p>
-        <a href="https://mpago.la/2CGD9Ar" target="_blank" class="w-full max-w-xs bg-green-500 text-white font-bold py-4 rounded-xl block text-center no-underline mb-4">PAGAR R$ 14,99</a>
-        <button onclick="firebaseLogout()" class="text-sm underline opacity-50">Sair da conta</button>
-    </div>
-
-    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
+    <header class="bg-indigo-600 text-white p-6 rounded-b-3xl shadow-lg">
         <div class="flex justify-between items-center">
-            <div>
-                <h1 id="nomeLojaExibicao" class="text-xl font-bold uppercase">Minha Loja</h1>
-                <span class="text-[10px] bg-green-500 px-2 py-0.5 rounded-full font-bold">ONLINE</span>
-            </div>
-            <button onclick="toggleDarkMode()" class="text-white opacity-80"><i class="fas fa-moon text-xl"></i></button>
+            <h1 class="text-xl font-bold">Meu Caderno</h1>
+            <button onclick="document.body.classList.toggle('dark-mode')"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
-    <main class="p-4 -mt-8">
-        <section id="dashboard" class="tab-content active">
-            <div class="card">
-                <div class="flex justify-between items-end mb-2">
-                    <div>
-                        <p class="text-[10px] font-bold text-indigo-500">TOTAL A RECEBER</p>
-                        <p id="totalReceber" class="text-3xl font-black text-red-500">R$ 0,00</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-bold text-green-500">RECEBIDO</p>
-                        <p id="totalHistorico" class="text-lg font-bold">R$ 0,00</p>
-                    </div>
-                </div>
+    <main class="p-4">
+        <div id="dashboard" class="tab-content active">
+            <div class="card bg-indigo-50">
+                <p class="text-xs font-bold text-indigo-600">TOTAL A RECEBER</p>
+                <p id="totalReceber" class="text-3xl font-black text-indigo-700">R$ 0,00</p>
             </div>
-            <div id="listaDividas" class="space-y-4"></div>
-        </section>
+            <div id="listaVendas" class="space-y-3"></div>
+        </div>
 
-        <section id="novo" class="tab-content">
+        <div id="novaVenda" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-6">Nova Venda Fiada</h2>
-                <div class="space-y-4">
-                    <input type="text" id="nome" placeholder="Nome do Cliente">
-                    <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
-                    <input type="text" id="produto" placeholder="Produto/Serviço">
-                    <input type="text" id="valor" placeholder="R$ 0,00" class="text-indigo-600 font-bold text-xl">
-                    <button onclick="salvarVenda()" class="w-full bg-indigo-600 text-white font-bold py-5 rounded-2xl shadow-lg">SALVAR NO CADERNO</button>
-                </div>
+                <h2 class="font-bold mb-4">Nova Venda</h2>
+                <input type="text" id="cliente" placeholder="Nome do Cliente" class="w-full p-3 border rounded-lg mb-3 dark:bg-gray-700">
+                <input type="text" id="valor" placeholder="Valor (Ex: 50,00)" class="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700">
+                <button onclick="salvarNoFirebase()" class="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold">SALVAR</button>
             </div>
-        </section>
-
-        <section id="config" class="tab-content">
-            <div class="card space-y-4">
-                <h2 class="font-bold">Ajustes do Perfil</h2>
-                <input type="text" id="cfgLoja" placeholder="Nome da sua Loja">
-                <input type="text" id="cfgPix" placeholder="Sua Chave PIX">
-                <button onclick="salvarConfig()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">ATUALIZAR DADOS</button>
-                <button onclick="firebaseLogout()" class="w-full bg-red-50 text-red-600 py-4 rounded-xl font-bold mt-8">SAIR DA CONTA</button>
-            </div>
-        </section>
+        </div>
     </main>
 
     <nav class="nav-bar">
-        <button onclick="showTab('dashboard')" class="text-indigo-600 nav-btn"><i class="fas fa-home text-xl"></i></button>
-        <button onclick="showTab('novo')" class="btn-plus"><i class="fas fa-plus text-xl"></i></button>
-        <button onclick="showTab('config')" class="text-gray-400 nav-btn"><i class="fas fa-cog text-xl"></i></button>
+        <button onclick="mudarAba('dashboard')" class="text-indigo-600"><i class="fas fa-home text-xl"></i></button>
+        <button onclick="mudarAba('novaVenda')" class="btn-plus"><i class="fas fa-plus text-xl"></i></button>
+        <button onclick="logout()" class="text-gray-400"><i class="fas fa-sign-out-alt text-xl"></i></button>
     </nav>
 
     <script type="module">
+        // CONFIGURAÇÃO DO SEU FIREBASE (Extraída dos seus prints)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, onSnapshot, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
@@ -135,127 +80,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let dadosVendas = [];
-        let usuarioConfig = {};
-
-        // AUTENTICAÇÃO
-        window.authAcesso = async () => {
-            const email = document.getElementById('logEmail').value;
-            const senha = document.getElementById('logSenha').value;
+        // LOGIN / CADASTRO
+        window.fazerLogin = async () => {
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
             try {
                 await signInWithEmailAndPassword(auth, email, senha);
             } catch (e) {
                 try {
-                    const res = await createUserWithEmailAndPassword(auth, email, senha);
-                    const hoje = new Date();
-                    hoje.setDate(hoje.getDate() + 3); // 3 dias grátis
-                    await setDoc(doc(db, "usuarios", res.user.uid), { email, pagoAte: hoje, loja: "MINHA LOJA", pix: "" });
-                } catch (err) { alert("Erro: " + err.message); }
-            }
-        };
-
-        window.firebaseLogout = () => signOut(auth).then(() => location.reload());
-
-        onAuthStateChanged(auth, async (user) => {
-            document.getElementById('carregando').style.display = 'none';
-            if (user) {
-                const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-                if (userDoc.exists()) {
-                    const data = userDoc.data();
-                    usuarioConfig = data;
-                    document.getElementById('nomeLojaExibicao').innerText = data.loja;
-                    document.getElementById('cfgLoja').value = data.loja;
-                    document.getElementById('cfgPix').value = data.pix;
-
-                    if (data.pagoAte.toDate() < new Date()) {
-                        document.getElementById('bloqueioPagamento').style.display = 'flex';
-                    } else {
-                        document.getElementById('telaLogin').style.display = 'none';
-                        carregarVendas(user.uid);
-                    }
-                }
-            } else {
-                document.getElementById('telaLogin').style.display = 'flex';
-            }
-        });
-
-        // DADOS
-        function carregarVendas(uid) {
-            const q = query(collection(db, "vendas"), where("uid", "==", uid));
-            onSnapshot(q, (snap) => {
-                dadosVendas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderDashboard();
-            });
-        }
-
-        window.salvarVenda = async () => {
-            const valor = parseFloat(document.getElementById('valor').value.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
-            await addDoc(collection(db, "vendas"), {
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('nome').value,
-                whatsapp: document.getElementById('whatsapp').value,
-                produto: document.getElementById('produto').value,
-                valor: valor,
-                pago: false,
-                data: new Date()
-            });
-            alert("Venda registrada!");
-            showTab('dashboard');
-        };
-
-        window.renderDashboard = () => {
-            const lista = document.getElementById('listaDividas');
-            let aReceber = 0; let recebido = 0;
-            lista.innerHTML = '';
-            
-            dadosVendas.forEach(v => {
-                if(v.pago) recebido += v.valor;
-                else {
-                    aReceber += v.valor;
-                    lista.innerHTML += `
-                        <div class="card border-l-4 border-indigo-500">
-                            <div class="flex justify-between items-start">
-                                <div><b>${v.nome}</b><p class="text-xs opacity-50">${v.produto}</p></div>
-                                <span class="font-bold text-red-500">R$ ${v.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                            </div>
-                            <div class="flex gap-2 mt-4">
-                                <button onclick="cobrar('${v.nome}','${v.whatsapp}',${v.valor})" class="flex-1 bg-green-500 text-white py-3 rounded-lg text-xs font-bold">COBRAR</button>
-                                <button onclick="baixar('${v.id}')" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg text-xs font-bold">RECEBI</button>
-                            </div>
-                        </div>`;
-                }
-            });
-            document.getElementById('totalReceber').innerText = `R$ ${aReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('totalHistorico').innerText = `R$ ${recebido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-        };
-
-        window.baixar = async (id) => { if(confirm("Confirmar recebimento?")) await updateDoc(doc(db, "vendas", id), { pago: true }); };
-        
-        window.cobrar = (nome, whats, valor) => {
-            const msg = `Olá ${nome}, lembrete da ${usuarioConfig.loja}: R$ ${valor.toLocaleString('pt-BR')}. Pix: ${usuarioConfig.pix}`;
-            window.open(`https://wa.me/55${whats.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`);
-        };
-
-        window.salvarConfig = async () => {
-            await updateDoc(doc(db, "usuarios", auth.currentUser.uid), {
-                loja: document.getElementById('cfgLoja').value,
-                pix: document.getElementById('cfgPix').value
-            });
-            alert("Dados atualizados!");
-        };
-
-        window.showTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
-
-        window.toggleDarkMode = () => document.body.classList.toggle('dark-mode');
-
-        document.getElementById('valor').addEventListener('input', (e) => {
-            let v = e.target.value.replace(/\D/g, '');
-            v = (v / 100).toFixed(2).replace('.', ',');
-            e.target.value = v ? 'R$ ' + v : '';
-        });
-    </script>
-</body>
-</html>
+                    await createUserWithEmailAndPassword(auth, email, senha);
+                    alert("Conta criada com sucesso!");
