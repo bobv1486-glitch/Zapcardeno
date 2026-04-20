@@ -7,23 +7,180 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding-bottom: 100px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #ffffff; margin: 0; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
         #telaLogin { position: fixed; inset: 0; background: #121212; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 70px; background: #1a1a1a; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; }
 
-        .btn-plus { background: #5851db; color: white; width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-top: -40px; box-shadow: 0 8px 20px rgba(88, 81, 219, 0.4); border: none; outline: none; }
+        .btn-plus { background: #5851db; color: white; width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-top: -40px; box-shadow: 0 8px 20px rgba(88, 81, 219, 0.4); border: none; }
         
-        .card { background: #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
+        .card { background: #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 15px; }
         
-        input { background: #242424 !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 15px !important; width: 100%; margin-bottom: 12px; color: #fff !important; outline: none; }
+        input { background: #242424 !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 15px !important; width: 100%; margin-bottom: 12px; color: #fff !important; }
         
-        .nav-btn { color: #666; font-size: 24px; background: none; border: none; transition: 0.3s; }
+        .nav-btn { color: #666; font-size: 24px; background: none; border: none; }
         .nav-btn.active { color: #a5a1f5; }
     </style>
 </head>
-<body>
+<body class="pb-32">
 
-    <div
+    <div id="telaLogin">
+        <h1 class="text-3xl font-bold mb-6 text-indigo-500">ZapCaderno</h1>
+        <input type="email" id="logEmail" placeholder="E-mail">
+        <input type="password" id="logSenha" placeholder="Senha">
+        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold border-none">ENTRAR</button>
+    </div>
+
+    <header class="p-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 id="headerNome" class="text-xl font-bold uppercase tracking-tight">MINHA LOJA</h1>
+                <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: Carregando...</p>
+            </div>
+            <span class="bg-green-500 text-[9px] text-black font-bold px-3 py-1 rounded-full uppercase">Sistema Ativo</span>
+        </div>
+    </header>
+
+    <main class="p-4">
+        <div id="dashboard" class="tab-content active">
+            <div class="card mb-4">
+                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Total a Receber</p>
+                <p id="totalReceber" class="text-4xl font-bold">R$ 0,00</p>
+            </div>
+            <div id="listaDividas"></div>
+        </div>
+
+        <div id="novo" class="tab-content">
+            <div class="card shadow-2xl">
+                <h2 class="font-bold mb-4 text-indigo-400">Novo Registro</h2>
+                <input type="text" id="nome" placeholder="Nome do Cliente">
+                <input type="text" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
+                <input type="text" id="produto" placeholder="Produto ou Serviço">
+                <input type="number" id="valor" placeholder="Valor Total R$">
+                <button id="btnSalvarVenda" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">SALVAR VENDA</button>
+            </div>
+        </div>
+
+        <div id="config" class="tab-content">
+            <div class="card">
+                <h2 class="font-bold mb-4 uppercase text-xs">Perfil</h2>
+                <input type="text" id="confNome" placeholder="Nome da Empresa">
+                <input type="text" id="confPix" placeholder="Chave PIX">
+                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold">SALVAR</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="nav-bar">
+        <button id="tabDash" class="nav-btn active"><i class="fas fa-home"></i></button>
+        <button id="tabNovo" class="btn-plus"><i class="fas fa-plus"></i></button>
+        <button id="tabConf" class="nav-btn"><i class="fas fa-cog"></i></button>
+        <button id="btnLogout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></button>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
+            authDomain: "zapcaderno.firebaseapp.com",
+            projectId: "zapcaderno",
+            storageBucket: "zapcaderno.firebasestorage.app",
+            messagingSenderId: "446641643061",
+            appId: "1:446641643061:web:daf768922b53614f229b7c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const openTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if(id === 'dashboard') document.getElementById('tabDash').classList.add('active');
+            if(id === 'config') document.getElementById('tabConf').classList.add('active');
+        };
+
+        document.getElementById('tabDash').onclick = () => openTab('dashboard');
+        document.getElementById('tabNovo').onclick = () => openTab('novo');
+        document.getElementById('tabConf').onclick = () => openTab('config');
+        document.getElementById('btnLogout').onclick = () => signOut(auth);
+
+        document.getElementById('btnEntrar').onclick = () => {
+            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value);
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('telaLogin').style.display = 'none';
+                const snap = await getDoc(doc(db, "configuracoes", user.uid));
+                if (snap.exists()) {
+                    document.getElementById('headerNome').innerText = snap.data().nome;
+                    document.getElementById('headerPix').innerText = "PIX: " + snap.data().pix;
+                }
+                initData(user.uid);
+            } else {
+                document.getElementById('telaLogin').style.display = 'flex';
+            }
+        });
+
+        document.getElementById('btnSalvarConfig').onclick = async () => {
+            await setDoc(doc(db, "configuracoes", auth.currentUser.uid), {
+                nome: document.getElementById('confNome').value,
+                pix: document.getElementById('confPix').value
+            });
+            alert("Perfil Salvo!");
+        };
+
+        document.getElementById('btnSalvarVenda').onclick = async () => {
+            await addDoc(collection(db, "vendas"), {
+                uid: auth.currentUser.uid,
+                nome: document.getElementById('nome').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                produto: document.getElementById('produto').value,
+                valor: parseFloat(document.getElementById('valor').value) || 0,
+                pago: false,
+                data: new Date().toLocaleDateString('pt-BR')
+            });
+            alert("Venda Registrada!");
+            openTab('dashboard');
+        };
+
+        function initData(uid) {
+            onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
+                let total = 0;
+                const div = document.getElementById('listaDividas');
+                div.innerHTML = '';
+                snap.forEach(s => {
+                    const d = s.data();
+                    if(!d.pago) {
+                        total += d.valor;
+                        div.innerHTML += `
+                            <div class="card flex justify-between items-center">
+                                <div><b>${d.nome}</b><p class="text-xs text-gray-500">${d.produto}</p></div>
+                                <div class="flex gap-2">
+                                    <button onclick="window.cobrar('${d.whatsapp}', '${d.valor}')" class="bg-green-600 p-2 rounded-lg"><i class="fab fa-whatsapp"></i></button>
+                                    <button onclick="window.receber('${s.id}')" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-bold">RECEBI</button>
+                                </div>
+                            </div>`;
+                    }
+                });
+                document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2)}`;
+            });
+        }
+
+        window.cobrar = (num, val) => {
+            window.open(`https://wa.me/${num}?text=Olá! Segue lembrete da cobrança no valor de R$ ${val}.`);
+        };
+
+        window.receber = async (id) => {
+            await updateDoc(doc(db, "vendas", id), { pago: true });
+        };
+    </script>
+</body>
+</html>
