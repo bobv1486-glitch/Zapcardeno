@@ -3,78 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZapCaderno</title>
+    <title>ZapCaderno Pro</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #ffffff; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; -webkit-tap-highlight-color: transparent; }
+        .dark-mode { background-color: #0f172a; color: #f1f5f9; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        #telaLogin { position: fixed; inset: 0; background: #121212; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 70px; background: #1a1a1a; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; }
+        #telaLogin { position: fixed; inset: 0; background: white; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; background: white; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; }
+        .dark-mode .nav-bar { background: #1e293b; }
 
-        .btn-plus { background: #5851db; color: white; width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-top: -40px; box-shadow: 0 8px 20px rgba(88, 81, 219, 0.4); border: none; }
+        .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-top: -40px; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4); border: none; }
         
-        .card { background: #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+        .dark-mode .card { background: #1e293b; border-color: #334155; }
         
-        input { background: #242424 !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 15px !important; width: 100%; margin-bottom: 12px; color: #fff !important; }
+        input, textarea { border: 1px solid #cbd5e1 !important; border-radius: 10px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; background: #fff; color: #000; font-size: 14px; }
+        .dark-mode input, .dark-mode textarea { background: #0f172a; color: #fff; border-color: #475569 !important; }
         
-        .nav-btn { color: #666; font-size: 24px; background: none; border: none; }
-        .nav-btn.active { color: #a5a1f5; }
+        .nav-btn { color: #94a3b8; font-size: 24px; background: none; border: none; cursor: pointer; outline: none; }
+        .nav-btn.active { color: #4f46e5; }
+        .btn-modelo { background: #e0e7ff; color: #4338ca; padding: 12px; border-radius: 12px; font-size: 11px; font-weight: bold; border: none; flex: 1; margin: 4px; text-align: center; }
     </style>
 </head>
 <body class="pb-32">
 
     <div id="telaLogin">
-        <h1 class="text-3xl font-bold mb-6 text-indigo-500">ZapCaderno</h1>
+        <h1 class="text-2xl font-bold mb-4">ZapCaderno</h1>
         <input type="email" id="logEmail" placeholder="E-mail">
         <input type="password" id="logSenha" placeholder="Senha">
-        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold border-none">ENTRAR</button>
+        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold border-none">ENTRAR</button>
     </div>
 
-    <header class="p-6">
-        <div class="flex justify-between items-center">
+    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[30px]">
+        <div class="flex justify-between">
             <div>
-                <h1 id="headerNome" class="text-xl font-bold uppercase tracking-tight">MINHA LOJA</h1>
-                <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: Carregando...</p>
+                <h1 id="headerNome" class="text-lg font-bold uppercase">MINHA LOJA</h1>
+                <p id="headerPix" class="text-xs opacity-80">PIX: Carregando...</p>
             </div>
-            <span class="bg-green-500 text-[9px] text-black font-bold px-3 py-1 rounded-full uppercase">Sistema Ativo</span>
+            <button onclick="document.body.classList.toggle('dark-mode')" class="text-xl bg-transparent border-none text-white"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
-    <main class="p-4">
+    <main class="p-4 -mt-8">
         <div id="dashboard" class="tab-content active">
             <div class="card mb-4">
-                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Total a Receber</p>
-                <p id="totalReceber" class="text-4xl font-bold">R$ 0,00</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase">Total a Receber</p>
+                <p id="totalReceber" class="text-3xl font-bold text-indigo-600">R$ 0,00</p>
             </div>
             <div id="listaDividas"></div>
         </div>
 
+        <div id="orcamentos" class="tab-content">
+            <div class="card bg-indigo-50 border-indigo-200 mb-4">
+                <p class="text-[10px] font-bold text-indigo-500 mb-2 uppercase text-center">Gerar Nova Proposta Profissional</p>
+                <div class="flex flex-wrap">
+                    <button class="btn-modelo" onclick="usarModelo('servico')"><i class="fas fa-hammer"></i> OBRA</button>
+                    <button class="btn-modelo" onclick="usarModelo('beleza')"><i class="fas fa-sparkles"></i> BELEZA</button>
+                </div>
+            </div>
+            <div id="listaOrcamentos"></div>
+        </div>
+
         <div id="novo" class="tab-content">
-            <div class="card shadow-2xl">
-                <h2 class="font-bold mb-4 text-indigo-400">Novo Registro</h2>
+            <div class="card">
+                <h2 class="font-bold mb-4 text-indigo-600">Preencha os Dados</h2>
                 <input type="text" id="nome" placeholder="Nome do Cliente">
                 <input type="text" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
-                <input type="text" id="produto" placeholder="Produto ou Serviço">
-                <input type="number" id="valor" placeholder="Valor Total R$">
-                <button id="btnSalvarVenda" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">SALVAR VENDA</button>
+                
+                <p class="text-[10px] font-bold text-gray-400 mb-1">DETALHES DO TRABALHO</p>
+                <textarea id="detalhes" rows="3" placeholder="Ex: Cimento, Areia, Pintura da sala..."></textarea>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 mb-1">PREÇO MATERIAIS</p>
+                        <input type="text" id="valorMat" placeholder="R$ 0,00" value="0">
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 mb-1">MÃO DE OBRA</p>
+                        <input type="text" id="valorMao" placeholder="R$ 0,00" value="0">
+                    </div>
+                </div>
+
+                <button id="btnOrc" class="w-full bg-indigo-600 text-white py-4 rounded-lg border-none font-bold mt-2 shadow-lg">GERAR PROPOSTA DE ORÇAMENTO</button>
+                <button id="btnVenda" class="w-full bg-gray-200 text-gray-600 py-2 rounded-lg border-none font-bold mt-4 text-xs">APENAS SALVAR VENDA RÁPIDA</button>
             </div>
         </div>
 
         <div id="config" class="tab-content">
             <div class="card">
-                <h2 class="font-bold mb-4 uppercase text-xs">Perfil</h2>
+                <h2 class="font-bold mb-4">Minha Empresa</h2>
                 <input type="text" id="confNome" placeholder="Nome da Empresa">
-                <input type="text" id="confPix" placeholder="Chave PIX">
-                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold">SALVAR</button>
+                <input type="text" id="confPix" placeholder="Chave PIX para Receber">
+                <button id="btnSalvarConfig" class="w-full bg-green-500 text-white py-3 rounded-lg border-none font-bold">SALVAR CONFIGURAÇÕES</button>
             </div>
         </div>
     </main>
 
     <nav class="nav-bar">
         <button id="tabDash" class="nav-btn active"><i class="fas fa-home"></i></button>
+        <button id="tabOrc" class="nav-btn"><i class="fas fa-file-contract"></i></button>
         <button id="tabNovo" class="btn-plus"><i class="fas fa-plus"></i></button>
         <button id="tabConf" class="nav-btn"><i class="fas fa-cog"></i></button>
         <button id="btnLogout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></button>
@@ -83,7 +114,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
@@ -98,88 +129,134 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let empresa = { nome: "Minha Empresa", pix: "Não definido" };
+
+        window.usarModelo = (tipo) => {
+            openTab('novo');
+            document.getElementById('detalhes').value = tipo === 'servico' ? "Mão de obra qualificada e materiais de primeira linha." : "Procedimentos estéticos e produtos profissionais.";
+        };
+
         const openTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if(id === 'dashboard') document.getElementById('tabDash').classList.add('active');
+            if(id === 'orcamentos') document.getElementById('tabOrc').classList.add('active');
             if(id === 'config') document.getElementById('tabConf').classList.add('active');
         };
 
         document.getElementById('tabDash').onclick = () => openTab('dashboard');
+        document.getElementById('tabOrc').onclick = () => openTab('orcamentos');
         document.getElementById('tabNovo').onclick = () => openTab('novo');
         document.getElementById('tabConf').onclick = () => openTab('config');
         document.getElementById('btnLogout').onclick = () => signOut(auth);
 
         document.getElementById('btnEntrar').onclick = () => {
-            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value);
+            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value).catch(() => alert("Erro no login"));
         };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('telaLogin').style.display = 'none';
-                const snap = await getDoc(doc(db, "configuracoes", user.uid));
-                if (snap.exists()) {
-                    document.getElementById('headerNome').innerText = snap.data().nome;
-                    document.getElementById('headerPix').innerText = "PIX: " + snap.data().pix;
-                }
+                await loadConfig(user.uid);
                 initData(user.uid);
             } else {
                 document.getElementById('telaLogin').style.display = 'flex';
             }
         });
 
+        async function loadConfig(uid) {
+            const snap = await getDoc(doc(db, "configuracoes", uid));
+            if (snap.exists()) {
+                empresa = snap.data();
+                document.getElementById('headerNome').innerText = empresa.nome;
+                document.getElementById('headerPix').innerText = "PIX: " + empresa.pix;
+            }
+        }
+
         document.getElementById('btnSalvarConfig').onclick = async () => {
-            await setDoc(doc(db, "configuracoes", auth.currentUser.uid), {
-                nome: document.getElementById('confNome').value,
-                pix: document.getElementById('confPix').value
+            await setDoc(doc(db, "configuracoes", auth.currentUser.uid), { 
+                nome: document.getElementById('confNome').value, 
+                pix: document.getElementById('confPix').value 
             });
-            alert("Perfil Salvo!");
+            alert("Empresa Configurada!");
+            location.reload();
         };
 
-        document.getElementById('btnSalvarVenda').onclick = async () => {
-            await addDoc(collection(db, "vendas"), {
+        const salvar = async (tipo) => {
+            const vMat = parseFloat(document.getElementById('valorMat').value.replace(',', '.')) || 0;
+            const vMao = parseFloat(document.getElementById('valorMao').value.replace(',', '.')) || 0;
+            const total = vMat + vMao;
+
+            if(total <= 0) return alert("Insira um valor!");
+
+            await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
                 uid: auth.currentUser.uid,
                 nome: document.getElementById('nome').value,
-                whatsapp: document.getElementById('whatsapp').value,
-                produto: document.getElementById('produto').value,
-                valor: parseFloat(document.getElementById('valor').value) || 0,
+                whatsapp: document.getElementById('whatsapp').value.replace(/\D/g,''),
+                produto: document.getElementById('detalhes').value,
+                valorMat: vMat,
+                valorMao: vMao,
+                valor: total,
                 pago: false,
                 data: new Date().toLocaleDateString('pt-BR')
             });
-            alert("Venda Registrada!");
-            openTab('dashboard');
+            
+            alert("Orçamento Gerado!");
+            openTab('orcamentos');
         };
 
+        document.getElementById('btnOrc').onclick = () => salvar('orcamento');
+        document.getElementById('btnVenda').onclick = () => salvar('venda');
+
         function initData(uid) {
+            // Dashboard
             onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
                 let total = 0;
-                const div = document.getElementById('listaDividas');
-                div.innerHTML = '';
+                const div = document.getElementById('listaDividas'); div.innerHTML = '';
                 snap.forEach(s => {
                     const d = s.data();
                     if(!d.pago) {
                         total += d.valor;
-                        div.innerHTML += `
-                            <div class="card flex justify-between items-center">
-                                <div><b>${d.nome}</b><p class="text-xs text-gray-500">${d.produto}</p></div>
-                                <div class="flex gap-2">
-                                    <button onclick="window.cobrar('${d.whatsapp}', '${d.valor}')" class="bg-green-600 p-2 rounded-lg"><i class="fab fa-whatsapp"></i></button>
-                                    <button onclick="window.receber('${s.id}')" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-bold">RECEBI</button>
-                                </div>
-                            </div>`;
+                        div.innerHTML += `<div class="card flex justify-between">
+                            <div><b>${d.nome}</b><p class="text-xs text-gray-400">${d.produto.substring(0, 30)}...</p></div>
+                            <button onclick="window.receber('${s.id}')" class="bg-indigo-600 text-white px-4 rounded-lg border-none text-xs font-bold">RECEBI R$ ${d.valor.toFixed(2)}</button>
+                        </div>`;
                     }
                 });
                 document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2)}`;
             });
+
+            // Lista de Orçamentos com Proposta Estilo Imagem
+            onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
+                const div = document.getElementById('listaOrcamentos'); div.innerHTML = '';
+                snap.forEach(s => {
+                    const o = s.data();
+                    // Gerando a mensagem formatada como a imagem enviada
+                    const msg = `*PROPOSTA DE ORÇAMENTO*%0A---%0A*Data:* ${o.data}%0A*Preparado por:* ${empresa.nome}%0A*Para:* ${o.nome}%0A%0A*QUERIDO CLIENTE*%0AEstou feliz em compartilhar esta proposta que contém os detalhes do serviço solicitado.%0A%0A*ESCOPO DO TRABALHO*%0A• ${o.produto}%0A%0A*VALORES*%0A• Materiais: R$ ${o.valorMat.toFixed(2)}%0A• Mão de Obra: R$ ${o.valorMao.toFixed(2)}%0A---%0A*TOTAL: R$ ${o.valor.toFixed(2)}*%0A%0A_Fico à disposição para dúvidas!_`;
+
+                    div.innerHTML += `
+                        <div class="card border-l-4 border-indigo-500">
+                            <div class="flex justify-between mb-2">
+                                <b>${o.nome}</b>
+                                <span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2)}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-3">${o.produto}</p>
+                            <div class="flex gap-2">
+                                <a href="https://wa.me/55${o.whatsapp}?text=${msg}" class="flex-1 bg-green-500 text-white text-center py-2 rounded-lg no-underline font-bold text-xs uppercase">Enviar Proposta</a>
+                                <button onclick="window.converter('${s.id}')" class="flex-1 bg-indigo-500 text-white rounded-lg border-none font-bold text-xs uppercase">Fechou!</button>
+                            </div>
+                        </div>`;
+                });
+            });
         }
 
-        window.cobrar = (num, val) => {
-            window.open(`https://wa.me/${num}?text=Olá! Segue lembrete da cobrança no valor de R$ ${val}.`);
-        };
-
-        window.receber = async (id) => {
-            await updateDoc(doc(db, "vendas", id), { pago: true });
+        window.receber = async (id) => { if(confirm("Confirmar?")) await updateDoc(doc(db, "vendas", id), { pago: true }); };
+        window.converter = async (id) => {
+            const snap = await getDoc(doc(db, "orcamentos", id));
+            await addDoc(collection(db, "vendas"), { ...snap.data(), data: new Date().toLocaleDateString('pt-BR') });
+            await deleteDoc(doc(db, "orcamentos", id));
+            openTab('dashboard');
         };
     </script>
 </body>
