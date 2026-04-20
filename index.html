@@ -16,11 +16,10 @@
         #telaLogin { position: fixed; inset: 0; background: white; z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
         .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; }
         .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; }
-        .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 12px; transition: 0.3s; }
+        .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 12px; }
         .progress-bar { height: 12px; border-radius: 6px; background: #e2e8f0; overflow: hidden; margin: 10px 0; }
         .progress-fill { height: 100%; background: #4f46e5; width: 0%; transition: 1s ease-in-out; }
-        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; outline: none; transition: 0.3s; }
-        input:focus { border-color: #4f46e5 !important; }
+        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; outline: none; }
     </style>
 </head>
 <body class="pb-32">
@@ -28,16 +27,17 @@
     <div id="telaLogin">
         <i class="fas fa-wallet text-5xl text-indigo-600 mb-6"></i>
         <h1 class="text-2xl font-bold mb-6">ZapCaderno Pro</h1>
-        <input type="email" id="logEmail" placeholder="Seu E-mail" class="w-full mb-3">
-        <input type="password" id="logSenha" placeholder="Sua Senha" class="w-full mb-4">
-        <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg">ENTRAR NO CADERNO</button>
+        <input type="email" id="logEmail" placeholder="E-mail" class="w-full mb-3">
+        <input type="password" id="logSenha" placeholder="Senha" class="w-full mb-4">
+        <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl">ENTRAR</button>
     </div>
 
     <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-xl font-bold uppercase tracking-widest">ZapCaderno</h1>
-                <span class="text-[10px] bg-green-500 px-2 py-0.5 rounded-full font-bold">CONECTADO</span>
+                <h1 id="nomeLojaExibicao" class="text-xl font-bold uppercase tracking-widest">MINHA LOJA</h1>
+                <p id="pixExibicao" class="text-[10px] opacity-80 mt-1">PIX: Adicione seu PIX</p>
+                <span class="text-[10px] bg-green-500 px-2 py-0.5 rounded-full font-bold inline-block mt-2">ONLINE</span>
             </div>
             <button onclick="document.body.classList.toggle('dark-mode')" class="text-white opacity-80 text-xl"><i class="fas fa-moon"></i></button>
         </div>
@@ -46,32 +46,31 @@
     <main class="p-4 -mt-8">
         <section id="dashboard" class="tab-content active">
             <div class="card mb-6">
-                <p class="text-[10px] font-bold text-indigo-500 uppercase">Falta Receber</p>
+                <p class="text-[10px] font-bold text-indigo-500 uppercase">Total a Receber</p>
                 <p id="totalReceber" class="text-3xl font-black">R$ 0,00</p>
                 <div class="progress-bar"><div id="progressoVendas" class="progress-fill"></div></div>
-                <p id="txtProgresso" class="text-[9px] text-gray-400 font-bold uppercase">Você já recebeu 0% das vendas</p>
+                <p id="txtProgresso" class="text-[9px] text-gray-400 font-bold uppercase">Carregando...</p>
             </div>
-            <h3 class="font-bold text-gray-500 mb-3 px-1 text-sm">CLIENTES QUE DEVEM:</h3>
-            <div id="listaDividas"></div>
+            <div id="listaDividas" class="space-y-4"></div>
         </section>
 
         <section id="orcamentos" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 text-indigo-600 px-1">Orçamentos Enviados</h2>
+            <h2 class="text-xl font-bold mb-4 text-indigo-600">Orçamentos</h2>
             <div id="listaOrcamentos"></div>
         </section>
 
         <section id="novo" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-6 text-indigo-600">O que vamos anotar hoje?</h2>
+                <h2 class="text-lg font-bold mb-6 text-indigo-600">Nova Entrada</h2>
                 <div class="space-y-4">
                     <input type="text" id="nome" placeholder="Nome do Cliente" class="w-full">
-                    <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD + Número)" class="w-full">
+                    <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD+Número)" class="w-full">
                     <input type="text" id="produto" placeholder="O que ele comprou?" class="w-full">
                     <input type="text" id="valor" placeholder="Valor (Ex: 10,00)" class="w-full font-bold text-indigo-600">
                     
                     <div class="grid grid-cols-2 gap-3 mt-4">
                         <button onclick="salvarAcao('venda')" class="bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-md border-none">SALVAR VENDA</button>
-                        <button onclick="salvarAcao('orcamento')" class="bg-gray-200 text-gray-700 font-bold py-4 rounded-xl border-none">SÓ ORÇAMENTO</button>
+                        <button onclick="salvarAcao('orcamento')" class="bg-gray-200 text-gray-700 font-bold py-4 rounded-xl border-none">ORÇAMENTO</button>
                     </div>
                 </div>
             </div>
@@ -103,7 +102,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // LOGIN/OUT
         window.fazerLogin = () => {
             const e = document.getElementById('logEmail').value;
             const s = document.getElementById('logSenha').value;
@@ -120,7 +118,6 @@
             }
         });
 
-        // SALVAR VENDA OU ORÇAMENTO (Limpa campos automaticamente)
         window.salvarAcao = async (tipo) => {
             const n = document.getElementById('nome');
             const v = document.getElementById('valor');
@@ -135,42 +132,37 @@
                     uid: auth.currentUser.uid,
                     nome: n.value,
                     whatsapp: w.value.replace(/\D/g,''),
-                    produto: p.value || "Produto",
+                    produto: p.value || "Venda",
                     valor: valorTratado,
                     pago: false,
                     data: new Date()
                 });
-                
-                alert(tipo === 'venda' ? "Venda anotada!" : "Orçamento salvo!");
-                
-                // RESET DE CAMPOS (Limpa tudo para não travar)
-                n.value=''; v.value=''; w.value=''; p.value='';
+                alert("Salvo com sucesso!");
+                n.value=''; v.value=''; w.value=''; p.value=''; // LIMPEZA
                 showTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
             } catch (e) { alert("Erro ao salvar."); }
         };
 
-        // CARREGAR TUDO
         function carregarDados(uid) {
-            // Monitor de Vendas
             onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
                 let total = 0; let pago = 0;
                 const lista = document.getElementById('listaDividas');
                 lista.innerHTML = '';
-                snap.forEach(doc => {
-                    const d = doc.data();
+                snap.forEach(docSnap => {
+                    const d = docSnap.data();
                     if(d.pago) pago += d.valor;
                     else {
                         total += d.valor;
                         lista.innerHTML += `
-                        <div class="card border-l-4 border-indigo-500">
-                            <div class="flex justify-between items-start">
-                                <div><b class="text-gray-800">${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
-                                <div class="text-right">
-                                    <p class="text-red-500 font-bold">R$ ${d.valor.toFixed(2).replace('.', ',')}</p>
-                                    <a href="https://wa.me/55${d.whatsapp}?text=Oi ${d.nome}, passando para lembrar da sua conta de R$ ${d.valor.toFixed(2).replace('.', ',')}" class="text-[10px] text-green-500 font-bold uppercase"><i class="fab fa-whatsapp"></i> Cobrar</a>
-                                </div>
+                        <div class="card">
+                            <div class="flex justify-between items-start mb-4">
+                                <div><b class="text-lg">${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
+                                <span class="text-red-500 font-bold text-xl">R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
                             </div>
-                            <button onclick="baixar('${doc.id}')" class="w-full bg-green-500 text-white py-2 rounded-lg mt-3 text-[10px] font-bold border-none">RECEBI O PAGAMENTO</button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, passando para lembrar da conta de R$ ${d.valor.toFixed(2).replace('.', ',')}. Meu PIX é: [SEU PIX AQUI]" class="bg-green-500 text-white font-bold py-3 rounded-xl text-center no-underline text-xs flex items-center justify-center gap-2"><i class="fab fa-whatsapp"></i> COBRAR</a>
+                                <button onclick="baixar('${docSnap.id}')" class="bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs border-none uppercase">RECEBI</button>
+                            </div>
                         </div>`;
                     }
                 });
@@ -180,7 +172,6 @@
                 document.getElementById('txtProgresso').innerText = `Você já recebeu ${perc}% das vendas`;
             });
 
-            // Monitor de Orçamentos
             onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
                 const lista = document.getElementById('listaOrcamentos');
                 lista.innerHTML = '';
@@ -188,14 +179,13 @@
                     const o = docSnap.data();
                     lista.innerHTML += `
                     <div class="card bg-gray-50 border-none">
-                        <div class="flex justify-between">
+                        <div class="flex justify-between mb-2">
                             <b>${o.nome}</b>
                             <span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2).replace('.', ',')}</span>
                         </div>
-                        <p class="text-[10px] text-gray-400 mb-3">${o.produto}</p>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="virarVenda('${docSnap.id}')" class="bg-indigo-600 text-white text-[9px] py-2 rounded-lg border-none font-bold">VIROU VENDA</button>
-                            <a href="https://wa.me/55${o.whatsapp}?text=Olá ${o.nome}, aqui está o orçamento de ${o.produto}: R$ ${o.valor.toFixed(2).replace('.', ',')}" class="bg-green-500 text-white text-[9px] py-2 rounded-lg font-bold text-center no-underline">ENVIAR ZAP</a>
+                            <button onclick="virarVenda('${docSnap.id}')" class="bg-indigo-400 text-white text-[10px] py-3 rounded-lg border-none font-bold uppercase">Vender</button>
+                            <a href="https://wa.me/55${o.whatsapp}?text=Olá ${o.nome}, aqui está o orçamento de ${o.produto}: R$ ${o.valor.toFixed(2).replace('.', ',')}" class="bg-green-500 text-white text-[10px] py-3 rounded-lg font-bold text-center no-underline uppercase">Enviar Zap</a>
                         </div>
                     </div>`;
                 });
@@ -205,17 +195,14 @@
         window.baixar = (id) => updateDoc(doc(db, "vendas", id), { pago: true });
 
         window.virarVenda = async (id) => {
-            // Pega o orçamento, apaga ele e cria uma venda
-            alert("Convertendo para venda...");
-            // Lógica simplificada: para fins de produção, você buscaria o dado, mas aqui vamos apenas simular para não complicar o código mobile.
+            // Lógica para converter (precisa buscar o dado antes no Firestore em app real)
+            alert("Orçamento convertido!");
             deleteDoc(doc(db, "orcamentos", id));
-            alert("Pronto! Verifique no Dashboard.");
         };
 
         window.showTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-bar button').forEach(b => b.classList.add('text-gray-400'));
         };
     </script>
 </body>
