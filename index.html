@@ -7,26 +7,25 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; -webkit-tap-highlight-color: transparent; margin: 0; }
         .dark-mode { background-color: #0f172a; color: #f1f5f9; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         #telaLogin { position: fixed; inset: 0; background: white; z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; }
-        .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; }
+        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; border: none; }
+        .dark-mode .nav-bar { background: #1e293b; }
+
+        .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; cursor: pointer; }
         
         .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #edf2f7; }
         .dark-mode .card { background: #1e293b; border-color: #334155; }
         
-        .btn-cobrar { background-color: #22c55e !important; color: white !important; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; border: none !important; text-decoration: none !important; }
-        .btn-recebi { background-color: #4f46e5 !important; color: white !important; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; border: none !important; text-transform: uppercase; }
-        
-        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; color: #1e293b; background: white; }
+        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; color: #1e293b; background: white; outline: none; }
         .dark-mode input { background: #0f172a; border-color: #334155 !important; color: white; }
         
-        .nav-btn { background: none; border: none; padding: 10px; color: #94a3b8; transition: 0.3s; cursor: pointer; }
+        .nav-btn { background: none; border: none; padding: 10px; color: #94a3b8; transition: 0.3s; cursor: pointer; outline: none; }
         .nav-btn.active { color: #4f46e5; }
     </style>
 </head>
@@ -37,7 +36,7 @@
         <h1 class="text-2xl font-bold mb-6">ZapCaderno Pro</h1>
         <input type="email" id="logEmail" placeholder="E-mail">
         <input type="password" id="logSenha" placeholder="Senha">
-        <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl border-none">ENTRAR</button>
+        <button id="btnEntrar" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl border-none">ENTRAR</button>
     </div>
 
     <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
@@ -45,7 +44,6 @@
             <div>
                 <h1 id="headerNomeEmpresa" class="text-xl font-bold uppercase tracking-widest">MINHA LOJA</h1>
                 <p id="headerPix" class="text-xs opacity-90 mt-1">Configure na engrenagem</p>
-                <span id="statusAtivo" class="text-[10px] bg-green-500 px-2 py-0.5 rounded-full font-bold inline-block mt-2">SISTEMA ATIVO</span>
             </div>
             <button onclick="document.body.classList.toggle('dark-mode')" class="bg-transparent border-none text-white text-xl"><i class="fas fa-moon"></i></button>
         </div>
@@ -65,16 +63,16 @@
         </section>
 
         <section id="orcamentos" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 text-indigo-600">Orçamentos Pendentes</h2>
+            <h2 class="text-xl font-bold mb-4 text-indigo-600">Meus Orçamentos</h2>
             <div id="listaOrcamentos"></div>
         </section>
 
         <section id="config" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-6 text-indigo-600">Dados da Empresa</h2>
+                <h2 class="text-lg font-bold mb-6 text-indigo-600">Dados do Seu Negócio</h2>
                 <input type="text" id="confNome" placeholder="Nome da Empresa">
-                <input type="text" id="confPix" placeholder="Chave PIX">
-                <button id="btnSaveConfig" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl border-none">SALVAR CONFIGURAÇÃO</button>
+                <input type="text" id="confPix" placeholder="Sua Chave PIX">
+                <button id="btnSalvarConfig" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl border-none shadow-md">SALVAR AGORA</button>
             </div>
         </section>
 
@@ -83,22 +81,22 @@
                 <h2 class="text-lg font-bold mb-6 text-indigo-600">Novo Registro</h2>
                 <input type="text" id="nome" placeholder="Nome do Cliente">
                 <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
-                <input type="text" id="produto" placeholder="Produto/Serviço">
+                <input type="text" id="produto" placeholder="O que ele comprou?">
                 <input type="text" id="valor" placeholder="Valor (Ex: 10,00)">
-                <div class="grid grid-cols-2 gap-3 mt-2">
-                    <button id="btnVenda" class="bg-indigo-600 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Venda</button>
-                    <button id="btnOrcamento" class="bg-gray-400 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Orçamento</button>
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <button id="btnSalvarVenda" class="bg-indigo-600 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Venda</button>
+                    <button id="btnSalvarOrcamento" class="bg-gray-400 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Orçamento</button>
                 </div>
             </div>
         </section>
     </main>
 
     <nav class="nav-bar">
-        <button onclick="changeTab('dashboard')" class="nav-btn active"><i class="fas fa-home text-2xl"></i></button>
-        <button onclick="changeTab('orcamentos')" class="nav-btn"><i class="fas fa-file-invoice-dollar text-2xl"></i></button>
-        <button onclick="changeTab('novo')" class="btn-plus"><i class="fas fa-plus text-2xl"></i></button>
-        <button onclick="changeTab('config')" class="nav-btn"><i class="fas fa-cog text-2xl"></i></button>
-        <button id="btnLogout" class="nav-btn"><i class="fas fa-sign-out-alt text-2xl"></i></button>
+        <button id="navHome" class="nav-btn active"><i class="fas fa-home text-2xl"></i></button>
+        <button id="navOrc" class="nav-btn"><i class="fas fa-file-invoice-dollar text-2xl"></i></button>
+        <button id="navPlus" class="btn-plus"><i class="fas fa-plus text-2xl"></i></button>
+        <button id="navConfig" class="nav-btn"><i class="fas fa-cog text-2xl"></i></button>
+        <button id="navLogout" class="nav-btn"><i class="fas fa-sign-out-alt text-2xl"></i></button>
     </nav>
 
     <script type="module">
@@ -119,16 +117,16 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let dadosEmpresa = { nome: "Minha Loja", pix: "Não configurado" };
+        let dadosEmpresa = { nome: "MINHA LOJA", pix: "Não configurado" };
 
-        // LOGIN
-        window.fazerLogin = () => {
+        // --- SISTEMA DE LOGIN ---
+        document.getElementById('btnEntrar').onclick = () => {
             const e = document.getElementById('logEmail').value;
             const s = document.getElementById('logSenha').value;
-            signInWithEmailAndPassword(auth, e, s).catch(() => alert("E-mail ou senha incorretos!"));
+            signInWithEmailAndPassword(auth, e, s).catch(() => alert("Erro ao acessar conta!"));
         };
 
-        document.getElementById('btnLogout').onclick = () => signOut(auth);
+        document.getElementById('navLogout').onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -140,23 +138,29 @@
             }
         });
 
-        // NAVEGAÇÃO
-        window.changeTab = (id) => {
+        // --- NAVEGAÇÃO ---
+        const changeTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            // Procura o botão correto para destacar
-            const btn = document.querySelector(`button[onclick="changeTab('${id}')"]`);
-            if(btn) btn.classList.add('active');
+            
+            if(id === 'dashboard') document.getElementById('navHome').classList.add('active');
+            if(id === 'orcamentos') document.getElementById('navOrc').classList.add('active');
+            if(id === 'config') document.getElementById('navConfig').classList.add('active');
         };
 
-        // SALVAR CONFIG
-        document.getElementById('btnSaveConfig').onclick = async () => {
+        document.getElementById('navHome').onclick = () => changeTab('dashboard');
+        document.getElementById('navOrc').onclick = () => changeTab('orcamentos');
+        document.getElementById('navPlus').onclick = () => changeTab('novo');
+        document.getElementById('navConfig').onclick = () => changeTab('config');
+
+        // --- CONFIGURAÇÕES ---
+        document.getElementById('btnSalvarConfig').onclick = async () => {
             const n = document.getElementById('confNome').value;
             const p = document.getElementById('confPix').value;
-            if(!n || !p) return alert("Preencha os dois campos!");
+            if(!n || !p) return alert("Preencha tudo!");
             await setDoc(doc(db, "configuracoes", auth.currentUser.uid), { nome: n, pix: p });
-            alert("Dados salvos!");
+            alert("Sucesso! Atualizando...");
             location.reload();
         };
 
@@ -171,76 +175,99 @@
             }
         }
 
-        // SALVAR VENDA/ORÇAMENTO
-        const salvar = async (tipo) => {
+        // --- SALVAR DADOS ---
+        const salvarNoBanco = async (tipo) => {
             const n = document.getElementById('nome');
             const v = document.getElementById('valor');
             const w = document.getElementById('whatsapp');
             const p = document.getElementById('produto');
-            const val = parseFloat(v.value.replace(',', '.'));
+            const valNum = parseFloat(v.value.replace(',', '.'));
 
-            if(!n.value || isNaN(val)) return alert("Nome e Valor são obrigatórios!");
+            if(!n.value || isNaN(valNum)) return alert("Nome e Valor são obrigatórios!");
 
             await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
                 uid: auth.currentUser.uid,
                 nome: n.value,
                 whatsapp: w.value.replace(/\D/g,''),
-                produto: p.value || "Venda",
-                valor: val,
+                produto: p.value || "Serviço",
+                valor: valNum,
                 pago: false,
                 data: new Date()
             });
-            
+
             n.value=''; v.value=''; w.value=''; p.value='';
-            alert(tipo === 'venda' ? "Venda Salva!" : "Orçamento Salvo!");
+            alert("Salvo com sucesso!");
             changeTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
         };
 
-        document.getElementById('btnVenda').onclick = () => salvar('venda');
-        document.getElementById('btnOrcamento').onclick = () => salvar('orcamento');
+        document.getElementById('btnSalvarVenda').onclick = () => salvarNoBanco('venda');
+        document.getElementById('btnSalvarOrcamento').onclick = () => salvarNoBanco('orcamento');
 
-        // CARREGAR LISTAS
+        // --- CARREGAR LISTAS ---
         function carregarDados(uid) {
-            // Vendas
             onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
                 let total = 0; let pago = 0;
                 const lista = document.getElementById('listaDividas');
                 lista.innerHTML = '';
                 snap.forEach(docSnap => {
                     const d = docSnap.data();
+                    const id = docSnap.id;
                     if(d.pago) {
                         pago += d.valor;
                     } else {
                         total += d.valor;
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            <div class="flex justify-between items-start mb-4">
-                                <div><b class="text-xl">${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
-                                <span class="text-red-500 font-bold text-2xl">R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, aqui é da ${dadosEmpresa.nome}. Temos um valor de R$ ${d.valor.toFixed(2).replace('.', ',')} em aberto. PIX: ${dadosEmpresa.pix}" class="btn-cobrar"><i class="fab fa-whatsapp"></i> COBRAR</a>
-                                <button onclick="baixar('${docSnap.id}')" class="btn-recebi">RECEBI</button>
+                        lista.innerHTML += `
+                            <div class="card">
+                                <div class="flex justify-between mb-4">
+                                    <div><b class="text-xl">${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
+                                    <span class="text-red-500 font-bold text-2xl">R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, aqui é da ${dadosEmpresa.nome}. Temos um valor de R$ ${d.valor.toFixed(2).replace('.', ',')} pendente. PIX: ${dadosEmpresa.pix}" style="background:#22c55e; color:white; padding:12px; border-radius:12px; text-align:center; text-decoration:none; font-weight:bold; font-size:12px;">COBRAR</a>
+                                    <button onclick="window.marcarPago('${id}')" style="background:#4f46e5; color:white; border-radius:12px; border:none; font-weight:bold; font-size:12px;">RECEBI</button>
+                                </div>
                             </div>`;
-                        lista.appendChild(card);
                     }
                 });
                 document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
                 const perc = Math.round((pago / (total + pago)) * 100) || 0;
                 document.getElementById('progressoVendas').style.width = perc + "%";
-                document.getElementById('txtProgresso').innerText = `Você já recebeu ${perc}% das vendas totais`;
+                document.getElementById('txtProgresso').innerText = `Recebeu ${perc}% das vendas totais`;
             });
 
-            // Orçamentos
             onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
                 const lista = document.getElementById('listaOrcamentos');
                 lista.innerHTML = '';
                 snap.forEach(docSnap => {
                     const o = docSnap.data();
-                    const card = document.createElement('div');
-                    card.className = 'card border-dashed';
-                    card.innerHTML = `
-                        <div class="flex justify-between mb-4"><b>${o.nome}</b><span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2).replace('.', ',')}</span></div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="virarVenda('${docSnap.id}')" class="bg-indigo-500 text-white py-3 rounded-xl border-none uppercase text-[10px]">Virou
+                    const id = docSnap.id;
+                    lista.innerHTML += `
+                        <div class="card border-dashed">
+                            <div class="flex justify-between mb-4"><b>${o.nome}</b><span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2).replace('.', ',')}</span></div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="window.virarVenda('${id}')" style="background:#6366f1; color:white; padding:10px; border-radius:10px; border:none; font-size:10px;">VIRAR VENDA</button>
+                                <a href="https://wa.me/55${o.whatsapp}?text=Olá ${o.nome}, orçamento da ${dadosEmpresa.nome}: R$ ${o.valor.toFixed(2).replace('.', ',')}" style="background:#22c55e; color:white; padding:10px; border-radius:10px; text-align:center; text-decoration:none; font-size:10px;">ZAP</a>
+                            </div>
+                        </div>`;
+                });
+            });
+        }
+
+        // FUNÇÕES GLOBAIS DE BOTÃO
+        window.marcarPago = async (id) => {
+            if(confirm("Confirmar recebimento?")) {
+                await updateDoc(doc(db, "vendas", id), { pago: true });
+            }
+        };
+
+        window.virarVenda = async (id) => {
+            const snap = await getDoc(doc(db, "orcamentos", id));
+            if(snap.exists()) {
+                await addDoc(collection(db, "vendas"), { ...snap.data(), data: new Date() });
+                await deleteDoc(doc(db, "orcamentos", id));
+                changeTab('dashboard');
+            }
+        };
+    </script>
+</body>
+</html>
