@@ -20,14 +20,14 @@
         .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #edf2f7; }
         .dark-mode .card { background: #1e293b; border-color: #334155; }
         
-        .btn-cobrar { background-color: #22c55e; color: white; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; }
-        .btn-recebi { background-color: #4f46e5; color: white; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; border: none; text-transform: uppercase; }
+        .btn-cobrar { background-color: #22c55e !important; color: white !important; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; border: none !important; text-decoration: none !important; }
+        .btn-recebi { background-color: #4f46e5 !important; color: white !important; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; border: none !important; text-transform: uppercase; }
         
-        .progress-bar { height: 12px; border-radius: 6px; background: #e2e8f0; overflow: hidden; margin: 10px 0; }
-        .progress-fill { height: 100%; background: #4f46e5; width: 0%; transition: 1s ease-in-out; }
-        
-        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; outline: none; width: 100%; margin-bottom: 10px; color: #1e293b; }
+        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; color: #1e293b; }
         .dark-mode input { background: #0f172a; border-color: #334155 !important; color: white; }
+        
+        .nav-btn { background: none; border: none; padding: 10px; color: #94a3b8; transition: 0.3s; }
+        .nav-btn.active { color: #4f46e5; }
     </style>
 </head>
 <body class="pb-32">
@@ -37,17 +37,16 @@
         <h1 class="text-2xl font-bold mb-6">ZapCaderno Pro</h1>
         <input type="email" id="logEmail" placeholder="E-mail">
         <input type="password" id="logSenha" placeholder="Senha">
-        <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl">ENTRAR</button>
+        <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl border-none">ENTRAR</button>
     </div>
 
     <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
         <div class="flex justify-between items-start">
             <div>
-                <h1 id="headerNomeEmpresa" class="text-xl font-bold uppercase tracking-widest">NOME DA SUA EMPRESA</h1>
-                <p id="headerPix" class="text-xs opacity-90 mt-1"><i class="fas fa-key text-[10px]"></i> PIX: 000.000.000-00</p>
-                <span class="text-[10px] bg-green-500 px-2 py-0.5 rounded-full font-bold inline-block mt-2">SISTEMA ATIVO</span>
+                <h1 id="headerNomeEmpresa" class="text-xl font-bold uppercase tracking-widest">MINHA LOJA</h1>
+                <p id="headerPix" class="text-xs opacity-90 mt-1">Configure na engrenagem</p>
             </div>
-            <button onclick="document.body.classList.toggle('dark-mode')" class="text-white opacity-80 text-xl"><i class="fas fa-moon"></i></button>
+            <button onclick="document.body.classList.toggle('dark-mode')" class="bg-transparent border-none text-white text-xl"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
@@ -56,53 +55,170 @@
             <div class="card mb-6">
                 <p class="text-[10px] font-bold text-indigo-500 uppercase">Total a Receber</p>
                 <p id="totalReceber" class="text-3xl font-black">R$ 0,00</p>
-                <div class="progress-bar"><div id="progressoVendas" class="progress-fill"></div></div>
+                <div style="height:12px; background:#e2e8f0; border-radius:6px; overflow:hidden; margin:10px 0;">
+                    <div id="progressoVendas" style="height:100%; background:#4f46e5; width:0%; transition:1s;"></div>
+                </div>
                 <p id="txtProgresso" class="text-[9px] text-gray-400 font-bold uppercase text-center">Calculando...</p>
             </div>
-            <div id="listaDividas" class="space-y-4"></div>
+            <div id="listaDividas"></div>
         </section>
 
         <section id="orcamentos" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 text-indigo-600">Orçamentos Pendentes</h2>
+            <h2 class="text-xl font-bold mb-4 text-indigo-600">Orçamentos</h2>
             <div id="listaOrcamentos"></div>
         </section>
 
         <section id="config" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-6 text-indigo-600">Dados da Minha Empresa</h2>
-                <label class="text-xs font-bold text-gray-400 ml-1">Nome da Loja/Empresa:</label>
-                <input type="text" id="confNome" placeholder="Ex: Loja da Carla">
-                
-                <label class="text-xs font-bold text-gray-400 ml-1">Sua Chave PIX:</label>
-                <input type="text" id="confPix" placeholder="CPF, Celular ou E-mail">
-                
-                <button onclick="salvarConfig()" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl mt-4 border-none shadow-lg uppercase">Salvar Configurações</button>
+                <h2 class="text-lg font-bold mb-6 text-indigo-600">Configurações</h2>
+                <input type="text" id="confNome" placeholder="Nome da Empresa">
+                <input type="text" id="confPix" placeholder="Chave PIX">
+                <button onclick="salvarConfig()" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl border-none">SALVAR DADOS</button>
             </div>
         </section>
 
         <section id="novo" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-6 text-indigo-600">O que vamos anotar hoje?</h2>
+                <h2 class="text-lg font-bold mb-6 text-indigo-600">Novo Registro</h2>
                 <input type="text" id="nome" placeholder="Nome do Cliente">
-                <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD + Número)">
-                <input type="text" id="produto" placeholder="O que ele comprou/orçou?">
-                <input type="text" id="valor" placeholder="Valor (Ex: 10,00)" class="font-bold text-indigo-600">
-                
-                <div class="grid grid-cols-2 gap-3 mt-4">
-                    <button onclick="salvarAcao('venda')" class="bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-md border-none uppercase text-xs">Salvar Venda</button>
-                    <button onclick="salvarAcao('orcamento')" class="bg-gray-200 text-gray-700 font-bold py-4 rounded-xl border-none uppercase text-xs">Orçamento</button>
+                <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
+                <input type="text" id="produto" placeholder="Produto/Serviço">
+                <input type="text" id="valor" placeholder="Valor (Ex: 10,00)">
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                    <button onclick="salvarAcao('venda')" class="bg-indigo-600 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Venda</button>
+                    <button onclick="salvarAcao('orcamento')" class="bg-gray-400 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Orçamento</button>
                 </div>
             </div>
         </section>
     </main>
 
     <nav class="nav-bar">
-        <button onclick="showTab('dashboard')" class="text-indigo-600 bg-transparent border-none"><i class="fas fa-home text-2xl"></i></button>
-        <button onclick="showTab('orcamentos')" class="text-gray-400 bg-transparent border-none"><i class="fas fa-file-invoice-dollar text-2xl"></i></button>
+        <button onclick="showTab('dashboard')" class="nav-btn active"><i class="fas fa-home text-2xl"></i></button>
+        <button onclick="showTab('orcamentos')" class="nav-btn"><i class="fas fa-file-invoice-dollar text-2xl"></i></button>
         <button onclick="showTab('novo')" class="btn-plus"><i class="fas fa-plus text-2xl"></i></button>
-        <button onclick="showTab('config')" class="text-gray-400 bg-transparent border-none"><i class="fas fa-cog text-2xl"></i></button>
-        <button onclick="logout()" class="text-gray-400 bg-transparent border-none"><i class="fas fa-sign-out-alt text-2xl"></i></button>
+        <button onclick="showTab('config')" class="nav-btn"><i class="fas fa-cog text-2xl"></i></button>
+        <button onclick="logout()" class="nav-btn"><i class="fas fa-sign-out-alt text-2xl"></i></button>
     </nav>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
+            authDomain: "zapcaderno.firebaseapp.com",
+            projectId: "zapcaderno",
+            storageBucket: "zapcaderno.firebasestorage.app",
+            messagingSenderId: "446641643061",
+            appId: "1:446641643061:web:daf768922b53614f229b7c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let dadosEmpresa = { nome: "Minha Loja", pix: "Não configurado" };
+
+        window.fazerLogin = () => {
+            const e = document.getElementById('logEmail').value;
+            const s = document.getElementById('logSenha').value;
+            signInWithEmailAndPassword(auth, e, s).catch(() => alert("Erro ao entrar"));
+        };
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('telaLogin').style.display = 'none';
+                await carregarConfig(user.uid);
+                carregarDados(user.uid);
+            } else {
+                document.getElementById('telaLogin').style.display = 'flex';
+            }
+        });
+
+        window.showTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const btnClicado = document.querySelector(`button[onclick="showTab('${id}')"]`);
+            if(btnClicado) btnClicado.classList.add('active');
+        };
+
+        window.salvarConfig = async () => {
+            const n = document.getElementById('confNome').value;
+            const p = document.getElementById('confPix').value;
+            await setDoc(doc(db, "configuracoes", auth.currentUser.uid), { nome: n, pix: p });
+            alert("Salvo!");
+            location.reload();
+        };
+
+        async function carregarConfig(uid) {
+            const snap = await getDoc(doc(db, "configuracoes", uid));
+            if (snap.exists()) {
+                dadosEmpresa = snap.data();
+                document.getElementById('headerNomeEmpresa').innerText = dadosEmpresa.nome;
+                document.getElementById('headerPix').innerText = "PIX: " + dadosEmpresa.pix;
+                document.getElementById('confNome').value = dadosEmpresa.nome;
+                document.getElementById('confPix').value = dadosEmpresa.pix;
+            }
+        }
+
+        window.salvarAcao = async (tipo) => {
+            const n = document.getElementById('nome');
+            const v = document.getElementById('valor');
+            const w = document.getElementById('whatsapp');
+            const p = document.getElementById('produto');
+            const val = parseFloat(v.value.replace(',', '.'));
+
+            if(!n.value || isNaN(val)) return alert("Preencha Nome e Valor!");
+
+            await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
+                uid: auth.currentUser.uid,
+                nome: n.value,
+                whatsapp: w.value.replace(/\D/g,''),
+                produto: p.value || "Venda",
+                valor: val,
+                pago: false,
+                data: new Date()
+            });
+            n.value=''; v.value=''; w.value=''; p.value='';
+            showTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
+        };
+
+        function carregarDados(uid) {
+            onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
+                let total = 0; let pago = 0;
+                const lista = document.getElementById('listaDividas');
+                lista.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const d = docSnap.data();
+                    if(d.pago) pago += d.valor;
+                    else {
+                        total += d.valor;
+                        lista.innerHTML += `
+                        <div class="card">
+                            <div class="flex justify-between items-start mb-4">
+                                <div><b class="text-xl">${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
+                                <span class="text-red-500 font-bold text-2xl">R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, aqui é da ${dadosEmpresa.nome}. Valor em aberto: R$ ${d.valor.toFixed(2).replace('.', ',')}. PIX: ${dadosEmpresa.pix}" class="btn-cobrar"><i class="fab fa-whatsapp"></i> COBRAR</a>
+                                <button onclick="baixarVenda('${docSnap.id}')" class="btn-recebi">RECEBI</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+                document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+                const perc = Math.round((pago / (total + pago)) * 100) || 0;
+                document.getElementById('progressoVendas').style.width = perc + "%";
+                document.getElementById('txtProgresso').innerText = `Recebeu ${perc}% do total`;
+            });
+
+            onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
+                const lista = document.getElementById('listaOrcamentos');
+                lista.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const o = docSnap.data();
+                    lista.innerHTML += `
+                    <div class="card border
