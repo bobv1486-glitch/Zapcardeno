@@ -18,14 +18,10 @@
         
         .card { background: #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
         
-        /* Estilo dos campos conforme a print */
         input, textarea { background: #242424 !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 15px !important; width: 100%; margin-bottom: 12px; color: #fff !important; outline: none; }
         
         .nav-btn { color: #666; font-size: 24px; background: none; border: none; }
         .nav-btn.active { color: #a5a1f5; }
-        
-        /* Botões de Categoria no Seletor */
-        .btn-categoria { background: #242424; border: 1px solid #333; padding: 15px; border-radius: 15px; width: 100%; color: #aaa; font-weight: bold; text-align: left; }
     </style>
 </head>
 <body class="pb-32">
@@ -40,10 +36,10 @@
     <header class="p-6">
         <div class="flex justify-between items-center">
             <div>
-                <h1 id="headerNome" class="text-xl font-bold uppercase tracking-tight">CARREGANDO...</h1>
+                <h1 id="headerNome" class="text-xl font-bold uppercase tracking-tight tracking-widest">CARREGANDO...</h1>
                 <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: ---</p>
             </div>
-            <button onclick="document.body.classList.toggle('dark-mode')" class="text-xl bg-transparent border-none text-white"><i class="fas fa-moon"></i></button>
+            <i class="fas fa-moon text-xl"></i>
         </div>
     </header>
 
@@ -57,58 +53,48 @@
         </div>
 
         <div id="orcamentos" class="tab-content">
-            <h2 class="font-bold mb-4 uppercase text-xs tracking-widest text-indigo-400">Propostas Geradas</h2>
+            <h2 class="font-bold mb-4 uppercase text-xs tracking-widest text-indigo-400">Meus Orçamentos</h2>
             <div id="listaOrcamentos"></div>
         </div>
 
-        <div id="escolhaAcao" class="tab-content">
-            <div class="card text-center">
-                <h2 class="font-bold mb-6 text-indigo-400">NOVO REGISTRO</h2>
-                <div class="grid grid-cols-1 gap-4">
-                    <button onclick="window.abrirFormulario('proposta')" class="btn-categoria"><i class="fas fa-file-signature mr-3 text-indigo-400"></i> CRIAR PROPOSTA PROFISSIONAL</button>
-                    <button onclick="window.abrirFormulario('venda')" class="btn-categoria"><i class="fas fa-bolt mr-3 text-yellow-400"></i> REGISTRO DE VENDA RÁPIDA</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="formularioCompleto" class="tab-content">
-            <div class="cardshadow-2xl">
+        <div id="novo" class="tab-content">
+            <div class="card shadow-2xl">
                 <h2 class="font-bold mb-4 text-indigo-400 uppercase text-xs">Preencha os Dados</h2>
-                <input type="text" id="compNome" placeholder="Nome do Cliente">
-                <input type="text" id="compWhatsapp" placeholder="WhatsApp (DDD+Número)">
+                <input type="text" id="propNome" placeholder="Nome do Cliente">
+                <input type="text" id="propWhatsapp" placeholder="WhatsApp (DDD+Número)">
                 
                 <h2 class="font-bold mb-1 text-gray-400 text-[10px] uppercase">Detalhes do Trabalho</h2>
-                <textarea id="compDetalhes" placeholder="Ex: Cimento, Areia, Pintura da sala..." rows="3"></textarea>
+                <textarea id="propDetalhes" placeholder="Ex: Cimento, Areia, Pintura da sala..." rows="3"></textarea>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Preço Materiais</label>
-                        <input type="number" id="compMat" value="0">
+                        <input type="number" id="propMat" value="0">
                     </div>
                     <div>
                         <label class="text-[10px] text-gray-500 font-bold uppercase">Mão de Obra</label>
-                        <input type="number" id="compMao" value="0">
+                        <input type="number" id="propMao" value="0">
                     </div>
                 </div>
                 
-                <button id="btnSalvarProposta" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg mb-3 uppercase text-sm">Gerar Proposta de Orçamento</button>
-                <button onclick="openTab('dashboard')" class="w-full bg-gray-800 text-gray-400 py-2 rounded-xl font-bold text-xs uppercase">Cancelar</button>
+                <button id="btnGerarOrcamento" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg mb-3 uppercase text-xs">Gerar Proposta de Orçamento</button>
+                <button id="btnVendaRapida" class="w-full bg-gray-800 text-gray-400 py-3 rounded-xl font-bold text-[10px] uppercase">Apenas Salvar Venda Rápida</button>
             </div>
         </div>
 
         <div id="config" class="tab-content">
             <div class="card">
-                <h2 class="font-bold mb-4 uppercase text-xs">Perfil</h2>
+                <h2 class="font-bold mb-4 uppercase text-xs">Meus Dados</h2>
                 <input type="text" id="confNome" placeholder="Nome da Empresa">
-                <input type="text" id="confPix" placeholder="Chave PIX">
-                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Salvar</button>
+                <input type="text" id="confPix" placeholder="Sua Chave PIX">
+                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Salvar Alterações</button>
             </div>
         </div>
     </main>
 
     <nav class="nav-bar">
         <button id="tabDash" class="nav-btn active"><i class="fas fa-home"></i></button>
-        <button id="tabOrc" class="nav-btn"><i class="fas fa-file-contract"></i></button>
+        <button id="tabOrc" class="nav-btn"><i class="fas fa-file-invoice-dollar"></i></button>
         <button id="tabNovo" class="btn-plus"><i class="fas fa-plus"></i></button>
         <button id="tabConf" class="nav-btn"><i class="fas fa-cog"></i></button>
         <button id="btnLogout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></button>
@@ -117,52 +103,4 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-        // CONFIGURAÇÃO FIREBASE (Não mexa aqui)
-        const firebaseConfig = {
-            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
-            authDomain: "zapcaderno.firebaseapp.com",
-            projectId: "zapcaderno",
-            storageBucket: "zapcaderno.firebasestorage.app",
-            messagingSenderId: "446641643061",
-            appId: "1:446641643061:web:daf768922b53614f229b7c"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let empresa = { nome: "ZAPCADERNO", pix: "Não definido" };
-
-        // CONTROLE DE TELAS
-        const openTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            if(id === 'dashboard') document.getElementById('tabDash').classList.add('active');
-            if(id === 'orcamentos') document.getElementById('tabOrc').classList.add('active');
-            if(id === 'config') document.getElementById('tabConf').classList.add('active');
-        };
-
-        window.abrirFormulario = (tipo) => {
-            // Independente do tipo, abre o formulário completo que você gostou.
-            openTab('formularioCompleto');
-            // Se for venda rápida, podemos ocultar os campos de obra ou preencher com '0'.
-            if(tipo === 'venda') {
-                document.getElementById('compMat').value = 0;
-                document.getElementById('compMao').value = 0;
-                document.getElementById('compDetalhes').placeholder = "O que ele comprou?";
-            } else {
-                document.getElementById('compDetalhes').placeholder = "Ex: Cimento, Areia, Pintura da sala...";
-            }
-        };
-
-        document.getElementById('tabDash').onclick = () => openTab('dashboard');
-        document.getElementById('tabOrc').onclick = () => openTab('orcamentos');
-        document.getElementById('tabNovo').onclick = () => openTab('escolhaAcao');
-        document.getElementById('tabConf').onclick = () => openTab('config');
-        document.getElementById('btnLogout').onclick = () => signOut(auth);
-
-        // AUTH & CARREGAMENTO INICIAL
-        onAuthStateChanged(auth, async (user
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, setDoc, getDoc, delete
