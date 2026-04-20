@@ -7,7 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #ffffff; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #ffffff; margin: 0; overflow-x: hidden; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
@@ -18,8 +18,11 @@
         
         .card { background: #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
         
-        input, textarea { background: #242424 !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 15px !important; width: 100%; margin-bottom: 12px; color: #fff !important; outline: none; }
+        input, textarea { background: #242424 !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 12px !important; width: 100%; margin-bottom: 12px; color: #fff !important; outline: none; font-size: 16px; }
         
+        /* Ajuste para o campo de data aparecer corretamente no celular */
+        input[type="date"] { min-height: 50px; position: relative; }
+
         .nav-btn { color: #666; font-size: 24px; background: none; border: none; }
         .nav-btn.active { color: #a5a1f5; }
     </style>
@@ -27,74 +30,65 @@
 <body class="pb-32">
 
     <div id="telaLogin">
-        <h1 class="text-3xl font-bold mb-6 text-indigo-500">ZapCaderno</h1>
+        <h1 class="text-3xl font-bold mb-6 text-indigo-500 text-center">ZAPCADERNO</h1>
         <input type="email" id="logEmail" placeholder="E-mail">
         <input type="password" id="logSenha" placeholder="Senha">
-        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">ENTRAR</button>
+        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold border-none">ENTRAR</button>
     </div>
 
-    <header class="p-6">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 id="headerNome" class="text-xl font-bold uppercase tracking-widest text-indigo-400">MINHA LOJA</h1>
-                <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: ---</p>
-            </div>
-            <i class="fas fa-user-circle text-2xl text-gray-600"></i>
+    <header class="p-6 flex justify-between items-center">
+        <div>
+            <h1 id="headerNome" class="text-xl font-bold uppercase tracking-widest text-indigo-400">CARREGANDO...</h1>
+            <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: AGUARDANDO</p>
         </div>
+        <button onclick="location.reload()" class="bg-transparent border-none text-gray-500"><i class="fas fa-sync-alt"></i></button>
     </header>
 
     <main class="p-4">
         <div id="dashboard" class="tab-content active">
-            <div class="card mb-4 border-l-4 border-indigo-500">
+            <div class="card border-l-4 border-indigo-500">
                 <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Total a Receber</p>
                 <p id="totalReceber" class="text-4xl font-bold text-white">R$ 0,00</p>
             </div>
-            <div id="listaDividas"></div>
+            <div id="listaDividas" class="mt-4"></div>
         </div>
 
         <div id="orcamentos" class="tab-content">
-            <div class="card mb-8">
-                <h2 class="font-bold mb-4 text-indigo-400 uppercase text-[10px] tracking-widest">Novo Orçamento Profissional</h2>
+            <div class="card mb-6">
+                <h2 class="font-bold mb-4 text-indigo-400 uppercase text-[10px]">Preencher Orçamento</h2>
                 <input type="text" id="propNome" placeholder="Nome do Cliente">
                 <input type="text" id="propWhatsapp" placeholder="WhatsApp">
-                <textarea id="propDetalhes" placeholder="Descrição do Trabalho..." rows="3"></textarea>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Materiais R$</label>
-                        <input type="number" id="propMat" value="0">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">Mão de Obra R$</label>
-                        <input type="number" id="propMao" value="0">
-                    </div>
+                <textarea id="propDetalhes" placeholder="O que será feito?" rows="2"></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="propMat" placeholder="Materiais R$">
+                    <input type="number" id="propMao" placeholder="Mão de Obra R$">
                 </div>
-                <button id="btnGerarOrcamento" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar Orçamento</button>
+                <button id="btnGerarOrcamento" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold uppercase text-xs border-none">Salvar Orçamento</button>
             </div>
             <div id="listaOrcamentos"></div>
         </div>
 
         <div id="novo" class="tab-content">
             <div class="card">
-                <h2 class="font-bold mb-4 text-indigo-400 uppercase text-xs text-center">Registrar Venda / Cobrança</h2>
+                <h2 class="font-bold mb-4 text-indigo-400 uppercase text-xs text-center">Registrar Cobrança</h2>
                 <input type="text" id="vendaNome" placeholder="Nome do Cliente">
                 <input type="text" id="vendaWhatsapp" placeholder="WhatsApp">
-                <input type="text" id="vendaProduto" placeholder="O que ele comprou?">
+                <input type="text" id="vendaProduto" placeholder="Produto/Serviço">
                 <input type="number" id="vendaValor" placeholder="Valor R$">
                 
-                <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Data para pagar:</label>
+                <label class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Data que ele vai pagar:</label>
                 <input type="date" id="vendaDataPagar">
                 
-                <button id="btnSalvarVendaRapida" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold uppercase text-xs">Salvar Cobrança</button>
+                <button id="btnSalvarVendaRapida" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold uppercase text-xs border-none">Salvar Cobrança</button>
             </div>
         </div>
 
         <div id="config" class="tab-content">
             <div class="card">
-                <h2 class="font-bold mb-4 uppercase text-xs">Perfil</h2>
+                <h2 class="font-bold mb-4 uppercase text-xs">Configurar Dados</h2>
                 <input type="text" id="confNome" placeholder="Nome da Empresa">
                 <input type="text" id="confPix" placeholder="Chave PIX">
-                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Salvar</button>
+                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold uppercase text-xs border-none">Salvar</button>
             </div>
         </div>
     </main>
@@ -127,7 +121,8 @@
 
         let dadosEmpresa = { nome: "ZAPCADERNO", pix: "" };
 
-        const openTab = (id) => {
+        // Função de troca de abas otimizada
+        window.openTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -158,26 +153,33 @@
         });
 
         document.getElementById('btnEntrar').onclick = () => {
-            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value);
+            const email = document.getElementById('logEmail').value;
+            const pass = document.getElementById('logSenha').value;
+            signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Erro: " + e.message));
         };
 
-        // SALVAR VENDA COM DATA
+        // Salvar Cobrança com Data
         document.getElementById('btnSalvarVendaRapida').onclick = async () => {
-            await addDoc(collection(db, "vendas"), {
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('vendaNome').value,
-                whatsapp: document.getElementById('vendaWhatsapp').value.replace(/\D/g, ''),
-                produto: document.getElementById('vendaProduto').value,
-                valor: parseFloat(document.getElementById('vendaValor').value) || 0,
-                dataPagar: document.getElementById('vendaDataPagar').value, // DATA SALVA AQUI
-                pago: false,
-                dataCriacao: new Date()
-            });
-            alert("Cobrança agendada!");
-            openTab('dashboard');
+            const btn = document.getElementById('btnSalvarVendaRapida');
+            btn.disabled = true; btn.innerText = "SALVANDO...";
+            try {
+                await addDoc(collection(db, "vendas"), {
+                    uid: auth.currentUser.uid,
+                    nome: document.getElementById('vendaNome').value,
+                    whatsapp: document.getElementById('vendaWhatsapp').value.replace(/\D/g, ''),
+                    produto: document.getElementById('vendaProduto').value,
+                    valor: parseFloat(document.getElementById('vendaValor').value) || 0,
+                    dataPagar: document.getElementById('vendaDataPagar').value,
+                    pago: false,
+                    dataCriacao: new Date()
+                });
+                alert("Cobrança registrada!");
+                openTab('dashboard');
+            } catch (e) { alert("Erro ao salvar!"); }
+            btn.disabled = false; btn.innerText = "SALVAR COBRANÇA";
         };
 
-        // SALVAR ORÇAMENTO
+        // Salvar Orçamento
         document.getElementById('btnGerarOrcamento').onclick = async () => {
             const mat = parseFloat(document.getElementById('propMat').value) || 0;
             const mao = parseFloat(document.getElementById('propMao').value) || 0;
@@ -190,8 +192,77 @@
                 data: new Date().toLocaleDateString('pt-BR')
             });
             alert("Orçamento Gravado!");
-            ['propNome', 'propWhatsapp', 'propDetalhes'].forEach(id => document.getElementById(id).value = "");
+            openTab('orcamentos');
         };
 
         function initData(uid) {
-            onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (
+            // Dashboard Listeners
+            onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
+                let total = 0;
+                const div = document.getElementById('listaDividas');
+                div.innerHTML = '';
+                snap.forEach(s => {
+                    const d = s.data();
+                    if(!d.pago) {
+                        total += d.valor;
+                        div.innerHTML += `
+                            <div class="card flex justify-between items-center">
+                                <div><b>${d.nome}</b><p class="text-[9px] text-red-400 font-bold">VENCE: ${d.dataPagar || '--'}</p></div>
+                                <div class="flex gap-2">
+                                    <button onclick="window.cobrar('${d.whatsapp}', '${d.valor}')" class="bg-green-600 p-3 rounded-xl border-none text-white"><i class="fab fa-whatsapp"></i></button>
+                                    <button onclick="window.receber('${s.id}')" class="bg-indigo-600 text-white px-3 py-2 rounded-xl text-[10px] font-bold border-none uppercase">PAGO</button>
+                                </div>
+                            </div>`;
+                    }
+                });
+                document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2)}`;
+            });
+
+            // Orçamentos Listeners
+            onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
+                const div = document.getElementById('listaOrcamentos');
+                div.innerHTML = '';
+                snap.forEach(s => {
+                    const o = s.data();
+                    div.innerHTML += `
+                        <div class="card">
+                            <div class="flex justify-between items-start mb-4">
+                                <b>${o.nome}</b>
+                                <b class="text-indigo-400">R$ ${o.valor.toFixed(2)}</b>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="window.enviarWhatsApp('${o.whatsapp}', '${o.valor}', '${o.detalhes}')" class="bg-green-600 text-white py-3 rounded-xl font-bold uppercase text-[9px] border-none"><i class="fab fa-whatsapp"></i> PROPOSTA</button>
+                                <button onclick="window.virarVenda('${s.id}')" class="bg-indigo-600 text-white py-3 rounded-xl font-bold uppercase text-[9px] border-none">FECHADO</button>
+                            </div>
+                        </div>`;
+                });
+            });
+        }
+
+        window.enviarWhatsApp = (num, val, det) => {
+            const msg = `*${dadosEmpresa.nome.toUpperCase()}*%0A---%0A*Orcamento:* ${det}%0A*Total:* R$ ${val}%0A*PIX:* ${dadosEmpresa.pix}`;
+            window.open(`https://wa.me/55${num}?text=${msg}`);
+        };
+
+        window.virarVenda = async (id) => {
+            const snap = await getDoc(doc(db, "orcamentos", id));
+            if (snap.exists()) {
+                const d = snap.data();
+                await addDoc(collection(db, "vendas"), {
+                    uid: d.uid, nome: d.nome, whatsapp: d.whatsapp, valor: d.valor, produto: d.detalhes, pago: false, dataCriacao: new Date()
+                });
+                await deleteDoc(doc(db, "orcamentos", id));
+                openTab('dashboard');
+            }
+        };
+
+        window.cobrar = (num, val) => window.open(`https://wa.me/55${num}?text=Ola! Segue o lembrete de pagamento no valor de R$ ${val}.`);
+        window.receber = async (id) => { if(confirm("Confirmar?")) await updateDoc(doc(db, "vendas", id), { pago: true }); };
+
+        document.getElementById('btnSalvarConfig').onclick = async () => {
+            await setDoc(doc(db, "configuracoes", auth.currentUser.uid), { nome: document.getElementById('confNome').value, pix: document.getElementById('confPix').value });
+            alert("Salvo!"); location.reload();
+        };
+    </script>
+</body>
+</html>
