@@ -7,9 +7,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #4f46e5; --dark: #0f172a; }
         body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; -webkit-tap-highlight-color: transparent; }
-        .dark-mode { background-color: var(--dark); color: #f1f5f9; }
+        .dark-mode { background-color: #0f172a; color: #f1f5f9; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
@@ -17,132 +16,125 @@
         .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; background: white; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; }
         .dark-mode .nav-bar { background: #1e293b; }
 
-        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-top: -40px; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4); border: none; }
+        .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-top: -40px; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4); border: none; }
         
         .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
         .dark-mode .card { background: #1e293b; border-color: #334155; }
         
-        input, textarea { border: 1px solid #cbd5e1 !important; border-radius: 10px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; background: #fff; color: #000; font-size: 14px; }
+        input, textarea { border: 1px solid #cbd5e1 !important; border-radius: 10px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; background: #fff; color: #000; }
         .dark-mode input, .dark-mode textarea { background: #0f172a; color: #fff; border-color: #475569 !important; }
         
-        .nav-btn { color: #94a3b8; font-size: 24px; background: none; border: none; cursor: pointer; }
-        .nav-btn.active { color: var(--primary); }
+        .nav-btn { color: #94a3b8; font-size: 24px; background: none; border: none; }
+        .nav-btn.active { color: #4f46e5; }
 
-        /* Estilo Proposta Profissional (Modal) */
-        #modalProposta { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: none; overflow-y: auto; padding: 20px; }
-        .folha-orcamento { background: white; width: 100%; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 4px; color: #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .timbre { border-bottom: 2px solid var(--primary); padding-bottom: 15px; margin-bottom: 20px; }
+        /* Estilo da Folha de Orçamento (Inspirado na imagem do Canva) */
+        #modalView { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; overflow-y: auto; padding: 15px; }
+        .folha { background: white; width: 100%; border-radius: 5px; padding: 25px; color: #333; }
+        .linha-divisora { border-bottom: 2px solid #4f46e5; margin: 15px 0; }
     </style>
 </head>
 <body class="pb-32">
 
-    <div id="modalProposta">
-        <div class="folha-orcamento">
-            <div class="timbre flex justify-between items-center">
+    <div id="modalView">
+        <div class="folha">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h2 id="viewEmpresa" class="text-xl font-black text-indigo-700 uppercase leading-none">EMPRESA</h2>
-                    <p class="text-[10px] text-gray-500 font-bold">PROPOSTA DE SERVIÇO</p>
+                    <p id="vData" class="text-[10px] text-gray-400">Data: --/--/----</p>
+                    <h2 class="text-2xl font-serif font-light">Proposta de <br><b>Orçamento</b></h2>
                 </div>
-                <div class="w-10 h-10 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-xl" id="logoIncial">Z</div>
-            </div>
-            
-            <div class="mb-6">
-                <p class="text-[10px] text-gray-400 uppercase font-bold">Preparado para:</p>
-                <h3 id="viewCliente" class="text-lg font-bold">Nome do Cliente</h3>
-                <p id="viewData" class="text-[10px] text-gray-400">Data: 00/00/0000</p>
-            </div>
-
-            <div class="mb-6">
-                <h4 class="text-xs font-bold text-indigo-600 border-b border-gray-100 pb-1 mb-2">ESCOPO DO TRABALHO</h4>
-                <p id="viewDesc" class="text-sm text-gray-600 leading-relaxed">Descrição detalhada do serviço aqui...</p>
-            </div>
-
-            <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                <div class="flex justify-between text-xs mb-1"><span>Materiais:</span><span id="viewValMat">R$ 0,00</span></div>
-                <div class="flex justify-between text-xs mb-2"><span>Mão de Obra:</span><span id="viewValMao">R$ 0,00</span></div>
-                <div class="flex justify-between border-t pt-2 font-bold text-indigo-700">
-                    <span>TOTAL ESTIMADO:</span><span id="viewTotal" class="text-lg">R$ 0,00</span>
+                <div class="text-right">
+                    <p class="text-[10px] font-bold text-indigo-600 uppercase">Emitido por:</p>
+                    <p id="vEmpresa" class="text-xs font-bold">MINHA LOJA</p>
                 </div>
             </div>
 
-            <button id="btnEnviarWhats" class="w-full bg-green-500 text-white py-3 rounded-lg font-bold mb-2 uppercase text-sm">
-                <i class="fab fa-whatsapp mr-2"></i> Enviar via WhatsApp
-            </button>
-            <button onclick="document.getElementById('modalProposta').style.display='none'" class="w-full text-gray-400 font-bold text-xs">FECHAR VISUALIZAÇÃO</button>
+            <div class="linha-divisora"></div>
+
+            <div class="mb-6">
+                <p class="text-[10px] font-bold text-gray-400 uppercase">Cliente:</p>
+                <p id="vCliente" class="text-lg font-bold">---</p>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-widest">Escopo do Trabalho</h4>
+                <p id="vDesc" class="text-sm text-gray-600 leading-relaxed italic">"Obrigado pelo interesse em nossos serviços..."</p>
+            </div>
+
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <div class="flex justify-between font-bold text-indigo-800 text-lg">
+                    <span>VALOR TOTAL:</span>
+                    <span id="vTotal">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <button id="btnZapFinal" class="w-full bg-green-500 text-white py-3 rounded-lg font-bold mb-3 uppercase text-sm">Enviar para o Cliente</button>
+                <button onclick="document.getElementById('modalView').style.display='none'" class="w-full text-gray-400 text-xs font-bold">VOLTAR</button>
+            </div>
         </div>
     </div>
 
     <div id="telaLogin">
-        <h1 class="text-2xl font-bold mb-4">ZapCaderno</h1>
-        <input type="email" id="logEmail" placeholder="Seu E-mail">
-        <input type="password" id="logSenha" placeholder="Sua Senha">
-        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold border-none">ENTRAR NO SISTEMA</button>
+        <h1 class="text-2xl font-bold mb-4 text-indigo-600">ZapCaderno</h1>
+        <input type="email" id="logEmail" placeholder="E-mail">
+        <input type="password" id="logSenha" placeholder="Senha">
+        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold border-none">ENTRAR</button>
     </div>
 
-    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[30px] shadow-lg">
+    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[30px]">
         <div class="flex justify-between items-center">
             <div>
-                <h1 id="headerNome" class="text-lg font-bold uppercase tracking-wider">MINHA LOJA</h1>
-                <p id="headerPix" class="text-[10px] opacity-70 font-mono">PIX: Carregando...</p>
+                <h1 id="headerNome" class="text-lg font-bold uppercase">MINHA LOJA</h1>
+                <p id="headerPix" class="text-[10px] opacity-70">PIX: Carregando...</p>
             </div>
-            <button onclick="document.body.classList.toggle('dark-mode')" class="w-10 h-10 bg-indigo-500 rounded-full text-white border-none"><i class="fas fa-moon"></i></button>
+            <button onclick="document.body.classList.toggle('dark-mode')" class="text-white bg-transparent border-none text-xl"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
     <main class="p-4 -mt-8">
         <div id="dashboard" class="tab-content active">
-            <div class="card mb-4 border-t-4 border-indigo-500 shadow-md">
-                <p class="text-[10px] font-bold text-gray-400 uppercase">Resumo de Cobranças</p>
-                <p id="totalReceber" class="text-3xl font-black text-indigo-600">R$ 0,00</p>
+            <div class="card mb-4 shadow-lg">
+                <p class="text-[10px] font-bold text-gray-400 uppercase">A Receber</p>
+                <p id="totalReceber" class="text-3xl font-bold text-indigo-600">R$ 0,00</p>
             </div>
             <div id="listaDividas"></div>
         </div>
 
         <div id="orcamentos" class="tab-content">
-            <h2 class="font-bold text-indigo-600 mb-4 px-2 uppercase text-xs tracking-widest">Propostas Emitidas</h2>
+            <h2 class="font-bold text-indigo-600 mb-4 px-2 uppercase text-xs">Orçamentos Profissionais</h2>
             <div id="listaOrcamentos"></div>
         </div>
 
         <div id="novo" class="tab-content">
             <div class="card shadow-xl">
-                <h2 class="font-bold mb-4 text-indigo-600">Nova Proposta Profissional</h2>
+                <h2 class="font-bold mb-4">Novo Registro</h2>
                 <input type="text" id="nome" placeholder="Nome do Cliente">
                 <input type="text" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
+                <textarea id="produto" rows="3" placeholder="O que ele comprou ou qual o serviço?"></textarea>
+                <input type="text" id="valor" placeholder="Valor Total R$">
                 
-                <p class="text-[10px] font-bold text-gray-400 mb-1">DETALHAMENTO DO SERVIÇO / MATERIAIS</p>
-                <textarea id="detalhes" rows="4" placeholder="Descreva aqui o que será feito e quais produtos serão usados..."></textarea>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-[10px] font-bold text-gray-400 mb-1 uppercase">Materiais</p>
-                        <input type="text" id="valorMat" value="0">
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-gray-400 mb-1 uppercase">Mão de Obra</p>
-                        <input type="text" id="valorMao" value="0">
-                    </div>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button id="btnVenda" class="bg-indigo-600 text-white py-4 rounded-lg border-none font-bold uppercase text-xs">É VENDA</button>
+                    <button id="btnOrc" class="bg-gray-400 text-white py-4 rounded-lg border-none font-bold uppercase text-xs">É ORÇAMENTO</button>
                 </div>
-
-                <button id="btnSalvarOrc" class="w-full bg-indigo-600 text-white py-4 rounded-xl border-none font-bold mt-2 shadow-lg uppercase tracking-wider">Gerar Proposta</button>
             </div>
         </div>
 
         <div id="config" class="tab-content">
             <div class="card">
-                <h2 class="font-bold mb-4">Perfil da Empresa</h2>
-                <p class="text-[10px] text-gray-400 mb-2">Estes dados aparecerão no topo do orçamento.</p>
-                <input type="text" id="confNome" placeholder="Nome da Sua Empresa">
-                <input type="text" id="confPix" placeholder="Chave PIX para Pagamento">
-                <button id="btnSalvarConfig" class="w-full bg-green-500 text-white py-3 rounded-lg border-none font-bold uppercase">Atualizar Perfil</button>
+                <h2 class="font-bold mb-4">Minha Empresa</h2>
+                <input type="text" id="confNome" placeholder="Nome da Empresa">
+                <input type="text" id="confPix" placeholder="Seu PIX">
+                <button id="btnSalvarConfig" class="w-full bg-green-500 text-white py-3 rounded-lg border-none font-bold uppercase">Salvar</button>
             </div>
         </div>
     </main>
 
     <nav class="nav-bar">
-        <button id="tabDash" class="nav-btn active"><i class="fas fa-wallet"></i></button>
-        <button id="tabOrc" class="nav-btn"><i class="fas fa-file-signature"></i></button>
-        <button id="tabNovo" class="btn-plus shadow-2xl"><i class="fas fa-plus"></i></button>
-        <button id="tabConf" class="nav-btn"><i class="fas fa-building"></i></button>
+        <button id="tabDash" class="nav-btn active"><i class="fas fa-home"></i></button>
+        <button id="tabOrc" class="nav-btn"><i class="fas fa-file-invoice"></i></button>
+        <button id="tabNovo" class="btn-plus"><i class="fas fa-plus"></i></button>
+        <button id="tabConf" class="nav-btn"><i class="fas fa-cog"></i></button>
         <button id="btnLogout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></button>
     </nav>
 
@@ -164,7 +156,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let empresa = { nome: "Empresa", pix: "Não definido" };
+        let empresa = { nome: "ZAPCADERNO", pix: "Não configurado" };
 
         const openTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -182,125 +174,11 @@
         document.getElementById('btnLogout').onclick = () => signOut(auth);
 
         document.getElementById('btnEntrar').onclick = () => {
-            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value).catch(() => alert("Acesso negado"));
+            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value).catch(() => alert("Erro no login"));
         };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('telaLogin').style.display = 'none';
-                await loadConfig(user.uid);
-                initData(user.uid);
-            } else {
-                document.getElementById('telaLogin').style.display = 'flex';
-            }
-        });
-
-        async function loadConfig(uid) {
-            const snap = await getDoc(doc(db, "configuracoes", uid));
-            if (snap.exists()) {
-                empresa = snap.data();
-                document.getElementById('headerNome').innerText = empresa.nome;
-                document.getElementById('headerPix').innerText = "PIX: " + empresa.pix;
-                document.getElementById('confNome').value = empresa.nome;
-                document.getElementById('confPix').value = empresa.pix;
-            }
-        }
-
-        document.getElementById('btnSalvarConfig').onclick = async () => {
-            await setDoc(doc(db, "configuracoes", auth.currentUser.uid), { 
-                nome: document.getElementById('confNome').value, 
-                pix: document.getElementById('confPix').value 
-            });
-            alert("Perfil Atualizado!");
-            location.reload();
-        };
-
-        document.getElementById('btnSalvarOrc').onclick = async () => {
-            const vMat = parseFloat(document.getElementById('valorMat').value.replace(',', '.')) || 0;
-            const vMao = parseFloat(document.getElementById('valorMao').value.replace(',', '.')) || 0;
-            const total = vMat + vMao;
-
-            await addDoc(collection(db, "orcamentos"), {
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('nome').value,
-                whatsapp: document.getElementById('whatsapp').value.replace(/\D/g,''),
-                produto: document.getElementById('detalhes').value,
-                valorMat: vMat,
-                valorMao: vMao,
-                valor: total,
-                pago: false,
-                data: new Date().toLocaleDateString('pt-BR')
-            });
-            
-            alert("Salvo com sucesso!");
-            openTab('orcamentos');
-        };
-
-        function initData(uid) {
-            onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
-                let total = 0;
-                const div = document.getElementById('listaDividas'); div.innerHTML = '';
-                snap.forEach(s => {
-                    const d = s.data();
-                    if(!d.pago) {
-                        total += d.valor;
-                        div.innerHTML += `<div class="card flex justify-between items-center shadow-sm">
-                            <div><b class="text-gray-700">${d.nome}</b><p class="text-[10px] text-gray-400">Total: R$ ${d.valor.toFixed(2)}</p></div>
-                            <button onclick="window.receber('${s.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg border-none text-[10px] font-bold">MARCAR PAGO</button>
-                        </div>`;
-                    }
-                });
-                document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2)}`;
-            });
-
-            onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
-                const div = document.getElementById('listaOrcamentos'); div.innerHTML = '';
-                snap.forEach(s => {
-                    const o = s.data();
-                    div.innerHTML += `
-                        <div class="card border-l-4 border-indigo-500 shadow-md">
-                            <div class="flex justify-between items-start">
-                                <div><b class="text-gray-800">${o.nome}</b><p class="text-[10px] text-gray-400">${o.data}</p></div>
-                                <span class="text-indigo-600 font-black">R$ ${o.valor.toFixed(2)}</span>
-                            </div>
-                            <div class="flex gap-2 mt-4">
-                                <button onclick="window.visualizarOrc('${s.id}')" class="flex-1 bg-gray-800 text-white py-2 rounded-lg border-none font-bold text-[10px] uppercase">Ver Proposta</button>
-                                <button onclick="window.converter('${s.id}')" class="flex-1 bg-indigo-500 text-white rounded-lg border-none font-bold text-[10px] uppercase">Fechou!</button>
-                            </div>
-                        </div>`;
-                });
-            });
-        }
-
-        window.visualizarOrc = async (id) => {
-            const snap = await getDoc(doc(db, "orcamentos", id));
-            const o = snap.data();
-            
-            document.getElementById('viewEmpresa').innerText = empresa.nome;
-            document.getElementById('logoIncial').innerText = empresa.nome.substring(0,1).toUpperCase();
-            document.getElementById('viewCliente').innerText = o.nome;
-            document.getElementById('viewData').innerText = "Data da Proposta: " + o.data;
-            document.getElementById('viewDesc').innerText = o.produto;
-            document.getElementById('viewValMat').innerText = "R$ " + o.valorMat.toFixed(2);
-            document.getElementById('viewValMao').innerText = "R$ " + o.valorMao.toFixed(2);
-            document.getElementById('viewTotal').innerText = "R$ " + o.valor.toFixed(2);
-
-            const msg = `*PROPOSTA PROFISSIONAL*%0A---%0A*Empresa:* ${empresa.nome}%0A*Cliente:* ${o.nome}%0A%0A*SERVIÇOS:*%0A${o.produto}%0A%0A*INVESTIMENTO:*%0A• Materiais: R$ ${o.valorMat.toFixed(2)}%0A• Mão de Obra: R$ ${o.valorMao.toFixed(2)}%0A---%0A*TOTAL: R$ ${o.valor.toFixed(2)}*%0A%0A*PIX:* ${empresa.pix}`;
-
-            document.getElementById('btnEnviarWhats').onclick = () => {
-                window.open(`https://wa.me/55${o.whatsapp}?text=${msg}`, '_blank');
-            };
-
-            document.getElementById('modalProposta').style.display = 'block';
-        };
-
-        window.receber = async (id) => { if(confirm("Confirmar pagamento?")) await updateDoc(doc(db, "vendas", id), { pago: true }); };
-        window.converter = async (id) => {
-            const snap = await getDoc(doc(db, "orcamentos", id));
-            await addDoc(collection(db, "vendas"), { ...snap.data(), data: new Date().toLocaleDateString('pt-BR') });
-            await deleteDoc(doc(db, "orcamentos", id));
-            openTab('dashboard');
-        };
-    </script>
-</body>
-</html>
+                const snap = await getDoc(doc(db, "configuracoes", user.uid));
+                if (snap
