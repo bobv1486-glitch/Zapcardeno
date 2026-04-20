@@ -25,8 +25,7 @@
 
         /* MODAL DE ORÇAMENTO PROFISSIONAL (Aba Orçamentos) */
         #modalOrc { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; display: none; overflow-y: auto; padding: 15px; }
-        .folha-papel { background: white; width: 100%; border-radius: 8px; padding: 30px; color: #1a1a1a; position: relative; }
-        .border-pro { border-top: 4px solid #5851db; margin-top: 10px; }
+        .folha-papel { background: white; width: 100%; border-radius: 8px; padding: 30px; color: #1a1a1a; }
     </style>
 </head>
 <body class="pb-32">
@@ -40,27 +39,21 @@
                     <p id="vEmpresa" class="text-xs font-bold text-indigo-600">MINHA LOJA</p>
                 </div>
             </div>
-            
-            <div class="border-pro pt-4 mb-6">
-                <p class="text-[10px] font-bold text-gray-400 uppercase">Para:</p>
-                <h3 id="vCliente" class="text-lg font-bold">Nome do Cliente</h3>
+            <div class="border-t-4 border-indigo-600 pt-4 mb-6">
+                <p class="text-[10px] font-bold text-gray-400 uppercase">Cliente:</p>
+                <h3 id="vCliente" class="text-lg font-bold">---</h3>
             </div>
-
             <div class="mb-8">
-                <h4 class="text-xs font-bold text-indigo-600 border-b pb-1 mb-3 uppercase tracking-tighter">Detalhes do Serviço</h4>
-                <p id="vDetalhes" class="text-sm text-gray-600 leading-relaxed italic">Descrevendo os serviços solicitados...</p>
+                <h4 class="text-xs font-bold text-indigo-600 mb-2 uppercase">Escopo do Trabalho</h4>
+                <p id="vDetalhes" class="text-sm text-gray-600 leading-relaxed italic">---</p>
             </div>
-
             <div class="bg-indigo-50 p-4 rounded-lg mb-8">
-                <div class="flex justify-between text-xs mb-2"><span>Materiais:</span><span id="vMat">R$ 0,00</span></div>
-                <div class="flex justify-between text-xs mb-4 border-b pb-2"><span>Mão de Obra:</span><span id="vMao">R$ 0,00</span></div>
                 <div class="flex justify-between font-bold text-indigo-900 text-lg">
-                    <span>TOTAL:</span><span id="vTotal">R$ 0,00</span>
+                    <span>TOTAL ESTIMADO:</span><span id="vTotal">R$ 0,00</span>
                 </div>
             </div>
-
-            <button id="btnZapPro" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold mb-4 uppercase text-sm shadow-lg">Enviar no WhatsApp</button>
-            <button onclick="document.getElementById('modalOrc').style.display='none'" class="w-full text-gray-400 font-bold text-xs uppercase">Fechar</button>
+            <button id="btnZapPro" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold mb-4 uppercase shadow-lg">Enviar WhatsApp</button>
+            <button onclick="document.getElementById('modalOrc').style.display='none'" class="w-full text-gray-400 font-bold text-xs uppercase">Voltar</button>
         </div>
     </div>
 
@@ -72,13 +65,8 @@
     </div>
 
     <header class="p-6">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 id="headerNome" class="text-xl font-bold uppercase tracking-tight">MINHA LOJA</h1>
-                <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: Carregando...</p>
-            </div>
-            <span class="bg-green-500 text-[9px] text-black font-bold px-3 py-1 rounded-full uppercase">Sistema Ativo</span>
-        </div>
+        <h1 id="headerNome" class="text-xl font-bold uppercase tracking-tight">MINHA LOJA</h1>
+        <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: Carregando...</p>
     </header>
 
     <main class="p-4">
@@ -91,110 +79,32 @@
         </div>
 
         <div id="orcamentos" class="tab-content">
-            <h2 class="text-gray-400 text-xs font-bold uppercase mb-4 ml-2">Orçamentos Salvos</h2>
+            <h2 class="text-gray-400 text-xs font-bold uppercase mb-4 ml-2">Meus Orçamentos</h2>
             <div id="listaOrcamentos"></div>
         </div>
 
         <div id="novo" class="tab-content">
             <div class="card shadow-2xl">
-                <h2 class="font-bold mb-4 text-indigo-400">Preencha os Dados</h2>
+                <h2 class="font-bold mb-4 text-indigo-400 uppercase text-xs">Novo Registro</h2>
                 <input type="text" id="nome" placeholder="Nome do Cliente">
-                <input type="text" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
-                <textarea id="detalhes" rows="4" placeholder="Ex: Cimento, Areia, Pintura da sala..."></textarea>
+                <input type="text" id="whatsapp" placeholder="WhatsApp">
+                <input type="text" id="produto" placeholder="Produto ou Serviço">
+                <input type="text" id="valor" placeholder="Valor Total R$">
                 
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div><p class="text-[10px] text-gray-500 mb-1">MATERIAIS</p><input type="text" id="valorMat" value="0"></div>
-                    <div><p class="text-[10px] text-gray-500 mb-1">MÃO DE OBRA</p><input type="text" id="valorMao" value="0"></div>
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                    <button id="btnVenda" class="bg-indigo-600 text-white py-4 rounded-xl font-bold text-xs uppercase">Venda Rápida</button>
+                    <button id="btnOrc" class="bg-gray-700 text-white py-4 rounded-xl font-bold text-xs uppercase">Orçamento</button>
                 </div>
-
-                <button id="btnGerarOrc" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold mb-4">GERAR PROPOSTA DE ORÇAMENTO</button>
-                <button id="btnVendaRapida" class="w-full bg-gray-800 text-gray-400 py-3 rounded-xl font-bold text-xs">APENAS SALVAR VENDA RÁPIDA</button>
             </div>
         </div>
 
         <div id="config" class="tab-content">
             <div class="card">
-                <h2 class="font-bold mb-4 uppercase text-xs">Configurar Perfil</h2>
                 <input type="text" id="confNome" placeholder="Nome da Empresa">
-                <input type="text" id="confPix" placeholder="Sua Chave PIX">
-                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Salvar Alterações</button>
+                <input type="text" id="confPix" placeholder="Chave PIX">
+                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Salvar</button>
             </div>
         </div>
     </main>
 
-    <nav class="nav-bar">
-        <button id="tabDash" class="nav-btn active"><i class="fas fa-home"></i></button>
-        <button id="tabOrc" class="nav-btn"><i class="fas fa-file-invoice-dollar"></i></button>
-        <button id="tabNovo" class="btn-plus"><i class="fas fa-plus"></i></button>
-        <button id="tabConf" class="nav-btn"><i class="fas fa-cog"></i></button>
-        <button id="btnLogout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></button>
-    </nav>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
-            authDomain: "zapcaderno.firebaseapp.com",
-            projectId: "zapcaderno",
-            storageBucket: "zapcaderno.firebasestorage.app",
-            messagingSenderId: "446641643061",
-            appId: "1:446641643061:web:daf768922b53614f229b7c"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let empresa = { nome: "ZAPCADERNO", pix: "Não cadastrado" };
-
-        const openTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            if(id === 'dashboard') document.getElementById('tabDash').classList.add('active');
-            if(id === 'orcamentos') document.getElementById('tabOrc').classList.add('active');
-            if(id === 'config') document.getElementById('tabConf').classList.add('active');
-        };
-
-        document.getElementById('tabDash').onclick = () => openTab('dashboard');
-        document.getElementById('tabOrc').onclick = () => openTab('orcamentos');
-        document.getElementById('tabNovo').onclick = () => openTab('novo');
-        document.getElementById('tabConf').onclick = () => openTab('config');
-        document.getElementById('btnLogout').onclick = () => signOut(auth);
-
-        document.getElementById('btnEntrar').onclick = () => {
-            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value).catch(() => alert("Acesso negado"));
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById('telaLogin').style.display = 'none';
-                const snap = await getDoc(doc(db, "configuracoes", user.uid));
-                if (snap.exists()) {
-                    empresa = snap.data();
-                    document.getElementById('headerNome').innerText = empresa.nome;
-                    document.getElementById('headerPix').innerText = "PIX: " + empresa.pix;
-                }
-                initData(user.uid);
-            } else {
-                document.getElementById('telaLogin').style.display = 'flex';
-            }
-        });
-
-        document.getElementById('btnSalvarConfig').onclick = async () => {
-            await setDoc(doc(db, "configuracoes", auth.currentUser.uid), { nome: document.getElementById('confNome').value, pix: document.getElementById('confPix').value });
-            alert("Perfil salvo!"); location.reload();
-        };
-
-        const salvarRegistro = async (tipo) => {
-            const mat = parseFloat(document.getElementById('valorMat').value.replace(',','.')) || 0;
-            const mao = parseFloat(document.getElementById('valorMao').value.replace(',','.')) || 0;
-            const total = mat + mao;
-
-            await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('nome').value,
-                whatsapp: document.getElementById('whatsapp').value.replace
+    <nav class
