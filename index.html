@@ -16,15 +16,10 @@
         #telaLogin { position: fixed; inset: 0; background: white; z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
         .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; }
         .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; }
-        
-        /* Card Profissional com botões grandes */
         .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #edf2f7; }
-        .btn-cobrar { background-color: #22c55e; color: white; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-recebi { background-color: #4f46e5; color: white; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; border: none; text-transform: uppercase; }
-        
+        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; outline: none; width: 100%; margin-bottom: 10px; }
         .progress-bar { height: 12px; border-radius: 6px; background: #e2e8f0; overflow: hidden; margin: 10px 0; }
         .progress-fill { height: 100%; background: #4f46e5; width: 0%; transition: 1s ease-in-out; }
-        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; outline: none; width: 100%; }
     </style>
 </head>
 <body class="pb-32">
@@ -32,17 +27,16 @@
     <div id="telaLogin">
         <i class="fas fa-wallet text-5xl text-indigo-600 mb-6"></i>
         <h1 class="text-2xl font-bold mb-6">ZapCaderno Pro</h1>
-        <input type="email" id="logEmail" placeholder="E-mail" class="mb-3">
-        <input type="password" id="logSenha" placeholder="Senha" class="mb-4">
+        <input type="email" id="logEmail" placeholder="E-mail">
+        <input type="password" id="logSenha" placeholder="Senha">
         <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl">ENTRAR</button>
     </div>
 
     <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
         <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-xl font-bold uppercase tracking-widest">NOME DA SUA EMPRESA</h1>
-                <p class="text-xs opacity-90 mt-1"><i class="fas fa-key text-[10px]"></i> PIX: 000.000.000-00</p>
-                <span class="text-[10px] bg-green-500 px-2 py-0.5 rounded-full font-bold inline-block mt-2">SISTEMA ATIVO</span>
+                <h1 id="headerNomeEmpresa" class="text-xl font-bold uppercase tracking-widest">ZapCaderno</h1>
+                <p id="headerPix" class="text-xs opacity-90 mt-1">Configure seu PIX na engrenagem</p>
             </div>
             <button onclick="document.body.classList.toggle('dark-mode')" class="text-white opacity-80 text-xl"><i class="fas fa-moon"></i></button>
         </div>
@@ -54,45 +48,52 @@
                 <p class="text-[10px] font-bold text-indigo-500 uppercase">Total a Receber</p>
                 <p id="totalReceber" class="text-3xl font-black">R$ 0,00</p>
                 <div class="progress-bar"><div id="progressoVendas" class="progress-fill"></div></div>
-                <p id="txtProgresso" class="text-[9px] text-gray-400 font-bold uppercase text-center">Calculando progresso...</p>
+                <p id="txtProgresso" class="text-[9px] text-gray-400 font-bold uppercase text-center">Calculando...</p>
             </div>
             <div id="listaDividas" class="space-y-4"></div>
         </section>
 
         <section id="orcamentos" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 text-indigo-600 px-1">Orçamentos Pendentes</h2>
+            <h2 class="text-xl font-bold mb-4 text-indigo-600">Orçamentos</h2>
             <div id="listaOrcamentos"></div>
+        </section>
+
+        <section id="config" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-6 text-indigo-600">Configurar Minha Empresa</h2>
+                <input type="text" id="confNome" placeholder="Nome da Empresa (Ex: Loja do João)">
+                <input type="text" id="confPix" placeholder="Seu PIX (Chave)">
+                <button onclick="salvarConfig()" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl mt-2 border-none">SALVAR CONFIGURAÇÕES</button>
+            </div>
         </section>
 
         <section id="novo" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-6 text-indigo-600">O que vamos anotar?</h2>
-                <div class="space-y-4">
-                    <input type="text" id="nome" placeholder="Nome do Cliente">
-                    <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
-                    <input type="text" id="produto" placeholder="O que ele levou?">
-                    <input type="text" id="valor" placeholder="Valor (Ex: 25,00)" class="font-bold text-indigo-600">
-                    
-                    <div class="grid grid-cols-2 gap-3 mt-4">
-                        <button onclick="salvarAcao('venda')" class="bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-md border-none uppercase text-xs">Salvar Venda</button>
-                        <button onclick="salvarAcao('orcamento')" class="bg-gray-200 text-gray-700 font-bold py-4 rounded-xl border-none uppercase text-xs">Orçamento</button>
-                    </div>
+                <h2 class="text-lg font-bold mb-6 text-indigo-600">Nova Entrada</h2>
+                <input type="text" id="nome" placeholder="Nome do Cliente">
+                <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
+                <input type="text" id="produto" placeholder="Produto">
+                <input type="text" id="valor" placeholder="Valor (Ex: 10,00)" class="font-bold">
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <button onclick="salvarAcao('venda')" class="bg-indigo-600 text-white font-bold py-4 rounded-xl border-none">VENDA</button>
+                    <button onclick="salvarAcao('orcamento')" class="bg-gray-200 text-gray-700 font-bold py-4 rounded-xl border-none">ORÇAMENTO</button>
                 </div>
             </div>
         </section>
     </main>
 
     <nav class="nav-bar">
-        <button onclick="showTab('dashboard')" class="text-indigo-600 bg-transparent border-none"><i class="fas fa-home text-2xl"></i></button>
-        <button onclick="showTab('orcamentos')" class="text-gray-400 bg-transparent border-none"><i class="fas fa-file-invoice-dollar text-2xl"></i></button>
-        <button onclick="showTab('novo')" class="btn-plus"><i class="fas fa-plus text-2xl"></i></button>
-        <button onclick="logout()" class="text-gray-400 bg-transparent border-none"><i class="fas fa-sign-out-alt text-2xl"></i></button>
+        <button onclick="showTab('dashboard')" class="text-indigo-600 bg-transparent border-none"><i class="fas fa-home text-xl"></i></button>
+        <button onclick="showTab('orcamentos')" class="text-gray-400 bg-transparent border-none"><i class="fas fa-file-invoice-dollar text-xl"></i></button>
+        <button onclick="showTab('novo')" class="btn-plus"><i class="fas fa-plus text-xl"></i></button>
+        <button onclick="showTab('config')" class="text-gray-400 bg-transparent border-none"><i class="fas fa-cog text-xl"></i></button>
+        <button onclick="logout()" class="text-gray-400 bg-transparent border-none"><i class="fas fa-sign-out-alt text-xl"></i></button>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
@@ -107,23 +108,47 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let dadosEmpresa = { nome: "ZapCaderno", pix: "" };
+
         window.fazerLogin = () => {
             const e = document.getElementById('logEmail').value;
             const s = document.getElementById('logSenha').value;
-            signInWithEmailAndPassword(auth, e, s).catch(err => alert("Erro ao acessar o caderno."));
+            signInWithEmailAndPassword(auth, e, s);
         };
         window.logout = () => signOut(auth);
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('telaLogin').style.display = 'none';
+                await carregarConfig(user.uid);
                 carregarDados(user.uid);
             } else {
                 document.getElementById('telaLogin').style.display = 'flex';
             }
         });
 
-        // SALVAR E LIMPAR CAMPOS
+        // SALVAR CONFIGURAÇÃO NO FIREBASE
+        window.salvarConfig = async () => {
+            const n = document.getElementById('confNome').value;
+            const p = document.getElementById('confPix').value;
+            const uid = auth.currentUser.uid;
+            await setDoc(doc(db, "configuracoes", uid), { nome: n, pix: p });
+            alert("Empresa configurada!");
+            location.reload();
+        };
+
+        async function carregarConfig(uid) {
+            const docRef = doc(db, "configuracoes", uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                dadosEmpresa = docSnap.data();
+                document.getElementById('headerNomeEmpresa').innerText = dadosEmpresa.nome;
+                document.getElementById('headerPix').innerText = "PIX: " + dadosEmpresa.pix;
+                document.getElementById('confNome').value = dadosEmpresa.nome;
+                document.getElementById('confPix').value = dadosEmpresa.pix;
+            }
+        }
+
         window.salvarAcao = async (tipo) => {
             const n = document.getElementById('nome');
             const v = document.getElementById('valor');
@@ -133,45 +158,39 @@
 
             if(!n.value || isNaN(valorNum)) return alert("Preencha Nome e Valor!");
 
-            try {
-                await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
-                    uid: auth.currentUser.uid,
-                    nome: n.value,
-                    whatsapp: w.value.replace(/\D/g,''),
-                    produto: p.value || "Item",
-                    valor: valorNum,
-                    pago: false,
-                    data: new Date()
-                });
-                alert(tipo === 'venda' ? "Venda Registrada!" : "Orçamento Salvo!");
-                
-                // LIMPEZA DOS CAMPOS (O que você pediu)
-                n.value=''; v.value=''; w.value=''; p.value='';
-                showTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
-            } catch (e) { alert("Erro de conexão."); }
+            await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
+                uid: auth.currentUser.uid,
+                nome: n.value,
+                whatsapp: w.value.replace(/\D/g,''),
+                produto: p.value || "Venda",
+                valor: valorNum,
+                pago: false,
+                data: new Date()
+            });
+            alert("Salvo!");
+            n.value=''; v.value=''; w.value=''; p.value=''; // LIMPEZA
+            showTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
         };
 
         function carregarDados(uid) {
-            // Monitor de Vendas Ativas
             onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
                 let total = 0; let pago = 0;
                 const lista = document.getElementById('listaDividas');
                 lista.innerHTML = '';
                 snap.forEach(docSnap => {
                     const d = docSnap.data();
-                    if(d.pago) {
-                        pago += d.valor;
-                    } else {
+                    if(d.pago) pago += d.valor;
+                    else {
                         total += d.valor;
                         lista.innerHTML += `
                         <div class="card">
                             <div class="flex justify-between items-start mb-4">
-                                <div><b class="text-xl text-gray-800">${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
-                                <span class="text-red-600 font-black text-2xl">R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
+                                <div><b>${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
+                                <span class="text-red-500 font-bold">R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, passando para lembrar da conta de R$ ${d.valor.toFixed(2).replace('.', ',')}. Nosso PIX é o CPF que está no topo do app." class="btn-cobrar no-underline text-xs uppercase"><i class="fab fa-whatsapp"></i> Cobrar</a>
-                                <button onclick="baixar('${docSnap.id}')" class="btn-recebi text-xs">Recebi</button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, aqui é da ${dadosEmpresa.nome}. Passando para lembrar da conta de R$ ${d.valor.toFixed(2).replace('.', ',')}. Nosso PIX é: ${dadosEmpresa.pix}" class="bg-green-500 text-white font-bold py-3 rounded-xl text-center no-underline text-[10px] uppercase flex items-center justify-center gap-1"><i class="fab fa-whatsapp"></i> Cobrar</a>
+                                <button onclick="baixar('${docSnap.id}')" class="bg-indigo-600 text-white font-bold py-3 rounded-xl text-[10px] border-none">RECEBI</button>
                             </div>
                         </div>`;
                     }
@@ -179,10 +198,9 @@
                 document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
                 const perc = Math.round((pago / (total + pago)) * 100) || 0;
                 document.getElementById('progressoVendas').style.width = perc + "%";
-                document.getElementById('txtProgresso').innerText = `Você já recebeu ${perc}% das suas vendas totais`;
+                document.getElementById('txtProgresso').innerText = `Você recebeu ${perc}% das vendas`;
             });
 
-            // Monitor de Orçamentos
             onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
                 const lista = document.getElementById('listaOrcamentos');
                 lista.innerHTML = '';
@@ -190,13 +208,10 @@
                     const o = docSnap.data();
                     lista.innerHTML += `
                     <div class="card bg-gray-50 border-dashed border-2 border-gray-200">
-                        <div class="flex justify-between mb-4">
-                            <b>${o.nome}</b>
-                            <span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2).replace('.', ',')}</span>
-                        </div>
+                        <div class="flex justify-between mb-2"><b>${o.nome}</b><span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2).replace('.', ',')}</span></div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="virarVenda('${docSnap.id}')" class="bg-indigo-500 text-white py-3 rounded-xl font-bold uppercase text-[10px]">Virou Venda</button>
-                            <a href="https://wa.me/55${o.whatsapp}?text=Olá ${o.nome}, aqui está o orçamento de ${o.produto}: R$ ${o.valor.toFixed(2).replace('.', ',')}" class="bg-green-500 text-white py-3 rounded-xl font-bold text-center no-underline uppercase text-[10px]">Enviar Zap</a>
+                            <button onclick="virarVenda('${docSnap.id}')" class="bg-indigo-400 text-white py-3 rounded-lg border-none text-[9px] font-bold uppercase">Virou Venda</button>
+                            <a href="https://wa.me/55${o.whatsapp}?text=Olá ${o.nome}, aqui está o orçamento de ${o.produto} da ${dadosEmpresa.nome}: Total R$ ${o.valor.toFixed(2).replace('.', ',')}" class="bg-green-500 text-white py-3 rounded-lg font-bold text-center no-underline text-[9px] uppercase">Enviar Zap</a>
                         </div>
                     </div>`;
                 });
@@ -209,10 +224,8 @@
             const orcRef = doc(db, "orcamentos", id);
             const orcDoc = await getDoc(orcRef);
             if (orcDoc.exists()) {
-                const dados = orcDoc.data();
-                await addDoc(collection(db, "vendas"), {...dados, pago: false, data: new Date()});
+                await addDoc(collection(db, "vendas"), {...orcDoc.data(), data: new Date()});
                 await deleteDoc(orcRef);
-                alert("Convertido para venda ativa!");
                 showTab('dashboard');
             }
         };
