@@ -23,10 +23,10 @@
         .btn-cobrar { background-color: #22c55e !important; color: white !important; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; border: none !important; text-decoration: none !important; }
         .btn-recebi { background-color: #4f46e5 !important; color: white !important; font-weight: bold; padding: 12px; border-radius: 12px; text-align: center; border: none !important; text-transform: uppercase; }
         
-        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; color: #1e293b; }
+        input { border: 1.5px solid #e2e8f0 !important; border-radius: 12px !important; padding: 12px !important; width: 100%; margin-bottom: 10px; color: #1e293b; background: white; }
         .dark-mode input { background: #0f172a; border-color: #334155 !important; color: white; }
         
-        .nav-btn { background: none; border: none; padding: 10px; color: #94a3b8; transition: 0.3s; }
+        .nav-btn { background: none; border: none; padding: 10px; color: #94a3b8; transition: 0.3s; cursor: pointer; }
         .nav-btn.active { color: #4f46e5; }
     </style>
 </head>
@@ -45,6 +45,7 @@
             <div>
                 <h1 id="headerNomeEmpresa" class="text-xl font-bold uppercase tracking-widest">MINHA LOJA</h1>
                 <p id="headerPix" class="text-xs opacity-90 mt-1">Configure na engrenagem</p>
+                <span id="statusAtivo" class="text-[10px] bg-green-500 px-2 py-0.5 rounded-full font-bold inline-block mt-2">SISTEMA ATIVO</span>
             </div>
             <button onclick="document.body.classList.toggle('dark-mode')" class="bg-transparent border-none text-white text-xl"><i class="fas fa-moon"></i></button>
         </div>
@@ -64,16 +65,16 @@
         </section>
 
         <section id="orcamentos" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 text-indigo-600">Orçamentos</h2>
+            <h2 class="text-xl font-bold mb-4 text-indigo-600">Orçamentos Pendentes</h2>
             <div id="listaOrcamentos"></div>
         </section>
 
         <section id="config" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-6 text-indigo-600">Configurações</h2>
+                <h2 class="text-lg font-bold mb-6 text-indigo-600">Dados da Empresa</h2>
                 <input type="text" id="confNome" placeholder="Nome da Empresa">
                 <input type="text" id="confPix" placeholder="Chave PIX">
-                <button onclick="salvarConfig()" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl border-none">SALVAR DADOS</button>
+                <button id="btnSaveConfig" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl border-none">SALVAR CONFIGURAÇÃO</button>
             </div>
         </section>
 
@@ -85,19 +86,19 @@
                 <input type="text" id="produto" placeholder="Produto/Serviço">
                 <input type="text" id="valor" placeholder="Valor (Ex: 10,00)">
                 <div class="grid grid-cols-2 gap-3 mt-2">
-                    <button onclick="salvarAcao('venda')" class="bg-indigo-600 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Venda</button>
-                    <button onclick="salvarAcao('orcamento')" class="bg-gray-400 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Orçamento</button>
+                    <button id="btnVenda" class="bg-indigo-600 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Venda</button>
+                    <button id="btnOrcamento" class="bg-gray-400 text-white font-bold py-4 rounded-xl border-none uppercase text-xs">Orçamento</button>
                 </div>
             </div>
         </section>
     </main>
 
     <nav class="nav-bar">
-        <button onclick="showTab('dashboard')" class="nav-btn active"><i class="fas fa-home text-2xl"></i></button>
-        <button onclick="showTab('orcamentos')" class="nav-btn"><i class="fas fa-file-invoice-dollar text-2xl"></i></button>
-        <button onclick="showTab('novo')" class="btn-plus"><i class="fas fa-plus text-2xl"></i></button>
-        <button onclick="showTab('config')" class="nav-btn"><i class="fas fa-cog text-2xl"></i></button>
-        <button onclick="logout()" class="nav-btn"><i class="fas fa-sign-out-alt text-2xl"></i></button>
+        <button onclick="changeTab('dashboard')" class="nav-btn active"><i class="fas fa-home text-2xl"></i></button>
+        <button onclick="changeTab('orcamentos')" class="nav-btn"><i class="fas fa-file-invoice-dollar text-2xl"></i></button>
+        <button onclick="changeTab('novo')" class="btn-plus"><i class="fas fa-plus text-2xl"></i></button>
+        <button onclick="changeTab('config')" class="nav-btn"><i class="fas fa-cog text-2xl"></i></button>
+        <button id="btnLogout" class="nav-btn"><i class="fas fa-sign-out-alt text-2xl"></i></button>
     </nav>
 
     <script type="module">
@@ -120,12 +121,14 @@
 
         let dadosEmpresa = { nome: "Minha Loja", pix: "Não configurado" };
 
+        // LOGIN
         window.fazerLogin = () => {
             const e = document.getElementById('logEmail').value;
             const s = document.getElementById('logSenha').value;
-            signInWithEmailAndPassword(auth, e, s).catch(() => alert("Erro ao entrar"));
+            signInWithEmailAndPassword(auth, e, s).catch(() => alert("E-mail ou senha incorretos!"));
         };
-        window.logout = () => signOut(auth);
+
+        document.getElementById('btnLogout').onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -137,19 +140,23 @@
             }
         });
 
-        window.showTab = (id) => {
+        // NAVEGAÇÃO
+        window.changeTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            const btnClicado = document.querySelector(`button[onclick="showTab('${id}')"]`);
-            if(btnClicado) btnClicado.classList.add('active');
+            // Procura o botão correto para destacar
+            const btn = document.querySelector(`button[onclick="changeTab('${id}')"]`);
+            if(btn) btn.classList.add('active');
         };
 
-        window.salvarConfig = async () => {
+        // SALVAR CONFIG
+        document.getElementById('btnSaveConfig').onclick = async () => {
             const n = document.getElementById('confNome').value;
             const p = document.getElementById('confPix').value;
+            if(!n || !p) return alert("Preencha os dois campos!");
             await setDoc(doc(db, "configuracoes", auth.currentUser.uid), { nome: n, pix: p });
-            alert("Salvo!");
+            alert("Dados salvos!");
             location.reload();
         };
 
@@ -164,14 +171,15 @@
             }
         }
 
-        window.salvarAcao = async (tipo) => {
+        // SALVAR VENDA/ORÇAMENTO
+        const salvar = async (tipo) => {
             const n = document.getElementById('nome');
             const v = document.getElementById('valor');
             const w = document.getElementById('whatsapp');
             const p = document.getElementById('produto');
             const val = parseFloat(v.value.replace(',', '.'));
 
-            if(!n.value || isNaN(val)) return alert("Preencha Nome e Valor!");
+            if(!n.value || isNaN(val)) return alert("Nome e Valor são obrigatórios!");
 
             await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
                 uid: auth.currentUser.uid,
@@ -182,43 +190,57 @@
                 pago: false,
                 data: new Date()
             });
+            
             n.value=''; v.value=''; w.value=''; p.value='';
-            showTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
+            alert(tipo === 'venda' ? "Venda Salva!" : "Orçamento Salvo!");
+            changeTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
         };
 
+        document.getElementById('btnVenda').onclick = () => salvar('venda');
+        document.getElementById('btnOrcamento').onclick = () => salvar('orcamento');
+
+        // CARREGAR LISTAS
         function carregarDados(uid) {
+            // Vendas
             onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
                 let total = 0; let pago = 0;
                 const lista = document.getElementById('listaDividas');
                 lista.innerHTML = '';
                 snap.forEach(docSnap => {
                     const d = docSnap.data();
-                    if(d.pago) pago += d.valor;
-                    else {
+                    if(d.pago) {
+                        pago += d.valor;
+                    } else {
                         total += d.valor;
-                        lista.innerHTML += `
-                        <div class="card">
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
                             <div class="flex justify-between items-start mb-4">
                                 <div><b class="text-xl">${d.nome}</b><p class="text-xs text-gray-400">${d.produto}</p></div>
                                 <span class="text-red-500 font-bold text-2xl">R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, aqui é da ${dadosEmpresa.nome}. Valor em aberto: R$ ${d.valor.toFixed(2).replace('.', ',')}. PIX: ${dadosEmpresa.pix}" class="btn-cobrar"><i class="fab fa-whatsapp"></i> COBRAR</a>
-                                <button onclick="baixarVenda('${docSnap.id}')" class="btn-recebi">RECEBI</button>
-                            </div>
-                        </div>`;
+                                <a href="https://wa.me/55${d.whatsapp}?text=Olá ${d.nome}, aqui é da ${dadosEmpresa.nome}. Temos um valor de R$ ${d.valor.toFixed(2).replace('.', ',')} em aberto. PIX: ${dadosEmpresa.pix}" class="btn-cobrar"><i class="fab fa-whatsapp"></i> COBRAR</a>
+                                <button onclick="baixar('${docSnap.id}')" class="btn-recebi">RECEBI</button>
+                            </div>`;
+                        lista.appendChild(card);
                     }
                 });
                 document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
                 const perc = Math.round((pago / (total + pago)) * 100) || 0;
                 document.getElementById('progressoVendas').style.width = perc + "%";
-                document.getElementById('txtProgresso').innerText = `Recebeu ${perc}% do total`;
+                document.getElementById('txtProgresso').innerText = `Você já recebeu ${perc}% das vendas totais`;
             });
 
+            // Orçamentos
             onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
                 const lista = document.getElementById('listaOrcamentos');
                 lista.innerHTML = '';
                 snap.forEach(docSnap => {
                     const o = docSnap.data();
-                    lista.innerHTML += `
-                    <div class="card border
+                    const card = document.createElement('div');
+                    card.className = 'card border-dashed';
+                    card.innerHTML = `
+                        <div class="flex justify-between mb-4"><b>${o.nome}</b><span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2).replace('.', ',')}</span></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="virarVenda('${docSnap.id}')" class="bg-indigo-500 text-white py-3 rounded-xl border-none uppercase text-[10px]">Virou
