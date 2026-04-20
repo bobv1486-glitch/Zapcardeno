@@ -26,10 +26,6 @@
         
         .nav-btn { color: #94a3b8; font-size: 24px; background: none; border: none; cursor: pointer; }
         .nav-btn.active { color: #4f46e5; }
-
-        /* Estilo para os botões de modelo */
-        .btn-modelo { background: #e2e8f0; color: #475569; padding: 8px 12px; border-radius: 8px; font-size: 10px; font-weight: bold; border: none; cursor: pointer; margin-right: 5px; margin-bottom: 5px; }
-        .dark-mode .btn-modelo { background: #334155; color: #f1f5f9; }
     </style>
 </head>
 <body class="pb-32">
@@ -62,26 +58,17 @@
         </div>
 
         <div id="orcamentos" class="tab-content">
-            <h2 class="font-bold mb-3 text-indigo-600">Meus Orçamentos</h2>
+            <h2 class="font-bold mb-3">Orçamentos</h2>
             <div id="listaOrcamentos"></div>
         </div>
 
         <div id="novo" class="tab-content">
             <div class="card">
                 <h2 class="font-bold mb-4">Novo Registro</h2>
-                
-                <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase">Modelos Rápidos:</p>
-                <div class="flex flex-wrap mb-3">
-                    <button class="btn-modelo" onclick="aplicarModelo('servico')">🛠️ SERVIÇO/OBRA</button>
-                    <button class="btn-modelo" onclick="aplicarModelo('beleza')">💅 BELEZA</button>
-                    <button class="btn-modelo" onclick="aplicarModelo('venda')">🛍️ PRODUTOS</button>
-                </div>
-
                 <input type="text" id="nome" placeholder="Nome do Cliente">
                 <input type="text" id="whatsapp" placeholder="WhatsApp (DDD+Número)">
-                <input type="text" id="produto" placeholder="O que comprou / Serviço?">
+                <input type="text" id="produto" placeholder="O que comprou?">
                 <input type="text" id="valor" placeholder="Valor (Ex: 15,00)">
-                
                 <div class="grid grid-cols-2 gap-2 mt-2">
                     <button id="btnVenda" class="bg-indigo-600 text-white py-3 rounded-lg border-none font-bold">VENDA</button>
                     <button id="btnOrc" class="bg-gray-400 text-white py-3 rounded-lg border-none font-bold">ORÇAMENTO</button>
@@ -127,18 +114,12 @@
 
         let empresa = { nome: "ZAPCADERNO", pix: "Não definido" };
 
-        // --- MODELOS DE TEXTO ---
-        window.aplicarModelo = (tipo) => {
-            const campo = document.getElementById('produto');
-            if(tipo === 'servico') campo.value = "Mão de obra + Materiais inclusos";
-            if(tipo === 'beleza') campo.value = "Combo Manicure + Pedicure completo";
-            if(tipo === 'venda') campo.value = "Kit Cosméticos (Entrega em mãos)";
-        };
-
+        // --- CONTROLE DE TELAS ---
         const openTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            // Estilo do botão ativo
             if(id === 'dashboard') document.getElementById('tabDash').classList.add('active');
             if(id === 'orcamentos') document.getElementById('tabOrc').classList.add('active');
             if(id === 'config') document.getElementById('tabConf').classList.add('active');
@@ -150,6 +131,7 @@
         document.getElementById('tabConf').onclick = () => openTab('config');
         document.getElementById('btnLogout').onclick = () => signOut(auth);
 
+        // --- LOGIN E AUTH ---
         document.getElementById('btnEntrar').onclick = () => {
             const e = document.getElementById('logEmail').value;
             const s = document.getElementById('logSenha').value;
@@ -166,6 +148,7 @@
             }
         });
 
+        // --- DADOS DA EMPRESA ---
         async function loadConfig(uid) {
             const snap = await getDoc(doc(db, "configuracoes", uid));
             if (snap.exists()) {
@@ -185,9 +168,11 @@
             location.reload();
         };
 
+        // --- OPERAÇÕES ---
         const salvar = async (tipo) => {
             const val = parseFloat(document.getElementById('valor').value.replace(',', '.'));
-            if(!val) return alert("Digite um valor!");
+            if(!val) return alert("Digite um valor válido!");
+
             await addDoc(collection(db, tipo === 'venda' ? "vendas" : "orcamentos"), {
                 uid: auth.currentUser.uid,
                 nome: document.getElementById('nome').value,
@@ -197,7 +182,7 @@
                 pago: false,
                 data: new Date()
             });
-            alert("Salvo com sucesso!");
+            alert("Sucesso!");
             document.getElementById('nome').value=''; document.getElementById('valor').value='';
             openTab(tipo === 'venda' ? 'dashboard' : 'orcamentos');
         };
@@ -205,7 +190,9 @@
         document.getElementById('btnVenda').onclick = () => salvar('venda');
         document.getElementById('btnOrc').onclick = () => salvar('orcamento');
 
+        // --- LISTAGEM ---
         function initData(uid) {
+            // Vendas (Dashboard)
             onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
                 let total = 0;
                 const div = document.getElementById('listaDividas');
@@ -228,9 +215,10 @@
                     }
                 });
                 document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
-                document.getElementById('txtProgresso').innerText = "Vendas atualizadas.";
+                document.getElementById('txtProgresso').innerText = "Dados atualizados.";
             });
 
+            // Orçamentos
             onSnapshot(query(collection(db, "orcamentos"), where("uid", "==", uid)), (snap) => {
                 const div = document.getElementById('listaOrcamentos');
                 div.innerHTML = '';
@@ -238,19 +226,14 @@
                     const o = s.data();
                     div.innerHTML += `
                         <div class="card border-dashed">
-                            <div class="flex justify-between items-start">
-                                <div><b>${o.nome}</b><p class="text-[10px] text-gray-400">${o.produto}</p></div>
-                                <span class="text-indigo-600 font-bold">R$ ${o.valor.toFixed(2)}</span>
-                            </div>
-                            <div class="flex gap-2 mt-3">
-                                <a href="https://wa.me/55${o.whatsapp}?text=Olá ${o.nome}, aqui é da ${empresa.nome}. Conforme solicitado, segue seu ORÇAMENTO:%0A%0A*Serviço:* ${o.produto}%0A*Valor:* R$ ${o.valor.toFixed(2)}%0A%0A_Aguardamos seu retorno!_" class="flex-1 bg-green-500 text-white text-center py-2 rounded-lg no-underline font-bold text-[10px]">ENVIAR ZAP</a>
-                                <button onclick="window.converter('${s.id}')" class="flex-1 bg-indigo-500 text-white rounded-lg border-none font-bold text-[10px]">VIRAR VENDA</button>
-                            </div>
+                            <div class="flex justify-between"><b>${o.nome}</b> <span>R$ ${o.valor.toFixed(2)}</span></div>
+                            <button onclick="window.converter('${s.id}')" class="w-full mt-2 bg-indigo-500 text-white py-2 rounded border-none text-xs">VIRAR VENDA</button>
                         </div>`;
                 });
             });
         }
 
+        // FUNÇÕES GLOBAIS
         window.receber = async (id) => {
             if(confirm("Confirmar pagamento?")) await updateDoc(doc(db, "vendas", id), { pago: true });
         };
