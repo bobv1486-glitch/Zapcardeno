@@ -2,73 +2,110 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZapCaderno Pro</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zapcaderno - Micro-SaaS Automático</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { color-scheme: dark; } /* Força o calendário nativo a ficar no modo escuro */
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0a0a0a; color: #ffffff; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        /* Navegação inferior robusta */
-        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: #161616; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.9); z-index: 1000; border: 1px solid #222; }
-        .btn-plus { background: #4f46e5; color: white; width: 65px; height: 65px; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: 4px solid #0a0a0a; font-size: 26px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); }
-        .nav-btn { color: #444; font-size: 24px; background: none; border: none; transition: 0.3s; }
-        .nav-btn.active { color: #818cf8; }
-
-        /* Estilo de Inputs para Celular */
-        .card { background: #161616; border-radius: 24px; padding: 22px; margin-bottom: 15px; border: 1px solid #222; }
-        input, textarea { background: #1f1f1f !important; border: 1px solid #333 !important; border-radius: 14px !important; padding: 16px !important; width: 100%; margin-bottom: 12px; color: #fff !important; font-size: 16px; outline: none; transition: 0.2s; }
-        input:focus { border-color: #4f46e5 !important; }
-        
-        /* Correção Definitiva da Data */
-        input[type="date"] {
-            min-height: 55px;
-            position: relative;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            padding-right: 45px !important;
-        }
-
-        #telaLogin { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; border-radius: inherit; }
+        /* Controle de visibilidade das telas */
+        #tela-carregamento, #tela-liberada, #tela-bloqueio { display: none; }
+        .flex-active { display: flex !important; }
+        .block-active { display: block !important; }
     </style>
 </head>
-<body class="pb-36">
+<body class="bg-gray-100 font-sans">
 
-    <div id="telaLogin">
-        <div class="text-center mb-8">
-            <h2 class="text-4xl font-black text-indigo-500 tracking-tighter">ZAPCADERNO</h2>
-            <p class="text-gray-500 text-sm">Sua caderneta profissional</p>
-        </div>
-        <input type="email" id="logEmail" placeholder="E-mail">
-        <input type="password" id="logSenha" placeholder="Senha">
-        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold border-none shadow-xl">ENTRAR</button>
+    <div id="tela-carregamento" class="h-screen flex flex-col items-center justify-center bg-white">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+        <p class="mt-4 text-gray-500 font-bold animate-pulse uppercase tracking-widest text-xs">Validando Pagamento...</p>
     </div>
 
-    <header class="p-6 flex justify-between items-start">
-        <div>
-            <h1 id="headerNome" class="text-xl font-bold text-white uppercase tracking-tight">CARREGANDO...</h1>
-            <div class="flex items-center gap-2 mt-1">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: ---</p>
+    <div id="tela-bloqueio" class="min-h-screen flex flex-col items-center justify-center p-6">
+        <div class="w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100">
+            <div class="bg-blue-600 p-10 text-center">
+                <h1 class="text-3xl font-black text-white italic tracking-tighter">Zapcaderno</h1>
+                <p class="text-blue-100 text-[10px] mt-2 font-bold uppercase tracking-widest opacity-80">Acesso Restrito</p>
+            </div>
+            <div class="p-10 text-center">
+                <div class="mb-8">
+                    <span class="text-5xl font-black text-gray-900">R$ 14,99</span>
+                    <p class="text-gray-400 text-[10px] font-bold mt-2 uppercase italic tracking-tighter">Liberação automática via Pix/Cartão</p>
+                </div>
+                <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" 
+                   class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition shadow-xl mb-6 text-center text-lg active:scale-95">
+                    LIBERAR MEU ACESSO
+                </a>
+                <button onclick="verificarAcesso()" class="text-[10px] text-gray-400 hover:text-blue-600 font-black underline uppercase tracking-tighter transition">
+                    Já paguei? Sincronizar agora
+                </button>
             </div>
         </div>
-        <button onclick="location.reload()" class="bg-gray-900 p-3 rounded-full text-gray-400 border-none"><i class="fas fa-redo-alt"></i></button>
-    </header>
+    </div>
 
-    <main class="p-4">
-        <div id="dashboard" class="tab-content active">
-            <div class="card bg-gradient-to-br from-gray-900 to-black border-indigo-900/30">
-                <p class="text-[11px] text-indigo-400 font-bold uppercase mb-1">Total a Receber</p>
-                <p id="totalReceber" class="text-4xl font-bold">R$ 0,00</p>
+    <div id="tela-liberada" class="min-h-screen bg-gray-50 flex-col">
+        <nav class="bg-white border-b px-6 py-5 flex justify-between items-center shadow-sm">
+            <h1 class="text-xl font-black text-blue-600 italic tracking-tighter">ZAPCADERNO PRO</h1>
+            <div class="flex items-center space-x-2">
+                <span class="h-2 w-2 bg-green-500 rounded-full"></span>
+                <span class="text-[10px] font-black text-green-600 uppercase">Acesso Ativo</span>
             </div>
-            <div id="listaDividas" class="space-y-3 mt-6"></div>
-        </div>
+        </nav>
+        <main class="p-6">
+            <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Bem-vindo ao seu Micro-SaaS!</h2>
+                <div class="p-5 bg-blue-50 rounded-xl border border-blue-100 mb-6">
+                    <p class="text-blue-700 font-medium text-sm">Sua assinatura vitalícia foi detectada na planilha.</p>
+                </div>
+                <textarea class="w-full h-48 p-4 bg-gray-50 border rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-gray-700" placeholder="Escreva suas notas aqui..."></textarea>
+                <button class="w-full mt-4 bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-100">Salvar Alterações</button>
+            </div>
+        </main>
+    </div>
 
-        <div id="orcamentos" class="tab-content">
-            <div class="card">
+    <script>
+        // Link da sua API que criamos no SheetDB
+        const API_SHEETDB = 'https://sheetdb.io/api/v1/2f431iyij8cgi';
+
+        async function verificarAcesso() {
+            // Volta para a tela de carregamento enquanto consulta
+            alternarTela('tela-carregamento');
+
+            try {
+                const response = await fetch(API_SHEETDB);
+                const dados = await response.json();
+
+                // Procura por qualquer linha que tenha status 'approved'
+                // O Webhook do Mercado Pago enviará isso para a planilha automaticamente
+                const pagamentoConfirmado = dados.some(item => 
+                    String(item.status).toLowerCase() === 'approved' || 
+                    String(item.collection_status).toLowerCase() === 'approved'
+                );
+
+                if (pagamentoConfirmado) {
+                    alternarTela('tela-liberada');
+                } else {
+                    alternarTela('tela-bloqueio');
+                }
+            } catch (error) {
+                console.error("Erro na API:", error);
+                alternarTela('tela-bloqueio');
+            }
+        }
+
+        // Função para trocar de tela suavemente
+        function alternarTela(idDesejado) {
+            const telas = ['tela-carregamento', 'tela-bloqueio', 'tela-liberada'];
+            telas.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === idDesejado) {
+                    el.classList.add(id === 'tela-liberada' ? 'block-active' : 'flex-active');
+                } else {
+                    el.classList.remove('flex-active', 'block-active');
+                }
+            });
+        }
+
+        // Inicia a verificação assim que o site abre
+        window.onload = verificarAcesso;
+    </script>
+</body>
+</html>
