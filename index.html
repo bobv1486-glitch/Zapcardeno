@@ -3,256 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZapCaderno Pro</title>
+    <title>ZapCaderno Ultra Pro</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { color-scheme: dark; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0a0a0a; color: #ffffff; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        /* Cores e Variáveis */
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; transition: 0.3s; -webkit-tap-highlight-color: transparent; }
+        .dark-mode { background-color: #0f172a; color: #f1f5f9; }
         
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Navegação inferior robusta */
-        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: #161616; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.9); z-index: 1000; border: 1px solid #222; }
-        .btn-plus { background: #4f46e5; color: white; width: 65px; height: 65px; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: 4px solid #0a0a0a; font-size: 26px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); }
-        .nav-btn { color: #444; font-size: 24px; background: none; border: none; transition: 0.3s; }
-        .nav-btn.active { color: #818cf8; }
-
-        /* Estilo de Inputs */
-        .card { background: #161616; border-radius: 24px; padding: 22px; margin-bottom: 15px; border: 1px solid #222; }
-        input, textarea { background: #1f1f1f !important; border: 1px solid #333 !important; border-radius: 14px !important; padding: 16px !important; width: 100%; margin-bottom: 12px; color: #fff !important; font-size: 16px; outline: none; transition: 0.2s; }
-        input:focus { border-color: #4f46e5 !important; }
-        
-        input[type="date"] {
-            min-height: 55px;
-            position: relative;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            padding-right: 45px !important;
+        /* Telas de Overlay */
+        #telaBemVindo, #bloqueioPagamento {
+            position: fixed; inset: 0; background: white; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; text-align: center;
         }
+        #bloqueioPagamento { display: none; background: #1e1b4b; color: white; }
 
-        #telaLogin { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        /* Navegação */
+        .nav-bar {
+            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px;
+            background: white; border-radius: 25px; display: flex; 
+            justify-content: space-around; align-items: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100;
+        }
+        .dark-mode .nav-bar { background: #1e293b; border: 1px solid #334155; }
+
+        .btn-plus {
+            background: #4f46e5; color: white; width: 55px; height: 55px;
+            border-radius: 18px; display: flex; align-items: center; justify-content: center;
+            margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none;
+        }
+        
+        /* Cards */
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
+        .dark-mode .card { background: #1e293b; border-color: #334155; }
+
+        .progress-bar { height: 10px; border-radius: 5px; background: #e2e8f0; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: #4f46e5; width: 0%; transition: 0.8s ease-in-out; }
+
+        input { border: 1px solid #e2e8f0; }
+        .dark-mode input { background: #0f172a !important; color: white !important; border-color: #334155; }
+        
+        button:active { transform: scale(0.95); }
     </style>
 </head>
-<body class="pb-36">
+<body class="pb-32">
 
-    <div id="telaLogin" style="display: none;">
-        <div class="text-center mb-8">
-            <h2 class="text-4xl font-black text-indigo-500 tracking-tighter italic">ZAPCADERNO</h2>
-            <p class="text-gray-500 text-sm">Sua caderneta profissional</p>
+    <div id="telaBemVindo">
+        <div class="w-24 h-24 bg-indigo-100 rounded-3xl flex items-center justify-center mb-6">
+            <i class="fas fa-wallet text-4xl text-indigo-600"></i>
         </div>
-        <input type="email" id="logEmail" placeholder="E-mail">
-        <input type="password" id="logSenha" placeholder="Senha">
-        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold border-none shadow-xl">ENTRAR</button>
+        <h1 class="text-3xl font-black text-gray-800 mb-2">ZapCaderno Pro</h1>
+        <p class="text-gray-500 mb-10 px-6">Sua gestão financeira na palma da mão.</p>
+        <button onclick="fecharBemVindo()" class="w-full max-w-xs bg-indigo-600 text-white font-bold py-5 rounded-2xl shadow-xl">COMEÇAR AGORA</button>
     </div>
 
-    <header class="p-6 flex justify-between items-start">
-        <div>
-            <h1 id="headerNome" class="text-xl font-bold text-white uppercase tracking-tight">CARREGANDO...</h1>
-            <div class="flex items-center gap-2 mt-1">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <p id="headerPix" class="text-[10px] text-gray-500 font-mono">PIX: ---</p>
+    <div id="bloqueioPagamento">
+        <i class="fas fa-lock text-5xl text-yellow-400 mb-6"></i>
+        <h2 class="text-2xl font-bold mb-2">Assinatura Expirada</h2>
+        <p class="text-indigo-200 text-sm mb-8 px-8">Para continuar usando, realize o pagamento mensal.</p>
+        <a href="https://mpago.la/2CGD9Ar" target="_blank" class="block w-full max-w-xs bg-indigo-500 text-white font-bold py-4 rounded-xl mb-4 text-center no-underline">PAGAR R$ 14,99</a>
+        <input type="text" id="chaveAtivacao" placeholder="SENHA DO MÊS" class="w-full max-w-xs p-4 rounded-xl text-center mb-3 uppercase font-bold text-gray-900 border-none outline-none">
+        <button onclick="verificarChave()" class="w-full max-w-xs bg-white bg-opacity-10 text-white py-3 rounded-xl font-bold">ATIVAR ACESSO</button>
+    </div>
+
+    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
+        <div class="flex justify-between items-center mb-2">
+            <div>
+                <h1 id="nomeLojaExibicao" class="text-xl font-bold tracking-tight uppercase">Minha Loja</h1>
+                <span id="statusBadge" class="text-[9px] bg-black bg-opacity-20 px-2 py-0.5 rounded-full font-bold uppercase">Sincronizado</span>
             </div>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 bg-white bg-opacity-10 rounded-full flex items-center justify-center border-none text-white">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
-        <button onclick="location.reload()" class="bg-gray-900 p-3 rounded-full text-gray-400 border-none"><i class="fas fa-redo-alt"></i></button>
     </header>
 
-    <main class="p-4">
-        <div id="dashboard" class="tab-content active">
-            <div class="card bg-gradient-to-br from-gray-900 to-black border-indigo-900/30">
-                <p class="text-[11px] text-indigo-400 font-bold uppercase mb-1">Total a Receber</p>
-                <p id="totalReceber" class="text-4xl font-bold">R$ 0,00</p>
-            </div>
-            <div id="listaDividas" class="space-y-3 mt-6"></div>
-        </div>
-
-        <div id="orcamentos" class="tab-content">
+    <main class="p-4 -mt-8">
+        <section id="dashboard" class="tab-content active">
             <div class="card">
-                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase">Nova Proposta</h3>
-                <input type="text" id="propNome" placeholder="Nome do Cliente">
-                <input type="text" id="propWhatsapp" placeholder="WhatsApp">
-                <textarea id="propDetalhes" placeholder="O que será feito?" rows="2"></textarea>
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="number" id="propMat" placeholder="Material R$">
-                    <input type="number" id="propMao" placeholder="Mão de Obra R$">
+                <div class="flex justify-between items-end mb-2">
+                    <div>
+                        <p class="text-[10px] font-bold text-indigo-500 uppercase">Total a Receber</p>
+                        <p id="totalReceber" class="text-3xl font-black">R$ 0,00</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-green-500 uppercase">Recebido</p>
+                        <p id="totalHistorico" class="text-lg font-bold">R$ 0,00</p>
+                    </div>
                 </div>
-                <button id="btnGerarOrcamento" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">SALVAR ORÇAMENTO</button>
+                <div class="progress-bar"><div id="progressoVendas" class="progress-fill"></div></div>
+                <div class="flex justify-between text-[9px] font-bold opacity-50">
+                    <span>PROGRESSO DE RECEBIMENTO</span>
+                    <span id="percentualTxt">0%</span>
+                </div>
             </div>
-            <div id="listaOrcamentos"></div>
-        </div>
 
-        <div id="novo" class="tab-content">
-            <div class="card">
-                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase text-center">Registrar Venda</h3>
-                <input type="text" id="vendaNome" placeholder="Nome do Cliente">
-                <input type="text" id="vendaWhatsapp" placeholder="WhatsApp">
-                <input type="text" id="vendaProduto" placeholder="Produto ou Serviço">
-                <input type="number" id="vendaValor" placeholder="Valor total R$">
-                <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Data que o cliente vai pagar:</label>
-                <input type="date" id="vendaDataPagar">
-                <button id="btnSalvarVendaRapida" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold mt-2">CONFIRMAR E SALVAR</button>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="buscaCliente" placeholder="🔍 Buscar cliente..." oninput="renderDashboard()" class="flex-1 p-4 bg-white rounded-2xl shadow-sm outline-none text-sm border-none">
+                <button onclick="gerarRelatorio()" class="bg-white p-4 rounded-2xl shadow-sm text-indigo-600 border-none"><i class="fas fa-print"></i></button>
             </div>
-        </div>
+            
+            <div id="listaDividas" class="space-y-4"></div>
+        </section>
 
-        <div id="config" class="tab-content">
+        <section id="novo" class="tab-content">
             <div class="card">
-                <h3 class="text-xs font-bold mb-4 uppercase">Perfil</h3>
-                <input type="text" id="confNome" placeholder="Nome da Empresa">
-                <input type="text" id="confPix" placeholder="Chave PIX">
-                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold">SALVAR PERFIL</button>
-                <button id="btnLogout" class="w-full mt-4 text-gray-600 text-sm">Sair da Conta</button>
+                <h2 class="text-lg font-bold mb-6">Nova Venda Fiada</h2>
+                <form id="formFiado" class="space-y-4">
+                    <input type="text" id="nome" placeholder="Nome do Cliente" required class="w-full p-4 rounded-xl outline-none">
+                    <input type="tel" id="whatsapp" placeholder="WhatsApp (DDD+Número)" required class="w-full p-4 rounded-xl outline-none">
+                    <input type="text" id="produto" placeholder="O que ele comprou?" required class="w-full p-4 rounded-xl outline-none">
+                    <input type="text" id="valor" placeholder="R$ 0,00" required class="w-full p-4 rounded-xl outline-none font-bold text-indigo-600 text-xl">
+                    <input type="date" id="data" required class="w-full p-4 rounded-xl outline-none">
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-5 rounded-2xl shadow-lg border-none mt-4">SALVAR NO CADERNO</button>
+                </form>
             </div>
-        </div>
+        </section>
+
+        <section id="clientes" class="tab-content">
+            <h2 class="text-xs font-bold opacity-50 uppercase mb-4 px-2">Histórico por Cliente</h2>
+            <div id="listaFichasClientes" class="space-y-3"></div>
+        </section>
+
+        <section id="config" class="tab-content">
+            <div class="card space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold opacity-50 uppercase ml-2">Dados do Negócio</label>
+                    <input type="text" id="cfgLoja" placeholder="Nome da Loja" class="w-full p-4 rounded-xl mt-1 outline-none">
+                    <input type="text" id="cfgPix" placeholder="Chave PIX para Cobrança" class="w-full p-4 rounded-xl mt-2 outline-none">
+                    <button onclick="salvarConfig()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold mt-4 border-none">ATUALIZAR DADOS</button>
+                </div>
+                <div class="pt-6 border-t border-gray-100">
+                    <label class="text-[10px] font-bold opacity-50 uppercase ml-2">Segurança de Dados</label>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <button onclick="exportarBackup()" class="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl text-xs font-bold border-none">EXPORTAR</button>
+                        <button onclick="document.getElementById('fileInput').click()" class="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl text-xs font-bold border-none">IMPORTAR</button>
+                    </div>
+                    <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importarBackup(event)">
+                </div>
+            </div>
+        </section>
     </main>
 
     <nav class="nav-bar">
-        <button onclick="openTab('dashboard')" id="tabDash" class="nav-btn active"><i class="fas fa-wallet"></i></button>
-        <button onclick="openTab('orcamentos')" id="tabOrc" class="nav-btn"><i class="fas fa-file-signature"></i></button>
-        <button onclick="openTab('novo')" class="btn-plus"><i class="fas fa-plus"></i></button>
-        <button onclick="openTab('config')" id="tabConf" class="nav-btn"><i class="fas fa-store"></i></button>
+        <button onclick="showTab('dashboard')" class="bg-transparent text-indigo-600 nav-btn border-none"><i class="fas fa-home text-xl"></i></button>
+        <button onclick="showTab('clientes')" class="bg-transparent text-gray-400 nav-btn border-none"><i class="fas fa-users text-xl"></i></button>
+        <button onclick="showTab('novo')" class="btn-plus border-none"><i class="fas fa-plus text-xl"></i></button>
+        <button onclick="showTab('config')" class="bg-transparent text-gray-400 nav-btn border-none"><i class="fas fa-cog text-xl"></i></button>
     </nav>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
-            authDomain: "zapcaderno.firebaseapp.com",
-            projectId: "zapcaderno",
-            storageBucket: "zapcaderno.firebasestorage.app",
-            messagingSenderId: "446641643061",
-            appId: "1:446641643061:web:daf768922b53614f229b7c"
-        };
+        let dividas = JSON.parse(localStorage.getItem('zap_dividas')) || [];
+        let historico = JSON.parse(localStorage.getItem('zap_historico')) || [];
+        let config = JSON.parse(localStorage.getItem('zap_config')) || { loja: "MINHA LOJA", pix: "" };
 
-        // Inicialização Compatível
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        let configUser = { nome: "ZAPCADERNO", pix: "" };
-
-        // Troca de abas
-        window.openTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            if(id === 'dashboard') document.getElementById('tabDash').classList.add('active');
-            if(id === 'orcamentos') document.getElementById('tabOrc').classList.add('active');
-            if(id === 'config') document.getElementById('tabConf').classList.add('active');
-        };
-
-        // Monitor de Login
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                document.getElementById('telaLogin').style.display = 'none';
-                const s = await db.collection("configuracoes").doc(user.uid).get();
-                if (s.exists()) {
-                    configUser = s.data();
-                    document.getElementById('headerNome').innerText = configUser.nome;
-                    document.getElementById('headerPix').innerText = "PIX: " + configUser.pix;
-                }
-                initApp(user.uid);
-            } else {
-                document.getElementById('telaLogin').style.display = 'flex';
-            }
-        });
-
-        document.getElementById('btnEntrar').onclick = () => {
-            const e = document.getElementById('logEmail').value;
-            const p = document.getElementById('logSenha').value;
-            auth.signInWithEmailAndPassword(e, p).catch(() => alert("Erro ao entrar!"));
-        };
-
-        document.getElementById('btnLogout').onclick = () => { auth.signOut(); };
-
-        function initApp(uid) {
-            // Monitorar Vendas
-            db.collection("vendas").where("uid", "==", uid).onSnapshot(snap => {
-                let total = 0;
-                const div = document.getElementById('listaDividas');
-                div.innerHTML = '';
-                snap.forEach(s => {
-                    const d = s.data();
-                    if(!d.pago) {
-                        total += d.valor;
-                        div.innerHTML += `
-                            <div class="card flex justify-between items-center border-l-4 border-indigo-600">
-                                <div><b>${d.nome}</b><br><small class="text-gray-500">${d.dataPagar}</small></div>
-                                <div class="flex gap-2">
-                                    <button onclick="fazerCobranca('${d.whatsapp}', '${d.valor}')" class="bg-green-600 p-3 rounded-xl border-none"><i class="fab fa-whatsapp"></i></button>
-                                    <button onclick="marcarPago('${s.id}')" class="bg-indigo-600 p-2 rounded-xl text-xs font-bold">RECEBI</button>
-                                </div>
-                            </div>`;
-                    }
-                });
-                document.getElementById('totalReceber').innerText = "R$ " + total.toLocaleString('pt-BR');
-            });
-
-            // Monitorar Orçamentos
-            db.collection("orcamentos").where("uid", "==", uid).onSnapshot(snap => {
-                const div = document.getElementById('listaOrcamentos');
-                div.innerHTML = '';
-                snap.forEach(s => {
-                    const o = s.data();
-                    div.innerHTML += `
-                        <div class="card">
-                            <div class="flex justify-between mb-2"><b>${o.nome}</b><b>R$ ${o.valor}</b></div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button onclick="mandarProposta('${o.whatsapp}', '${o.valor}', '${o.detalhes}')" class="bg-green-600 py-2 rounded-xl text-xs font-bold uppercase">Enviar</button>
-                                <button onclick="aprovarOrcamento('${s.id}')" class="bg-indigo-600 py-2 rounded-xl text-xs font-bold uppercase">Fechar</button>
-                            </div>
-                        </div>`;
-                });
-            });
+        function inicializarApp() {
+            if (localStorage.getItem('zap_primeira_vez') === 'false') document.getElementById('telaBemVindo').style.display = 'none';
+            if (localStorage.getItem('zap_dark') === 'true') document.body.classList.add('dark-mode');
+            
+            document.getElementById('cfgLoja').value = config.loja;
+            document.getElementById('cfgPix').value = config.pix;
+            document.getElementById('data').valueAsDate = new Date();
+            verificarAssinatura();
+            renderDashboard();
         }
 
-        window.fazerCobranca = (tel, val) => window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=Lembrete de R$ ${val}. PIX: ${configUser.pix}`);
-        window.marcarPago = (id) => db.collection("vendas").doc(id).update({pago: true});
-        window.mandarProposta = (tel, val, det) => window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=*ORÇAMENTO*%0A${det}%0A*Total:* R$ ${val}`);
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('zap_dark', isDark);
+        }
 
-        window.aprovarOrcamento = async (id) => {
-            const s = await db.collection("orcamentos").doc(id).get();
-            await db.collection("vendas").add({...s.data(), pago: false, dataPagar: new Date().toLocaleDateString()});
-            await db.collection("orcamentos").doc(id).delete();
-            openTab('dashboard');
-        };
+        function fecharBemVindo() {
+            localStorage.setItem('zap_primeira_vez', 'false');
+            document.getElementById('telaBemVindo').style.display = 'none';
+        }
 
-        document.getElementById('btnSalvarVendaRapida').onclick = async () => {
-            await db.collection("vendas").add({
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('vendaNome').value,
-                whatsapp: document.getElementById('vendaWhatsapp').value,
-                valor: parseFloat(document.getElementById('vendaValor').value),
-                dataPagar: document.getElementById('vendaDataPagar').value,
-                pago: false
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.style.color = "#94a3b8");
+            event.currentTarget.style.color = "#4f46e5";
+            
+            if(id === 'dashboard') renderDashboard();
+            if(id === 'clientes') renderFichasClientes();
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('listaDividas');
+            const busca = document.getElementById('buscaCliente').value.toLowerCase();
+            let total = 0;
+            container.innerHTML = '';
+
+            dividas.filter(d => d.nome.toLowerCase().includes(busca)).forEach(d => {
+                total += d.valor;
+                container.innerHTML += `
+                <div class="card border-l-4 border-indigo-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <b class="text-lg">${d.nome}</b>
+                            <p class="text-[10px] font-bold opacity-40 uppercase">${d.produto}</p>
+                        </div>
+                        <span class="text-xl font-black text-indigo-500">R$ ${d.valor.toFixed(2).replace('.',',')}</span>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick='cobrar(${JSON.stringify(d)})' class="flex-1 bg-green-500 text-white py-4 rounded-xl text-[10px] font-bold border-none shadow-sm">COBRAR ZAP</button>
+                        <button onclick="darBaixa(${d.id})" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl text-[10px] font-bold border-none shadow-sm">RECEBI</button>
+                    </div>
+                </div>`;
             });
-            openTab('dashboard');
-        };
 
-        document.getElementById('btnSalvarConfig').onclick = async () => {
-            await db.collection("configuracoes").doc(auth.currentUser.uid).set({
-                nome: document.getElementById('confNome').value,
-                pix: document.getElementById('confPix').value
-            });
-            location.reload();
-        };
+            const recebido = historico.reduce((a,b) => a + b.valor, 0);
+            document.getElementById('totalReceber').innerText = `R$ ${total.toFixed(2).replace('.',',')}`;
+            document.getElementById('totalHistorico').innerText = `R$ ${recebido.toFixed(2).replace('.',',')}`;
+            document.getElementById('nomeLojaExibicao').innerText = config.loja;
 
-        document.getElementById('btnGerarOrcamento').onclick = async () => {
-            const v = (parseFloat(document.getElementById('propMat').value) || 0) + (parseFloat(document.getElementById('propMao').value) || 0);
-            await db.collection("orcamentos").add({
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('propNome').value,
-                whatsapp: document.getElementById('propWhatsapp').value,
-                detalhes: document.getElementById('propDetalhes').value,
-                valor: v
+            const meta = total + recebido;
+            const perc = meta > 0 ? (recebido / meta) * 100 : 0;
+            document.getElementById('progressoVendas').style.width = perc + "%";
+            document.getElementById('percentualTxt').innerText = Math.round(perc) + "%";
+        }
+
+        function renderFichasClientes() {
+            const container = document.getElementById('listaFichasClientes');
+            const nomes = Array.from(new Set([...dividas, ...historico].map(i => i.nome)));
+            container.innerHTML = nomes.map(nome => {
+                const devedor = dividas.filter(i => i.nome === nome).reduce((a,b) => a + b.valor, 0);
+                return `<div class="card flex justify-between items-center py-4">
+                    <span class="font-bold">${nome}</span>
+                    <b class="${devedor > 0 ? 'text-red-500' : 'text-green-500'}">R$ ${devedor.toFixed(2).replace('.',',')}</b>
+                </div>`;
+            }).join('') || '<p class="text-center opacity-40 py-10">Nenhum registro ainda.</p>';
+        }
+
+        function cobrar(d) {
+            const msg = `Olá *${d.nome}*, lembrete da loja *${config.loja}*.\nValor em aberto: *R$ ${d.valor.toFixed(2).replace('.',',')}*.\n\nChave Pix para pagamento: ${config.pix}`;
+            window.open(`https://wa.me/55${d.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`);
+        }
+
+        function darBaixa(id) {
+            if(!confirm("Confirmar recebimento deste valor?")) return;
+            const item = dividas.find(d => d.id === id);
+            historico.push(item);
+            dividas = dividas.filter(d => d.id !== id);
+            localStorage.setItem('zap_dividas', JSON.stringify(dividas));
+            localStorage.setItem('zap_historico', JSON.stringify(historico));
+            renderDashboard();
+        }
+
+        function gerarRelatorio() {
+            let texto = `📋 RELATÓRIO DE COBRANÇA - ${config.loja}\n\n`;
+            dividas.forEach(d => texto += `• ${d.nome}: R$ ${d.valor.toFixed(2)} (${d.produto})\n`);
+            if(dividas.length === 0) texto = "Nenhuma dívida pendente.";
+            alert(texto);
+        }
+
+        function verificarAssinatura() {
+            const agora = new Date();
+            const mesAno = (agora.getMonth() + 1).toString().padStart(2, '0') + agora.getFullYear().toString().slice(-2);
+            if (localStorage.getItem('zap_chave_mes') === "ZAP" + mesAno) {
+                const b = document.getElementById('statusBadge');
+                b.innerText = "ASSINATURA ATIVA"; b.classList.replace('bg-black', 'bg-green-500');
+                return;
+            }
+            let dI = localStorage.getItem('zap_data_instala');
+            if (!dI) { dI = agora.getTime(); localStorage.setItem('zap_data_instala', dI); }
+            if (agora.getTime() - parseInt(dI) > (15 * 24 * 60 * 60 * 1000)) document.getElementById('bloqueioPagamento').style.display = 'flex';
+        }
+
+        function verificarChave() {
+            const input = document.getElementById('chaveAtivacao').value.toUpperCase().trim();
+            const mesAno = (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getFullYear().toString().slice(-2);
+            if (input === "ZAP" + mesAno) { localStorage.setItem('zap_chave_mes', input); location.reload(); }
+            else alert("Senha de ativação incorreta para este mês.");
+        }
+
+        function salvarConfig() {
+            config.loja = document.getElementById('cfgLoja').value.toUpperCase();
+            config.pix = document.getElementById('cfgPix').value;
+            localStorage.setItem('zap_config', JSON.stringify(config));
+            alert("Ajustes salvos com sucesso!"); location.reload();
+        }
+
+        function exportarBackup() {
+            const b = new Blob([JSON.stringify({dividas, historico, config})], {type: 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'backup_zapcaderno.json'; a.click();
+        }
+
+        function importarBackup(e) {
+            const reader = new FileReader();
+            reader.onload = (f) => {
+                const d = JSON.parse(f.target.result);
+                localStorage.setItem('zap_dividas', JSON.stringify(d.dividas));
+                localStorage.setItem('zap_historico', JSON.stringify(d.historico));
+                localStorage.setItem('zap_config', JSON.stringify(d.config));
+                location.reload();
+            };
+            reader.readAsText(e.target.files[0]);
+        }
+
+        document.getElementById('formFiado').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const v = document.getElementById('valor').value.replace('R$ ', '').replace(/\./g, '').replace(',', '.');
+            dividas.push({
+                id: Date.now(),
+                nome: document.getElementById('nome').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                produto: document.getElementById('produto').value,
+                valor: parseFloat(v) || 0,
+                data: document.getElementById('data').value
             });
-            openTab('orcamentos');
-        };
+            localStorage.setItem('zap_dividas', JSON.stringify(dividas));
+            alert("Venda registrada!");
+            showTab('dashboard');
+        });
+
+        document.getElementById('valor').addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g, '');
+            v = (v / 100).toFixed(2).replace('.', ',');
+            e.target.value = v ? 'R$ ' + v : '';
+        });
+
+        window.onload = inicializarApp;
     </script>
 </body>
 </html>
