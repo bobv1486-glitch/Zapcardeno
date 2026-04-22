@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minha Loja - ZapCaderno</title>
+    <title>ZapCaderno Ultra Pro</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -13,123 +13,118 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { color-scheme: dark; }
-        body { background-color: #121214; color: #e1e1e6; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; transition: 0.3s; -webkit-tap-highlight-color: transparent; }
+        .dark-mode { background-color: #0f172a; color: #f1f5f9; }
         
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* Estilo idêntico ao vídeo */
-        .header-status { background-color: #4f46e5; color: white; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .card-stats { background-color: #1f1f23; border-radius: 16px; padding: 20px; margin: 15px; border: 1px solid #29292e; }
+        #telaLogin, #bloqueioPagamento { position: fixed; inset: 0; background: #0f172a; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; color: white; }
+        #bloqueioPagamento { background: #1e1b4b; display: none; }
+
+        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; }
+        .dark-mode .nav-bar { background: #1e293b; border: 1px solid #334155; }
+
+        .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; }
         
-        .progress-bar-bg { background: #29292e; height: 8px; border-radius: 4px; width: 100%; margin-top: 8px; }
-        .progress-bar-fill { background: #4f46e5; height: 100%; border-radius: 4px; width: 0%; transition: 0.5s; }
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
+        .dark-mode .card { background: #1e293b; border-color: #334155; }
 
-        .search-container { position: relative; margin: 15px; }
-        .search-input { background: #1f1f23; border: 1px solid #29292e; border-radius: 12px; width: 100%; padding: 12px 40px; color: white; outline: none; }
-        .search-icon { position: absolute; left: 15px; top: 13px; color: #7c7c8a; }
+        .progress-bar { height: 10px; border-radius: 5px; background: #e2e8f0; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: #4f46e5; width: 0%; transition: 0.8s ease-in-out; }
 
-        /* Navegação do vídeo */
-        .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #121214; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #29292e; z-index: 100; }
-        .nav-item { color: #7c7c8a; font-size: 20px; background: none; border: none; padding: 10px; }
-        .nav-item.active { color: #4f46e5; }
-        .btn-main-add { background: #4f46e5; width: 56px; height: 56px; border-radius: 18px; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); border: none; transform: translateY(-15px); }
-
-        /* Inputs do Modal de Venda */
-        .input-dark { background: #121214; border: 1px solid #29292e; border-radius: 8px; padding: 14px; width: 100%; color: white; margin-bottom: 12px; }
-        
-        #telaLogin { position: fixed; inset: 0; background: #121214; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        input, textarea { border: 1px solid #e2e8f0; width: 100%; padding: 14px; border-radius: 12px; outline: none; margin-bottom: 10px; }
+        .dark-mode input, .dark-mode textarea { background: #0f172a !important; color: white !important; border-color: #334155; }
+        button:active { transform: scale(0.95); }
     </style>
 </head>
-<body>
+<body class="pb-32">
 
     <div id="telaLogin" style="display:none;">
-        <h2 class="text-2xl font-bold mb-6">ZAPCADERNO</h2>
-        <input type="email" id="l-email" class="input-dark" placeholder="E-mail">
-        <input type="password" id="l-senha" class="input-dark" placeholder="Senha">
-        <button id="btnEntrar" class="w-full bg-indigo-600 p-4 rounded-xl font-bold">ENTRAR</button>
+        <h1 class="text-2xl font-black mb-6 italic text-indigo-500">ZAPCADERNO PRO</h1>
+        <input type="email" id="l-email" placeholder="E-mail">
+        <input type="password" id="l-senha" placeholder="Senha">
+        <button id="btnEntrar" class="w-full max-w-xs bg-indigo-600 py-4 rounded-xl font-bold border-none">ENTRAR</button>
     </div>
 
-    <div class="p-4 flex justify-between items-center">
-        <span class="header-status">Sincronizado</span>
-        <i class="fas fa-moon text-indigo-400"></i>
+    <div id="bloqueioPagamento">
+        <i class="fas fa-lock text-5xl text-yellow-400 mb-6"></i>
+        <h2 class="text-2xl font-bold mb-2">Assinatura Expirada</h2>
+        <p class="text-indigo-200 text-sm mb-8">Realize o pagamento mensal para liberar o acesso.</p>
+        <a href="https://mpago.la/2CGD9Ar" target="_blank" class="w-full max-w-xs bg-indigo-500 py-4 rounded-xl font-bold mb-4 block text-center no-underline text-white">PAGAR R$ 14,99</a>
+        <input type="text" id="chaveAtivacao" placeholder="SENHA DO MÊS" class="max-w-xs text-center uppercase font-bold text-gray-900">
+        <button onclick="verificarChave()" class="w-full max-w-xs bg-white bg-opacity-10 py-3 rounded-xl font-bold border-none text-white">ATIVAR ACESSO</button>
     </div>
 
-    <main>
-        <div id="home" class="tab-content active">
-            <div class="card-stats">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase font-bold">Total a Receber</p>
-                        <h2 id="totalReceber" class="text-3xl font-bold mt-1">R$ 0,00</h2>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-green-400 uppercase font-bold">Recebido</p>
-                        <p id="totalPago" class="text-lg font-bold">R$ 0,00</p>
-                    </div>
-                </div>
-                <div class="flex justify-between text-[10px] uppercase font-bold text-gray-500">
-                    <span>Progresso de Recebimento</span>
-                    <span id="txtPorcentagem">0%</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div id="barPreenchimento" class="progress-bar-fill"></div>
-                </div>
+    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
+        <div class="flex justify-between items-center mb-2">
+            <div>
+                <h1 id="h-nome" class="text-xl font-bold uppercase">CARREGANDO...</h1>
+                <span id="statusBadge" class="text-[9px] bg-black bg-opacity-20 px-2 py-0.5 rounded-full font-bold uppercase">Sincronizado</span>
             </div>
-
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="busca" class="search-input" placeholder="Buscar cliente...">
-                <button class="absolute right-4 top-3 text-gray-500"><i class="fas fa-print"></i></button>
-            </div>
-
-            <div id="listaVendas" class="px-4 space-y-3">
-                </div>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 bg-white bg-opacity-10 rounded-full flex items-center justify-center border-none text-white">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
+    </header>
 
-        <div id="clientes" class="tab-content">
-            <div class="p-4">
-                <h3 class="text-xs font-bold text-indigo-400 uppercase mb-4">Histórico por Cliente</h3>
-                <div id="listaClientes" class="text-center text-gray-600 mt-10">Nenhum registro ainda.</div>
-            </div>
-        </div>
-
-        <div id="novo" class="tab-content">
-            <div class="p-6">
-                <h3 class="text-xl font-bold mb-6">Nova Venda Fiada</h3>
-                <input type="text" id="v-nome" class="input-dark" placeholder="Nome do Cliente">
-                <input type="text" id="v-whats" class="input-dark" placeholder="WhatsApp (DDD+Número)">
-                <input type="text" id="v-item" class="input-dark" placeholder="O que ele comprou?">
-                <input type="number" id="v-valor" class="input-dark" placeholder="R$ 0,00">
-                <input type="date" id="v-data" class="input-dark" value="2026-04-22">
-                <button id="btnSalvar" class="w-full bg-indigo-600 py-4 rounded-xl font-bold uppercase mt-2">Salvar no Caderno</button>
-            </div>
-        </div>
-
-        <div id="config" class="tab-content">
-            <div class="p-6">
-                <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Dados do Negócio</h3>
-                <input type="text" id="c-loja" class="input-dark" placeholder="Minha Loja">
-                <input type="text" id="c-pix" class="input-dark" placeholder="Chave PIX para Cobrança">
-                <button id="btnSalvarConf" class="w-full bg-indigo-600 py-4 rounded-xl font-bold mb-8">Atualizar Dados</button>
-                
-                <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Segurança de Dados</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <button class="bg-gray-800 p-4 rounded-xl font-bold">EXPORTAR</button>
-                    <button class="bg-gray-800 p-4 rounded-xl font-bold">IMPORTAR</button>
+    <main class="p-4 -mt-8">
+        <section id="dashboard" class="tab-content active">
+            <div class="card">
+                <div class="flex justify-between items-end mb-2">
+                    <div><p class="text-[10px] font-bold text-indigo-500 uppercase">A Receber</p><p id="t-pendente" class="text-3xl font-black">R$ 0,00</p></div>
+                    <div class="text-right"><p class="text-[10px] font-bold text-green-500 uppercase">Pago</p><p id="t-recebido" class="text-lg font-bold">R$ 0,00</p></div>
                 </div>
-                <button onclick="firebase.auth().signOut()" class="w-full mt-10 text-red-500 text-sm uppercase font-bold">Sair do Aplicativo</button>
+                <div class="progress-bar"><div id="barra" class="progress-fill"></div></div>
             </div>
-        </div>
+            <input type="text" id="busca" placeholder="🔍 Buscar cliente..." class="w-full bg-white shadow-sm border-none mb-4">
+            <div id="listaVendas" class="space-y-4"></div>
+        </section>
+
+        <section id="orcamentos" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-4">Novo Orçamento</h2>
+                <input type="text" id="o-nome" placeholder="Cliente">
+                <input type="tel" id="o-whats" placeholder="WhatsApp (DDD+Número)">
+                <textarea id="o-detalhes" placeholder="Descrição do serviço..."></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="o-mat" placeholder="Material R$">
+                    <input type="number" id="o-mao" placeholder="Mão de Obra R$">
+                </div>
+                <button id="btnSalvarOrc" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold border-none mt-2">GERAR PROPOSTA</button>
+            </div>
+            <div id="listaOrcamentos" class="space-y-4 mt-6"></div>
+        </section>
+
+        <section id="novo" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-6">Registrar Venda Fiada</h2>
+                <input type="text" id="v-nome" placeholder="Nome do Cliente">
+                <input type="tel" id="v-whats" placeholder="WhatsApp">
+                <input type="text" id="v-item" placeholder="Produto/Serviço">
+                <input type="number" id="v-valor" placeholder="Valor R$" class="font-bold text-indigo-600 text-xl">
+                <input type="date" id="v-data">
+                <button id="btnSalvarVenda" class="w-full bg-indigo-600 text-white font-bold py-5 rounded-2xl border-none mt-4">SALVAR NO CADERNO</button>
+            </div>
+        </section>
+
+        <section id="config" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-4">Perfil da Loja</h2>
+                <input type="text" id="c-loja" placeholder="Nome da Loja">
+                <input type="text" id="c-pix" placeholder="Sua Chave PIX">
+                <button id="btnSaveConf" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold border-none">ATUALIZAR DADOS</button>
+                <button onclick="firebase.auth().signOut()" class="w-full mt-10 text-red-500 font-bold text-xs bg-transparent border-none">SAIR DA CONTA</button>
+            </div>
+        </section>
     </main>
 
-    <nav class="nav-bottom">
-        <button onclick="mudarAba('home')" class="nav-item active" id="n-home"><i class="fas fa-home"></i></button>
-        <button onclick="mudarAba('clientes')" class="nav-item" id="n-clientes"><i class="fas fa-users"></i></button>
-        <button onclick="mudarAba('novo')" class="btn-main-add"><i class="fas fa-plus"></i></button>
-        <button onclick="mudarAba('config')" class="nav-item" id="n-config"><i class="fas fa-cog"></i></button>
+    <nav class="nav-bar">
+        <button onclick="abrir('dashboard')" class="bg-transparent text-indigo-600 border-none"><i class="fas fa-home text-xl"></i></button>
+        <button onclick="abrir('orcamentos')" class="bg-transparent text-gray-400 border-none"><i class="fas fa-file-invoice-dollar text-xl"></i></button>
+        <button onclick="abrir('novo')" class="btn-plus border-none"><i class="fas fa-plus text-xl"></i></button>
+        <button onclick="abrir('config')" class="bg-transparent text-gray-400 border-none"><i class="fas fa-cog text-xl"></i></button>
     </nav>
 
     <script>
@@ -145,75 +140,152 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        let configLoja = { loja: "ZAPCADERNO", pix: "" };
 
-        // Mudar Abas
-        function mudarAba(aba) {
+        function abrir(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(aba).classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            if(aba !== 'novo') document.getElementById('n-'+aba).classList.add('active');
+            document.getElementById(id).classList.add('active');
         }
 
-        // Login
-        auth.onAuthStateChanged(user => {
+        function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+
+        // Sistema de Assinatura
+        function verificarAssinatura() {
+            const mesAno = (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getFullYear().toString().slice(-2);
+            if (localStorage.getItem('zap_chave') === "ZAP" + mesAno) {
+                document.getElementById('statusBadge').innerText = "ASSINATURA ATIVA";
+                document.getElementById('statusBadge').style.background = "#10b981";
+            } else {
+                let dI = localStorage.getItem('zap_instala') || new Date().getTime();
+                localStorage.setItem('zap_instala', dI);
+                if (new Date().getTime() - dI > (15 * 24 * 60 * 60 * 1000)) document.getElementById('bloqueioPagamento').style.display = 'flex';
+            }
+        }
+
+        window.verificarChave = () => {
+            const mesAno = (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getFullYear().toString().slice(-2);
+            if (document.getElementById('chaveAtivacao').value.toUpperCase() === "ZAP" + mesAno) {
+                localStorage.setItem('zap_chave', "ZAP" + mesAno);
+                location.reload();
+            } else alert("Senha incorreta!");
+        };
+
+        auth.onAuthStateChanged(async user => {
             if (user) {
                 document.getElementById('telaLogin').style.display = 'none';
-                carregarVendas(user.uid);
-            } else {
-                document.getElementById('telaLogin').style.display = 'flex';
-            }
+                const doc = await db.collection("configuracoes").doc(user.uid).get();
+                if(doc.exists()) {
+                    configLoja = doc.data();
+                    document.getElementById('h-nome').innerText = configLoja.loja;
+                    document.getElementById('c-loja').value = configLoja.loja;
+                    document.getElementById('c-pix').value = configLoja.pix;
+                }
+                verificarAssinatura();
+                carregarDados(user.uid);
+            } else document.getElementById('telaLogin').style.display = 'flex';
         });
 
         document.getElementById('btnEntrar').onclick = () => {
             auth.signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-senha').value);
         };
 
-        function carregarVendas(uid) {
-            db.collection("vendas").where("uid", "==", uid).onSnapshot(snap => {
-                let pendente = 0, recebido = 0;
-                const lista = document.getElementById('listaVendas');
-                lista.innerHTML = '';
-
-                snap.forEach(doc => {
-                    const v = doc.data();
-                    if(v.pago) recebido += v.valor;
-                    else {
-                        pendente += v.valor;
-                        lista.innerHTML += `
-                            <div class="card-stats !m-0 !p-4 flex justify-between items-center">
-                                <div><b class="block">${v.cliente}</b><span class="text-xs text-gray-500">${v.data}</span></div>
-                                <div class="flex gap-2">
-                                    <button onclick="zap('${v.whatsapp}', '${v.valor}')" class="text-green-500 text-xl p-2"><i class="fab fa-whatsapp"></i></button>
-                                    <button onclick="receber('${doc.id}')" class="bg-indigo-600 px-3 py-1 rounded-lg text-[10px] font-bold">OK</button>
-                                </div>
-                            </div>`;
-                    }
-                });
-
-                document.getElementById('totalReceber').innerText = "R$ " + pendente.toFixed(2).replace('.',',');
-                document.getElementById('totalPago').innerText = "R$ " + recebido.toFixed(2).replace('.',',');
-                
-                const totalGeral = pendente + recebido;
-                const porc = totalGeral > 0 ? (recebido / totalGeral) * 100 : 0;
-                document.getElementById('txtPorcentagem').innerText = Math.round(porc) + "%";
-                document.getElementById('barPreenchimento').style.width = porc + "%";
-            });
-        }
-
-        window.receber = (id) => db.collection("vendas").doc(id).update({pago: true});
-        window.zap = (tel, val) => window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=Olá, lembrete de cobrança: R$ ${val}`);
-
-        document.getElementById('btnSalvar').onclick = async () => {
+        // Salvar Fiado
+        document.getElementById('btnSalvarVenda').onclick = async () => {
             await db.collection("vendas").add({
                 uid: auth.currentUser.uid,
-                cliente: document.getElementById('v-nome').value,
+                nome: document.getElementById('v-nome').value,
                 whatsapp: document.getElementById('v-whats').value,
+                item: document.getElementById('v-item').value,
                 valor: parseFloat(document.getElementById('v-valor').value),
                 data: document.getElementById('v-data').value,
                 pago: false
             });
-            mudarAba('home');
+            abrir('dashboard');
+        };
+
+        // Salvar Orçamento
+        document.getElementById('btnSalvarOrc').onclick = async () => {
+            const total = (parseFloat(document.getElementById('o-mat').value) || 0) + (parseFloat(document.getElementById('o-mao').value) || 0);
+            await db.collection("orcamentos").add({
+                uid: auth.currentUser.uid,
+                nome: document.getElementById('o-nome').value,
+                whatsapp: document.getElementById('o-whats').value,
+                detalhes: document.getElementById('o-detalhes').value,
+                valor: total
+            });
+            abrir('orcamentos');
+        };
+
+        function carregarDados(uid) {
+            // Vendas
+            db.collection("vendas").where("uid", "==", uid).onSnapshot(snap => {
+                let pend = 0, rec = 0;
+                const container = document.getElementById('listaVendas');
+                container.innerHTML = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    if(d.pago) rec += d.valor;
+                    else {
+                        pend += d.valor;
+                        container.innerHTML += `
+                        <div class="card border-l-4 border-indigo-500">
+                            <div class="flex justify-between mb-4">
+                                <div><b>${d.nome}</b><p class="text-[10px] opacity-40 uppercase">${d.item}</p></div>
+                                <b class="text-indigo-500">R$ ${d.valor.toFixed(2)}</b>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="cobrar('${d.whatsapp}', '${d.valor}', '${d.nome}')" class="flex-1 bg-green-500 text-white py-3 rounded-xl font-bold border-none"><i class="fab fa-whatsapp mr-2"></i>COBRAR</button>
+                                <button onclick="baixar('${doc.id}')" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold border-none">RECEBI</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+                document.getElementById('t-pendente').innerText = "R$ " + pend.toFixed(2);
+                document.getElementById('t-recebido').innerText = "R$ " + rec.toFixed(2);
+                document.getElementById('barra').style.width = (rec/(pend+rec)*100) + "%";
+            });
+
+            // Orçamentos
+            db.collection("orcamentos").where("uid", "==", uid).onSnapshot(snap => {
+                const container = document.getElementById('listaOrcamentos');
+                container.innerHTML = '';
+                snap.forEach(doc => {
+                    const o = doc.data();
+                    container.innerHTML += `
+                    <div class="card border-l-4 border-yellow-500">
+                        <div class="flex justify-between mb-2"><b>${o.nome}</b><b>R$ ${o.valor.toFixed(2)}</b></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="enviarOrc('${o.whatsapp}', '${o.valor}', '${o.detalhes}')" class="bg-green-500 text-white py-2 rounded-lg font-bold border-none text-[10px]">ENVIAR ZAP</button>
+                            <button onclick="fecharOrc('${doc.id}')" class="bg-indigo-600 text-white py-2 rounded-lg font-bold border-none text-[10px]">FECHAR VENDA</button>
+                        </div>
+                    </div>`;
+                });
+            });
+        }
+
+        window.cobrar = (tel, val, nome) => {
+            const msg = `Olá *${nome}*, tudo bem? Passando para lembrar da sua pendência na *${configLoja.loja}* no valor de *R$ ${val}*.\n\n📍 Chave Pix: *${configLoja.pix}*.\nAgradecemos a preferência!`;
+            window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
+        };
+
+        window.enviarOrc = (tel, val, det) => {
+            const msg = `Olá! Segue o orçamento da *${configLoja.loja}*:\n\n📝 *Serviço:* ${det}\n💰 *Total:* R$ ${val}\n\nAguardamos sua aprovação!`;
+            window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
+        };
+
+        window.baixar = (id) => db.collection("vendas").doc(id).update({pago: true});
+        
+        window.fecharOrc = async (id) => {
+            const doc = await db.collection("orcamentos").doc(id).get();
+            await db.collection("vendas").add({...doc.data(), pago: false, data: new Date().toISOString().split('T')[0]});
+            await db.collection("orcamentos").doc(id).delete();
+            abrir('dashboard');
+        };
+
+        document.getElementById('btnSaveConf').onclick = async () => {
+            const novaConf = { loja: document.getElementById('c-loja').value.toUpperCase(), pix: document.getElementById('c-pix').value };
+            await db.collection("configuracoes").doc(auth.currentUser.uid).set(novaConf);
+            location.reload();
         };
     </script>
 </body>
