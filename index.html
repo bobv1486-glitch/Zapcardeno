@@ -8,96 +8,87 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { color-scheme: dark; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0a0a0a; color: #ffffff; margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0a0a0a; color: #ffffff; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        /* Controle de Telas Fixo */
+        /* Telas */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        #tela-carregamento, #tela-bloqueio, #tela-login {
+        #tela-bloqueio, #tela-login, #tela-carregando {
             position: fixed; inset: 0; background: #0a0a0a; z-index: 9999;
-            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px;
+            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center;
         }
+        
+        /* Loading inicial sempre ativo no começo */
+        #tela-carregamento { display: flex; z-index: 10001; }
 
-        /* Estilo App */
-        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: #161616; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.9); z-index: 1000; border: 1px solid #222; }
-        .btn-plus { background: #4f46e5; color: white; width: 65px; height: 65px; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: 4px solid #0a0a0a; font-size: 26px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); }
-        .nav-btn { color: #444; font-size: 24px; transition: 0.3s; background: none; border: none; cursor: pointer; }
-        .nav-btn.active { color: #818cf8; }
-        .card { background: #161616; border-radius: 24px; padding: 22px; margin-bottom: 15px; border: 1px solid #222; }
-        input, textarea { background: #1f1f1f !important; border: 1px solid #333 !important; border-radius: 14px !important; padding: 16px !important; width: 100%; margin-bottom: 12px; color: #fff !important; outline: none; }
+        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: #161616; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid #222; }
+        .btn-plus { background: #4f46e5; color: white; width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-top: -40px; border: 4px solid #0a0a0a; font-size: 24px; }
+        .card { background: #161616; border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
+        input, textarea { background: #1f1f1f !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 14px !important; width: 100%; margin-bottom: 10px; color: #fff !important; outline: none; }
     </style>
 </head>
 <body class="pb-36">
 
-    <div id="tela-carregamento" style="display: flex;">
-        <div class="h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-        <p class="mt-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Sincronizando...</p>
+    <div id="tela-carregamento">
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+        <p class="mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sincronizando Sistema</p>
     </div>
 
     <div id="tela-bloqueio">
-        <h2 class="text-4xl font-black text-red-600 italic mb-4">EXPIRADO</h2>
-        <p class="text-gray-500 mb-8 text-center">Seu teste grátis acabou.<br>Ative o acesso vitalício.</p>
-        <div class="text-6xl font-black mb-8">R$ 14,99</div>
-        <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold text-center">LIBERAR AGORA</a>
-        <button onclick="window.location.reload()" class="mt-6 text-gray-600 underline text-xs">JÁ PAGUEI? CLIQUE PARA ATUALIZAR</button>
+        <i class="fas fa-lock text-indigo-500 text-5xl mb-6"></i>
+        <h2 class="text-3xl font-black italic mb-2">ACESSO EXPIRADO</h2>
+        <p class="text-gray-500 text-sm mb-8">Seu período de 15 dias acabou.<br>Assine para continuar usando.</p>
+        <div class="text-5xl font-black mb-8 text-white">R$ 14,99</div>
+        <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" class="w-full bg-indigo-600 py-5 rounded-2xl font-bold block mb-4">LIBERAR AGORA</a>
+        <button onclick="location.reload()" class="text-xs text-gray-600 underline uppercase">Já paguei? Verificar</button>
     </div>
 
     <div id="tela-login">
-        <h2 class="text-4xl font-black text-indigo-500 italic mb-8">ZAPCADERNO</h2>
-        <input type="email" id="email" placeholder="E-mail">
+        <div class="mb-10">
+            <h2 class="text-4xl font-black text-indigo-500 italic tracking-tighter">ZAPCADERNO</h2>
+            <p class="text-gray-500 text-sm mt-1">Acesse sua conta profissional</p>
+        </div>
+        <input type="email" id="email" placeholder="E-mail" value="bobv1486@gmail.com">
         <input type="password" id="senha" placeholder="Senha">
-        <button id="btn-entrar" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold">ENTRAR</button>
+        <button id="btn-entrar" class="w-full bg-indigo-600 py-5 rounded-2xl font-bold shadow-2xl active:scale-95 transition">ENTRAR</button>
     </div>
 
-    <header class="p-6 flex justify-between items-center">
+    <header class="p-6 flex justify-between items-start">
         <div>
-            <h1 id="header-nome" class="text-xl font-bold italic uppercase">ZAPCADERNO</h1>
-            <div class="flex items-center gap-2">
+            <h1 id="h-nome" class="text-xl font-bold italic uppercase tracking-tighter">ZAPCADERNO</h1>
+            <div class="flex items-center gap-2 mt-1">
                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span id="label-acesso" class="text-[10px] text-gray-500 font-bold uppercase">Acesso Ativo</span>
+                <span id="badge-acesso" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Acesso Ativo</span>
             </div>
         </div>
-        <button onclick="location.reload()" class="text-gray-500"><i class="fas fa-sync-alt"></i></button>
+        <button onclick="location.reload()" class="bg-gray-900 p-3 rounded-full text-gray-500"><i class="fas fa-sync-alt"></i></button>
     </header>
 
     <main class="p-4">
         <div id="dashboard" class="tab-content active">
-            <div class="card bg-gradient-to-br from-indigo-900/20 to-black">
-                <p class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Total Pendente</p>
+            <div class="card bg-gradient-to-br from-indigo-900/30 to-black">
+                <p class="text-[10px] text-indigo-400 font-bold uppercase mb-1 tracking-widest">Total a Receber</p>
                 <p id="total-receber" class="text-4xl font-bold">R$ 0,00</p>
             </div>
             <div id="lista-vendas" class="space-y-3 mt-6"></div>
         </div>
 
-        <div id="orcamentos" class="tab-content">
-            <div class="card">
-                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase">Nova Proposta</h3>
-                <input type="text" id="o-nome" placeholder="Nome do Cliente">
-                <input type="text" id="o-whats" placeholder="WhatsApp">
-                <textarea id="o-detalhe" placeholder="Descrição do serviço..."></textarea>
-                <input type="number" id="o-valor" placeholder="Valor Total R$">
-                <button id="btn-save-o" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">GRAVAR ORÇAMENTO</button>
-            </div>
-        </div>
-
         <div id="novo" class="tab-content">
             <div class="card">
-                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase">Registrar Cobrança</h3>
+                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase italic">Nova Cobrança</h3>
                 <input type="text" id="v-nome" placeholder="Nome do Cliente">
-                <input type="text" id="v-whats" placeholder="WhatsApp">
                 <input type="number" id="v-valor" placeholder="Valor R$">
                 <input type="date" id="v-data">
-                <button id="btn-save-v" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">CONFIRMAR</button>
+                <button id="btn-save-v" class="w-full bg-indigo-600 py-4 rounded-xl font-bold mt-2">CONFIRMAR</button>
             </div>
         </div>
     </main>
 
     <nav class="nav-bar">
-        <button onclick="changeTab('dashboard')" class="nav-btn active"><i class="fas fa-wallet"></i></button>
-        <button onclick="changeTab('orcamentos')" class="nav-btn"><i class="fas fa-file-invoice"></i></button>
-        <button onclick="changeTab('novo')" class="btn-plus"><i class="fas fa-plus"></i></button>
-        <button onclick="alert('Funcionalidade em breve!')" class="nav-btn"><i class="fas fa-cog"></i></button>
+        <button onclick="openTab('dashboard')" class="nav-btn active"><i class="fas fa-wallet"></i></button>
+        <button onclick="openTab('novo')" class="btn-plus"><i class="fas fa-plus"></i></button>
+        <button onclick="alert('Configurações em breve')" class="nav-btn"><i class="fas fa-cog"></i></button>
     </nav>
 
     <script type="module">
@@ -119,102 +110,94 @@
         const db = getFirestore(app);
         const API_SHEETDB = 'https://sheetdb.io/api/v1/2f431iyij8cgi';
 
-        // --- CONTROLE DE ABAS ---
-        window.changeTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            window.scrollTo(0,0);
-        };
+        // --- SISTEMA DE ACESSO ---
+        async function verificarLicenca() {
+            // Check 15 dias primeiro (Local)
+            let start = localStorage.getItem('z_start_v3');
+            if (!start) {
+                start = new Date().toISOString();
+                localStorage.setItem('z_start_v3', start);
+            }
+            const diasUso = Math.floor((new Date() - new Date(start)) / (1000*60*60*24));
 
-        // --- SISTEMA DE ACESSO (REVISADO) ---
-        async function validarEntrada() {
-            // 1. Checa pagamento
+            // Check Pagamento (API)
+            let pago = false;
             try {
                 const res = await fetch(API_SHEETDB);
                 const dados = await res.json();
-                if (dados.some(i => String(i.status).toLowerCase() === 'approved')) {
-                    document.getElementById('label-acesso').innerText = "ASSINANTE VITALÍCIO";
-                    document.getElementById('tela-carregamento').style.display = 'none';
-                    return true;
-                }
-            } catch (e) { console.log("Erro API"); }
+                pago = dados.some(i => String(i.status).toLowerCase() === 'approved');
+            } catch (e) { console.log("Erro API, mantendo teste"); }
 
-            // 2. Checa 15 dias
-            let start = localStorage.getItem('zap_start_date');
-            if (!start) {
-                start = new Date().toISOString();
-                localStorage.setItem('zap_start_date', start);
-            }
-            const diff = Math.floor((new Date() - new Date(start)) / (1000*60*60*24));
+            document.getElementById('tela-carregamento').style.display = 'none';
 
-            if (diff > 15) {
-                document.getElementById('tela-bloqueio').style.display = 'flex';
-                document.getElementById('tela-carregamento').style.display = 'none';
-                return false;
-            } else {
-                document.getElementById('label-acesso').innerText = `TESTE: ${15-diff} DIAS`;
-                document.getElementById('tela-carregamento').style.display = 'none';
+            if (pago) {
+                document.getElementById('badge-acesso').innerText = "VITALÍCIO ATIVO";
                 return true;
+            } else if (diasUso <= 15) {
+                document.getElementById('badge-acesso').innerText = `TESTE: ${15-diasUso} DIAS`;
+                return true;
+            } else {
+                document.getElementById('tela-bloqueio').style.display = 'flex';
+                return false;
             }
         }
 
-        // --- LOGIN E MONITORAMENTO ---
         onAuthStateChanged(auth, async (user) => {
-            const isAllowed = await validarEntrada();
-            if (isAllowed) {
+            const ok = await verificarLicenca();
+            if (ok) {
                 if (user) {
                     document.getElementById('tela-login').style.display = 'none';
-                    carregarDados(user.uid);
+                    initApp(user.uid);
                 } else {
                     document.getElementById('tela-login').style.display = 'flex';
                 }
             }
         });
 
+        // --- INTERAÇÕES ---
+        window.openTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        };
+
         document.getElementById('btn-entrar').onclick = () => {
             const e = document.getElementById('email').value;
             const s = document.getElementById('senha').value;
-            signInWithEmailAndPassword(auth, e, s).catch(() => alert("Erro ao acessar!"));
+            signInWithEmailAndPassword(auth, e, s).catch(() => alert("E-mail ou Senha inválidos!"));
         };
 
-        function carregarDados(uid) {
+        function initApp(uid) {
             onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
-                let total = 0;
-                const lista = document.getElementById('lista-vendas');
-                lista.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const d = docSnap.data();
-                    if (!d.pago) {
-                        total += d.valor;
-                        lista.innerHTML += `
-                            <div class="card flex justify-between items-center border-l-4 border-indigo-600">
-                                <div><b>${d.nome}</b><br><span class="text-[10px] text-gray-500 uppercase">${d.data}</span></div>
-                                <div class="flex gap-2">
-                                    <span class="font-bold text-indigo-400">R$ ${d.valor}</span>
-                                    <button onclick="window.marcar('${docSnap.id}')" class="bg-indigo-600 text-[9px] font-black p-2 rounded-lg">PAGO</button>
-                                </div>
-                            </div>`;
+                let t = 0;
+                const list = document.getElementById('lista-vendas');
+                list.innerHTML = '';
+                snap.forEach(s => {
+                    const d = s.data();
+                    if(!d.pago) {
+                        t += d.valor;
+                        list.innerHTML += `<div class="card flex justify-between items-center border-l-4 border-indigo-600">
+                            <div><b>${d.nome}</b><br><span class="text-[10px] text-gray-500">${d.data}</span></div>
+                            <button onclick="window.marcar('${s.id}')" class="bg-indigo-600 px-4 py-2 rounded-xl text-[10px] font-bold">RECEBI</button>
+                        </div>`;
                     }
                 });
-                document.getElementById('total-receber').innerText = `R$ ${total.toLocaleString('pt-BR')}`;
+                document.getElementById('total-receber').innerText = `R$ ${t.toLocaleString('pt-BR')}`;
             });
         }
 
         window.marcar = async (id) => {
-            if(confirm("Confirmar pagamento?")) await updateDoc(doc(db, "vendas", id), { pago: true });
+            if(confirm("Confirmar recebimento?")) await updateDoc(doc(db, "vendas", id), { pago: true });
         };
 
         document.getElementById('btn-save-v').onclick = async () => {
-            await addDoc(collection(db, "vendas"), {
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('v-nome').value,
-                whatsapp: document.getElementById('v-whats').value,
-                valor: parseFloat(document.getElementById('v-valor').value),
-                data: document.getElementById('v-data').value,
-                pago: false
-            });
-            alert("Salvo!");
-            changeTab('dashboard');
+            const n = document.getElementById('v-nome').value;
+            const v = parseFloat(document.getElementById('v-valor').value);
+            const d = document.getElementById('v-data').value;
+            if(!n || !v || !d) return alert("Preencha tudo!");
+            
+            await addDoc(collection(db, "vendas"), { uid: auth.currentUser.uid, nome: n, valor: v, data: d, pago: false });
+            alert("Venda registrada!");
+            openTab('dashboard');
         };
     </script>
 </body>
