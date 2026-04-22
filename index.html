@@ -1,194 +1,69 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZapCaderno Ultra Pro</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; transition: 0.3s; }
-        .dark-mode { background-color: #0f172a; color: #f1f5f9; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+<script>
+function carregarDados(uid) {
+    db.collection("vendas").where("uid", "==", uid).onSnapshot(snap => {
+        let pend = 0;
+        const container = document.getElementById('listaVendas');
+        container.innerHTML = '';
         
-        #telaLogin, #bloqueioPagamento { position: fixed; inset: 0; background: #0f172a; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; color: white; }
-        #bloqueioPagamento { background: #1e1b4b; }
+        snap.forEach(doc => {
+            const d = doc.data();
+            if(!d.pago) {
+                pend += d.valor;
+                // Formata o valor para R$ 0,00
+                const valorFormatado = d.valor.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
+                const nomeCliente = d.nome || "Cliente sem nome";
 
-        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; }
-        .dark-mode .nav-bar { background: #1e293b; border: 1px solid #334155; }
-        .btn-plus { background: #4f46e5; color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; }
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .dark-mode .card { background: #1e293b; }
-        input, textarea { border: 1px solid #e2e8f0; width: 100%; padding: 14px; border-radius: 12px; outline: none; margin-bottom: 10px; color: #1e293b; }
-        .dark-mode input { background: #0f172a !important; color: white !important; border-color: #334155; }
-    </style>
-</head>
-<body class="pb-32">
-
-    <div id="telaLogin" style="display:none;">
-        <h1 class="text-2xl font-black mb-6 italic text-indigo-500">ZAPCADERNO PRO</h1>
-        <input type="email" id="l-email" placeholder="E-mail">
-        <input type="password" id="l-senha" placeholder="Senha">
-        <button id="btnEntrar" class="w-full max-w-xs bg-indigo-600 py-4 rounded-xl font-bold border-none text-white">ENTRAR</button>
-    </div>
-
-    <div id="bloqueioPagamento" style="display:none;">
-        <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
-            <i class="fas fa-rocket text-3xl text-yellow-300"></i>
-        </div>
-        <h2 class="text-2xl font-bold mb-2">Assinatura Expirada</h2>
-        <p class="text-indigo-200 text-sm mb-6">Pague com o e-mail:<br><b id="exibirEmailUser" class="text-white underline">...</b></p>
-        <a href="https://mpago.la/2CGD9Ar" target="_blank" class="w-full max-w-xs bg-green-500 text-white py-4 rounded-2xl font-bold mb-6 block text-center no-underline shadow-xl font-bold">PAGAR R$ 14,99</a>
-        <button onclick="location.reload()" class="text-xs text-indigo-300 bg-transparent border-none uppercase font-bold tracking-widest">Já paguei? Atualizar</button>
-    </div>
-
-    <header class="bg-indigo-600 text-white p-6 pb-12 rounded-b-[40px] shadow-lg">
-        <div class="flex justify-between items-center mb-2">
-            <div>
-                <h1 id="h-nome" class="text-xl font-bold uppercase">ZapCaderno</h1>
-                <span id="statusBadge" class="text-[9px] bg-black bg-opacity-20 px-2 py-0.5 rounded-full font-bold uppercase">Verificando...</span>
-            </div>
-            <button onclick="toggleDarkMode()" class="w-10 h-10 bg-white bg-opacity-10 rounded-full flex items-center justify-center border-none text-white">
-                <i class="fas fa-moon"></i>
-            </button>
-        </div>
-    </header>
-
-    <main class="p-4 -mt-8" id="conteudoPrincipal">
-        <section id="dashboard" class="tab-content active">
-            <div class="card shadow-md">
-                <p class="text-[10px] font-bold text-indigo-500 uppercase">A Receber</p>
-                <p id="t-pendente" class="text-3xl font-black">R$ 0,00</p>
-            </div>
-            <div id="listaVendas" class="space-y-4"></div>
-        </section>
-
-        <section id="orcamentos" class="tab-content">
-            <div class="card">
-                <h2 class="text-lg font-bold mb-4">Novo Orçamento</h2>
-                <input type="text" id="o-nome" placeholder="Cliente">
-                <input type="tel" id="o-whats" placeholder="WhatsApp">
-                <textarea id="o-detalhes" placeholder="Descrição..."></textarea>
-                <input type="number" id="o-total" placeholder="Valor Total R$">
-                <button id="btnSalvarOrc" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold border-none mt-2">GERAR PROPOSTA</button>
-            </div>
-            <div id="listaOrcamentos" class="space-y-4 mt-4"></div>
-        </section>
-
-        <section id="novo" class="tab-content">
-            <div class="card">
-                <h2 class="text-lg font-bold mb-6">Registrar Venda Fiada</h2>
-                <input type="text" id="v-nome" placeholder="Nome do Cliente">
-                <input type="tel" id="v-whats" placeholder="WhatsApp">
-                <input type="text" id="v-item" placeholder="Produto">
-                <input type="number" id="v-valor" placeholder="Valor R$">
-                <input type="date" id="v-data">
-                <button id="btnSalvarVenda" class="w-full bg-indigo-600 text-white font-bold py-5 rounded-2xl border-none mt-4">SALVAR</button>
-            </div>
-        </section>
-
-        <section id="config" class="tab-content">
-            <div class="card">
-                <input type="text" id="c-loja" placeholder="Nome da Loja">
-                <input type="text" id="c-pix" placeholder="Chave PIX">
-                <button id="btnSaveConf" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold border-none">ATUALIZAR</button>
-                <button onclick="firebase.auth().signOut()" class="w-full mt-10 text-red-500 font-bold bg-transparent border-none">SAIR</button>
-            </div>
-        </section>
-    </main>
-
-    <nav class="nav-bar">
-        <button onclick="abrir('dashboard')" class="bg-transparent text-indigo-600 border-none"><i class="fas fa-home text-xl"></i></button>
-        <button onclick="abrir('orcamentos')" class="bg-transparent text-gray-400 border-none"><i class="fas fa-file-invoice-dollar text-xl"></i></button>
-        <button onclick="abrir('novo')" class="btn-plus border-none"><i class="fas fa-plus text-xl"></i></button>
-        <button onclick="abrir('config')" class="bg-transparent text-gray-400 border-none"><i class="fas fa-cog text-xl"></i></button>
-    </nav>
-
-    <script>
-        // CONFIGURAÇÕES
-        const firebaseConfig = {
-            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
-            authDomain: "zapcaderno.firebaseapp.com",
-            projectId: "zapcaderno",
-            storageBucket: "zapcaderno.firebasestorage.app",
-            messagingSenderId: "446641643061",
-            appId: "1:446641643061:web:daf768922b53614f229b7c"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const API_PLANILHA = "https://sheetdb.io/api/v1/2f431iyij8cgi";
-        let configLoja = { loja: "MINHA LOJA", pix: "" };
-
-        function abrir(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
-
-        async function verificarAssinatura(email) {
-            document.getElementById('exibirEmailUser').innerText = email;
-            try {
-                const res = await fetch(`${API_PLANILHA}/search?email=${email}`);
-                const dados = await res.json();
-                if (dados.length > 0 && (dados[dados.length-1].status.toLowerCase() === 'approved')) return true;
-                return false;
-            } catch(e) { return false; }
-        }
-
-        auth.onAuthStateChanged(async user => {
-            if (user) {
-                document.getElementById('telaLogin').style.display = 'none';
-                const pago = await verificarAssinatura(user.email);
-                
-                let dI = localStorage.getItem('zap_instala') || new Date().getTime();
-                localStorage.setItem('zap_instala', dI);
-                const emTeste = (new Date().getTime() - dI < (15 * 24 * 60 * 60 * 1000));
-
-                if (pago || emTeste) {
-                    document.getElementById('statusBadge').innerText = pago ? "ATIVO" : "TESTE";
-                    carregarDados(user.uid);
-                } else {
-                    document.getElementById('bloqueioPagamento').style.display = 'flex';
-                }
-            } else {
-                document.getElementById('telaLogin').style.display = 'flex';
+                container.innerHTML += `
+                <div class="card shadow-sm border-l-4 border-indigo-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <b class="text-lg">${nomeCliente}</b>
+                            <p class="text-xs opacity-50 uppercase">${d.item || 'Venda'}</p>
+                        </div>
+                        <b class="text-indigo-600">${valorFormatado}</b>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="cobrar('${d.whatsapp}', ${d.valor}, '${nomeCliente}')" 
+                                class="flex-1 bg-green-500 text-white p-3 rounded-xl font-bold border-none flex items-center justify-center gap-2">
+                            <i class="fab fa-whatsapp text-xl"></i> COBRAR
+                        </button>
+                        <button onclick="baixar('${doc.id}')" 
+                                class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold border-none">
+                            RECEBI
+                        </button>
+                    </div>
+                </div>`;
             }
         });
+        document.getElementById('t-pendente').innerText = pend.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
+    });
 
-        document.getElementById('btnEntrar').onclick = () => {
-            auth.signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-senha').value);
-        };
+    // Carregar Orçamentos também
+    db.collection("orcamentos").where("uid", "==", uid).onSnapshot(snap => {
+        const container = document.getElementById('listaOrcamentos');
+        if(!container) return; 
+        container.innerHTML = '';
+        snap.forEach(doc => {
+            const o = doc.data();
+            container.innerHTML += `
+            <div class="card border-l-4 border-yellow-500">
+                <div class="flex justify-between mb-2">
+                    <b>${o.nome}</b>
+                    <b class="text-yellow-600">R$ ${o.valor.toFixed(2)}</b>
+                </div>
+                <button onclick="enviarOrc('${o.whatsapp}', '${o.valor}', '${o.detalhes}')" 
+                        class="w-full bg-green-500 text-white py-2 rounded-lg font-bold border-none flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp"></i> ENVIAR PROPOSTA
+                </button>
+            </div>`;
+        });
+    });
+}
 
-        function carregarDados(uid) {
-            db.collection("vendas").where("uid", "==", uid).onSnapshot(snap => {
-                let pend = 0;
-                const container = document.getElementById('listaVendas');
-                container.innerHTML = '';
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    if(!d.pago) {
-                        pend += d.valor;
-                        container.innerHTML += `<div class="card"><b>${d.nome}</b> - R$ ${d.valor} <br> <button onclick="cobrar('${d.whatsapp}', ${d.valor}, '${d.nome}')" class="bg-green-500 text-white p-2 rounded mt-2 border-none">Cobrar</button></div>`;
-                    }
-                });
-                document.getElementById('t-pendente').innerText = "R$ " + pend.toFixed(2);
-            });
-        }
-
-        window.cobrar = (tel, val, nome) => {
-            const msg = `Olá ${nome}, lembrete da ${configLoja.loja}: R$ ${val}. PIX: ${configLoja.pix}`;
-            window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
-        };
-    </script>
-</body>
-</html>
+// Função para marcar como pago
+window.baixar = (id) => {
+    if(confirm("Confirmar recebimento?")) {
+        db.collection("vendas").doc(id).update({pago: true});
+    }
+};
+</script>
