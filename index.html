@@ -2,67 +2,117 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZAPCADERNO PRO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZapCaderno Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        #tela-carregamento, #tela-liberada, #tela-bloqueio { display: none; }
+        :root { color-scheme: dark; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0a0a0a; color: #ffffff; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        /* Controle de Telas */
+        .tab-content, #tela-bloqueio, #tela-carregamento-saas { display: none; }
+        .tab-content.active { display: block; }
         .flex-active { display: flex !important; }
-        .block-active { display: block !important; }
-        .hide { display: none !important; }
+
+        /* Estilo Premium */
+        .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: #161616; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.9); z-index: 1000; border: 1px solid #222; }
+        .btn-plus { background: #4f46e5; color: white; width: 65px; height: 65px; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: 4px solid #0a0a0a; font-size: 26px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); }
+        .nav-btn { color: #444; font-size: 24px; background: none; border: none; transition: 0.3s; }
+        .nav-btn.active { color: #818cf8; }
+        .card { background: #161616; border-radius: 24px; padding: 22px; margin-bottom: 15px; border: 1px solid #222; }
+        input, textarea { background: #1f1f1f !important; border: 1px solid #333 !important; border-radius: 14px !important; padding: 16px !important; width: 100%; margin-bottom: 12px; color: #fff !important; outline: none; }
+        
+        #telaLogin { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        #tela-bloqueio { position: fixed; inset: 0; background: #0a0a0a; z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans antialiased text-gray-900">
+<body class="pb-36">
 
-    <div id="tela-carregamento" class="h-screen flex flex-col items-center justify-center bg-white">
-        <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-        <p class="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Sincronizando Banco de Dados</p>
+    <div id="tela-carregamento-saas" class="fixed inset-0 bg-black z-[10001] flex flex-col items-center justify-center">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+        <p class="mt-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Sincronizando Acesso...</p>
     </div>
 
-    <div id="tela-bloqueio" class="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100">
-        <div class="w-full max-w-sm bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white">
-            <div class="bg-blue-600 p-12 text-center">
-                <h1 class="text-4xl font-black text-white italic tracking-tighter">Zapcaderno</h1>
-                <p class="text-blue-100 text-[10px] mt-2 font-bold uppercase tracking-[0.2em] opacity-70">Acesso Expirado</p>
-            </div>
-            <div class="p-10 text-center">
-                <div class="mb-8">
-                    <p class="text-red-500 text-[10px] font-black uppercase tracking-widest mb-2">Seus 15 dias acabaram</p>
-                    <span class="text-6xl font-black text-gray-900">R$ 14,99</span>
-                </div>
-                <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" 
-                   class="block w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl mb-6 text-lg active:scale-95 transition">
-                    LIBERAR AGORA
-                </a>
-                <button onclick="validarAcesso()" class="text-[10px] text-gray-400 hover:text-blue-600 font-black underline uppercase tracking-tighter">
-                    Já paguei? Verificar agora
-                </button>
+    <div id="tela-bloqueio">
+        <h2 class="text-4xl font-black text-red-500 italic mb-2">EXPIRADO</h2>
+        <p class="text-gray-400 text-sm mb-8">Seu período de teste de 15 dias acabou.<br>Ative o acesso vitalício para continuar.</p>
+        <div class="text-5xl font-black mb-8 text-white">R$ 14,99</div>
+        <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold shadow-xl mb-6 block text-center">LIBERAR AGORA</a>
+        <button onclick="checkLicenca()" class="text-xs text-gray-500 underline uppercase tracking-widest">Já paguei? Verificar</button>
+    </div>
+
+    <div id="telaLogin">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-black text-indigo-500 tracking-tighter italic">ZAPCADERNO</h2>
+            <p class="text-gray-500 text-sm">Acesse sua conta profissional</p>
+        </div>
+        <input type="email" id="logEmail" placeholder="E-mail">
+        <input type="password" id="logSenha" placeholder="Senha">
+        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold border-none shadow-xl">ENTRAR</button>
+    </div>
+
+    <header class="p-6 flex justify-between items-start">
+        <div>
+            <h1 id="headerNome" class="text-xl font-bold text-white uppercase tracking-tight italic">ZAPCADERNO</h1>
+            <div class="flex items-center gap-2 mt-1">
+                <span id="statusDot" class="w-2 h-2 rounded-full animate-pulse bg-green-500"></span>
+                <p id="badgeAcesso" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Acesso Ativo</p>
             </div>
         </div>
-    </div>
+        <button onclick="location.reload()" class="bg-gray-900 p-3 rounded-full text-gray-400"><i class="fas fa-redo-alt"></i></button>
+    </header>
 
-    <div id="tela-liberada" class="min-h-screen flex flex-col">
-        <header class="bg-white border-b px-6 py-5 flex justify-between items-center sticky top-0 z-20">
-            <h1 class="text-2xl font-black text-blue-600 italic tracking-tighter">ZAPCADERNO</h1>
-            <div class="flex items-center px-3 py-1 rounded-full bg-blue-50 border border-blue-100">
-                <span id="dot-status" class="h-2 w-2 rounded-full mr-2 animate-pulse"></span>
-                <span id="badge-status" class="text-[10px] font-black uppercase tracking-tighter"></span>
+    <main class="p-4">
+        <div id="dashboard" class="tab-content active">
+            <div class="card bg-gradient-to-br from-gray-900 to-black border-indigo-900/30">
+                <p class="text-[11px] text-indigo-400 font-bold uppercase mb-1">Total a Receber</p>
+                <p id="totalReceber" class="text-4xl font-bold">R$ 0,00</p>
             </div>
-        </header>
+            <div id="listaDividas" class="space-y-3 mt-6"></div>
+        </div>
 
-        <main class="p-6 flex-1 max-w-2xl mx-auto w-full space-y-6">
-            
-            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Editor de Notas</span>
-                    <span id="contador" class="text-[10px] font-bold text-gray-400 uppercase">0 Caracteres</span>
+        <div id="orcamentos" class="tab-content">
+            <div class="card">
+                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase">Nova Proposta</h3>
+                <input type="text" id="propNome" placeholder="Nome do Cliente">
+                <input type="text" id="propWhatsapp" placeholder="WhatsApp">
+                <textarea id="propDetalhes" placeholder="O que será feito?" rows="2"></textarea>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="propMat" placeholder="Material R$">
+                    <input type="number" id="propMao" placeholder="Mão de Obra R$">
                 </div>
-                
-                <input type="text" id="titulo-nota" placeholder="Título da Nota..." class="w-full mb-4 text-xl font-bold border-none outline-none placeholder:text-gray-300">
-                
-                <textarea id="texto-nota" oninput="atualizarContador()" class="w-full h-64 p-0 bg-transparent border-none outline-none text-gray-700 text-lg leading-relaxed resize-none" placeholder="Comece a escrever..."></textarea>
-                
-                <div class="grid grid-cols-2 gap-3 mt-6">
-                    <button onclick="salvarNota()" class="bg-blue-600 text-white py-4 rounded-2xl font-black text-xs shadow-lg shadow-blue-100 active:scale-95 transition">
-                        SALVAR NOTA
-                    </button>
+                <button id="btnGerarOrcamento" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">SALVAR ORÇAMENTO</button>
+            </div>
+            <div id="listaOrcamentos"></div>
+        </div>
+
+        <div id="novo" class="tab-content">
+            <div class="card">
+                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase text-center">Registrar Venda</h3>
+                <input type="text" id="vendaNome" placeholder="Nome do Cliente">
+                <input type="text" id="vendaWhatsapp" placeholder="WhatsApp">
+                <input type="text" id="vendaProduto" placeholder="Produto/Serviço">
+                <input type="number" id="vendaValor" placeholder="Valor R$">
+                <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Data do Pagamento:</label>
+                <input type="date" id="vendaDataPagar">
+                <button id="btnSalvarVendaRapida" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold mt-2">CONFIRMAR E SALVAR</button>
+            </div>
+        </div>
+
+        <div id="config" class="tab-content">
+            <div class="card">
+                <h3 class="text-xs font-bold mb-4 uppercase">Perfil da Empresa</h3>
+                <input type="text" id="confNome" placeholder="Nome da Empresa">
+                <input type="text" id="confPix" placeholder="Chave PIX">
+                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold">SALVAR ALTERAÇÕES</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="nav-bar">
+        <button onclick="openTab('dashboard')" id="tabDash" class="nav-btn active"><i class="fas fa-wallet"></i></button>
+        <button onclick="openTab('orcamentos')" id="tabOrc" class="nav-btn"><i class="fas fa-file-signature"></i></button>
+        <button onclick="openTab('novo')" id="tabNovo" class="btn-plus"><i class="fas fa-plus"></i></button>
+        <button onclick="openTab('config')" id="tabConf" class="nav-btn"><i class="fas fa-store"></i></button>
+        <button id="btnLogout" class="nav-btn"><i class="fas fa-door-open"></i></button>
