@@ -10,62 +10,60 @@
         :root { color-scheme: dark; }
         body { font-family: 'Segoe UI', sans-serif; background-color: #0a0a0a; color: #ffffff; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        /* Controle de Telas */
-        .tab-content, #tela-bloqueio, #tela-carregamento-saas { display: none; }
+        .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .flex-active { display: flex !important; }
-
-        /* Estilo Premium */
+        
+        /* Navegação */
         .nav-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: #161616; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.9); z-index: 1000; border: 1px solid #222; }
         .btn-plus { background: #4f46e5; color: white; width: 65px; height: 65px; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: 4px solid #0a0a0a; font-size: 26px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); }
         .nav-btn { color: #444; font-size: 24px; background: none; border: none; transition: 0.3s; }
         .nav-btn.active { color: #818cf8; }
+
+        /* Estilo de Inputs */
         .card { background: #161616; border-radius: 24px; padding: 22px; margin-bottom: 15px; border: 1px solid #222; }
         input, textarea { background: #1f1f1f !important; border: 1px solid #333 !important; border-radius: 14px !important; padding: 16px !important; width: 100%; margin-bottom: 12px; color: #fff !important; outline: none; }
         
-        #telaLogin { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        #tela-bloqueio { position: fixed; inset: 0; background: #0a0a0a; z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        /* Telas de Bloqueio */
+        #telaLogin, #tela-bloqueio, #tela-carregamento-saas { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        #tela-carregamento-saas { display: flex; z-index: 10001; }
     </style>
 </head>
 <body class="pb-36">
 
-    <div id="tela-carregamento-saas" class="fixed inset-0 bg-black z-[10001] flex flex-col items-center justify-center">
+    <div id="tela-carregamento-saas">
         <div class="h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-        <p class="mt-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Sincronizando Acesso...</p>
+        <p class="mt-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Validando Licença...</p>
     </div>
 
     <div id="tela-bloqueio">
-        <h2 class="text-4xl font-black text-red-500 italic mb-2">EXPIRADO</h2>
-        <p class="text-gray-400 text-sm mb-8">Seu período de teste de 15 dias acabou.<br>Ative o acesso vitalício para continuar.</p>
-        <div class="text-5xl font-black mb-8 text-white">R$ 14,99</div>
-        <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold shadow-xl mb-6 block text-center">LIBERAR AGORA</a>
-        <button onclick="checkLicenca()" class="text-xs text-gray-500 underline uppercase tracking-widest">Já paguei? Verificar</button>
+        <h2 class="text-4xl font-black text-red-600 italic mb-2">EXPIRADO</h2>
+        <p class="text-gray-500 text-sm mb-10">Seu teste de 15 dias acabou.<br>Libere o acesso vitalício agora.</p>
+        <div class="text-6xl font-black mb-10 text-white">R$ 14,99</div>
+        <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold shadow-xl mb-6 block">LIBERAR AGORA</a>
+        <button onclick="checkLicenca()" class="text-xs text-gray-600 underline uppercase">Já paguei? Verificar</button>
     </div>
 
     <div id="telaLogin">
-        <div class="text-center mb-8">
-            <h2 class="text-4xl font-black text-indigo-500 tracking-tighter italic">ZAPCADERNO</h2>
-            <p class="text-gray-500 text-sm">Acesse sua conta profissional</p>
-        </div>
+        <h2 class="text-4xl font-black text-indigo-500 italic mb-8">ZAPCADERNO</h2>
         <input type="email" id="logEmail" placeholder="E-mail">
         <input type="password" id="logSenha" placeholder="Senha">
-        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold border-none shadow-xl">ENTRAR</button>
+        <button id="btnEntrar" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold">ENTRAR</button>
     </div>
 
     <header class="p-6 flex justify-between items-start">
         <div>
-            <h1 id="headerNome" class="text-xl font-bold text-white uppercase tracking-tight italic">ZAPCADERNO</h1>
+            <h1 id="headerNome" class="text-xl font-bold text-white uppercase italic tracking-tight">ZAPCADERNO</h1>
             <div class="flex items-center gap-2 mt-1">
-                <span id="statusDot" class="w-2 h-2 rounded-full animate-pulse bg-green-500"></span>
+                <span id="statusDot" class="w-2 h-2 rounded-full bg-green-500"></span>
                 <p id="badgeAcesso" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Acesso Ativo</p>
             </div>
         </div>
-        <button onclick="location.reload()" class="bg-gray-900 p-3 rounded-full text-gray-400"><i class="fas fa-redo-alt"></i></button>
+        <button onclick="location.reload()" class="bg-gray-900 p-3 rounded-full text-gray-400 border-none"><i class="fas fa-redo-alt"></i></button>
     </header>
 
     <main class="p-4">
         <div id="dashboard" class="tab-content active">
-            <div class="card bg-gradient-to-br from-gray-900 to-black border-indigo-900/30">
+            <div class="card bg-gradient-to-br from-gray-900 to-black">
                 <p class="text-[11px] text-indigo-400 font-bold uppercase mb-1">Total a Receber</p>
                 <p id="totalReceber" class="text-4xl font-bold">R$ 0,00</p>
             </div>
@@ -74,14 +72,11 @@
 
         <div id="orcamentos" class="tab-content">
             <div class="card">
-                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase">Nova Proposta</h3>
+                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase italic">Nova Proposta</h3>
                 <input type="text" id="propNome" placeholder="Nome do Cliente">
                 <input type="text" id="propWhatsapp" placeholder="WhatsApp">
                 <textarea id="propDetalhes" placeholder="O que será feito?" rows="2"></textarea>
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="number" id="propMat" placeholder="Material R$">
-                    <input type="number" id="propMao" placeholder="Mão de Obra R$">
-                </div>
+                <input type="number" id="propValorTotal" placeholder="Valor Total R$">
                 <button id="btnGerarOrcamento" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">SALVAR ORÇAMENTO</button>
             </div>
             <div id="listaOrcamentos"></div>
@@ -89,12 +84,11 @@
 
         <div id="novo" class="tab-content">
             <div class="card">
-                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase text-center">Registrar Venda</h3>
+                <h3 class="text-indigo-400 text-xs font-bold mb-4 uppercase text-center italic">Registrar Venda</h3>
                 <input type="text" id="vendaNome" placeholder="Nome do Cliente">
                 <input type="text" id="vendaWhatsapp" placeholder="WhatsApp">
-                <input type="text" id="vendaProduto" placeholder="Produto/Serviço">
                 <input type="number" id="vendaValor" placeholder="Valor R$">
-                <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Data do Pagamento:</label>
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Data do Pagamento:</label>
                 <input type="date" id="vendaDataPagar">
                 <button id="btnSalvarVendaRapida" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold mt-2">CONFIRMAR E SALVAR</button>
             </div>
@@ -102,10 +96,10 @@
 
         <div id="config" class="tab-content">
             <div class="card">
-                <h3 class="text-xs font-bold mb-4 uppercase">Perfil da Empresa</h3>
+                <h3 class="text-xs font-bold mb-4 uppercase italic">Perfil</h3>
                 <input type="text" id="confNome" placeholder="Nome da Empresa">
                 <input type="text" id="confPix" placeholder="Chave PIX">
-                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold">SALVAR ALTERAÇÕES</button>
+                <button id="btnSalvarConfig" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold">SALVAR</button>
             </div>
         </div>
     </main>
@@ -116,3 +110,128 @@
         <button onclick="openTab('novo')" id="tabNovo" class="btn-plus"><i class="fas fa-plus"></i></button>
         <button onclick="openTab('config')" id="tabConf" class="nav-btn"><i class="fas fa-store"></i></button>
         <button id="btnLogout" class="nav-btn"><i class="fas fa-door-open"></i></button>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
+            authDomain: "zapcaderno.firebaseapp.com",
+            projectId: "zapcaderno",
+            storageBucket: "zapcaderno.firebasestorage.app",
+            messagingSenderId: "446641643061",
+            appId: "1:446641643061:web:daf768922b53614f229b7c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const API_SHEETDB = 'https://sheetdb.io/api/v1/2f431iyij8cgi';
+
+        // --- SISTEMA DE ACESSO ---
+        async function checkLicenca() {
+            document.getElementById('tela-carregamento-saas').style.display = 'flex';
+            
+            try {
+                const res = await fetch(API_SHEETDB);
+                const dados = await res.json();
+                if (dados.some(i => String(i.status).toLowerCase() === 'approved')) {
+                    document.getElementById('badgeAcesso').innerText = "VITALÍCIO";
+                    document.getElementById('tela-bloqueio').style.display = 'none';
+                    document.getElementById('tela-carregamento-saas').style.display = 'none';
+                    return true;
+                }
+            } catch (e) { console.log("Erro licença"); }
+
+            let dataStart = localStorage.getItem('zap_v2_start');
+            if (!dataStart) {
+                dataStart = new Date().toISOString();
+                localStorage.setItem('zap_v2_start', dataStart);
+            }
+            const diff = Math.floor((new Date() - new Date(dataStart)) / (1000*60*60*24));
+
+            if (diff <= 15) {
+                document.getElementById('badgeAcesso').innerText = `TESTE: ${15-diff} DIAS`;
+                document.getElementById('tela-bloqueio').style.display = 'none';
+                document.getElementById('tela-carregamento-saas').style.display = 'none';
+                return true;
+            } else {
+                document.getElementById('tela-bloqueio').style.display = 'flex';
+                document.getElementById('tela-carregamento-saas').style.display = 'none';
+                return false;
+            }
+        }
+        window.checkLicenca = checkLicenca;
+
+        // --- INICIALIZAÇÃO ---
+        onAuthStateChanged(auth, async (user) => {
+            const ok = await checkLicenca();
+            if (ok) {
+                if (user) {
+                    document.getElementById('telaLogin').style.display = 'none';
+                    initApp(user.uid);
+                } else {
+                    document.getElementById('telaLogin').style.display = 'flex';
+                }
+            }
+        });
+
+        // --- ABAS ---
+        window.openTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if(id === 'dashboard') document.getElementById('tabDash').classList.add('active');
+            if(id === 'orcamentos') document.getElementById('tabOrc').classList.add('active');
+            if(id === 'config') document.getElementById('tabConf').classList.add('active');
+        };
+
+        // --- FUNÇÕES FIREBASE ---
+        document.getElementById('btnEntrar').onclick = () => {
+            signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logSenha').value)
+                .catch(() => alert("Usuário ou Senha incorretos!"));
+        };
+
+        document.getElementById('btnLogout').onclick = () => { if(confirm("Sair?")) signOut(auth); };
+
+        function initApp(uid) {
+            onSnapshot(query(collection(db, "vendas"), where("uid", "==", uid)), (snap) => {
+                let total = 0;
+                const div = document.getElementById('listaDividas');
+                div.innerHTML = '';
+                snap.forEach(s => {
+                    const d = s.data();
+                    if(!d.pago) {
+                        total += d.valor;
+                        div.innerHTML += `
+                        <div class="card flex justify-between items-center border-l-4 border-indigo-600">
+                            <div><b>${d.nome}</b><br><span class="text-[10px] text-red-400">Vence: ${d.dataPagar}</span></div>
+                            <button onclick="window.marcarPago('${s.id}')" class="bg-indigo-600 text-white px-3 py-2 rounded-xl text-[10px] font-bold">RECEBI</button>
+                        </div>`;
+                    }
+                });
+                document.getElementById('totalReceber').innerText = `R$ ${total.toLocaleString('pt-BR')}`;
+            });
+        }
+
+        window.marcarPago = async (id) => { if(confirm("Marcar como recebido?")) await updateDoc(doc(db, "vendas", id), { pago: true }); };
+
+        document.getElementById('btnSalvarVendaRapida').onclick = async () => {
+            await addDoc(collection(db, "vendas"), {
+                uid: auth.currentUser.uid,
+                nome: document.getElementById('vendaNome').value,
+                whatsapp: document.getElementById('vendaWhatsapp').value,
+                valor: parseFloat(document.getElementById('vendaValor').value),
+                dataPagar: document.getElementById('vendaDataPagar').value,
+                pago: false,
+                timestamp: new Date()
+            });
+            alert("Venda Salva!");
+            openTab('dashboard');
+        };
+    </script>
+</body>
+</html>
