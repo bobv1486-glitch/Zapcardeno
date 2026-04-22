@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zapcaderno - Micro-SaaS Automático</title>
+    <title>Zapcaderno - Teste Grátis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Controle de visibilidade das telas */
         #tela-carregamento, #tela-liberada, #tela-bloqueio { display: none; }
         .flex-active { display: flex !important; }
         .block-active { display: block !important; }
@@ -15,97 +14,94 @@
 <body class="bg-gray-100 font-sans">
 
     <div id="tela-carregamento" class="h-screen flex flex-col items-center justify-center bg-white">
-        <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-        <p class="mt-4 text-gray-500 font-bold animate-pulse uppercase tracking-widest text-xs">Validando Pagamento...</p>
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
     </div>
 
     <div id="tela-bloqueio" class="min-h-screen flex flex-col items-center justify-center p-6">
-        <div class="w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100">
-            <div class="bg-blue-600 p-10 text-center">
-                <h1 class="text-3xl font-black text-white italic tracking-tighter">Zapcaderno</h1>
-                <p class="text-blue-100 text-[10px] mt-2 font-bold uppercase tracking-widest opacity-80">Acesso Restrito</p>
+        <div class="w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden">
+            <div class="bg-red-500 p-8 text-center text-white">
+                <h1 class="text-2xl font-black italic">PERÍODO EXPIRADO</h1>
+                <p class="text-xs opacity-80 uppercase font-bold mt-1">Seus 15 dias de teste acabaram</p>
             </div>
             <div class="p-10 text-center">
+                <p class="text-gray-500 text-sm mb-6">Para continuar usando o Zapcaderno e salvar suas notas, ative o acesso vitalício.</p>
                 <div class="mb-8">
                     <span class="text-5xl font-black text-gray-900">R$ 14,99</span>
-                    <p class="text-gray-400 text-[10px] font-bold mt-2 uppercase italic tracking-tighter">Liberação automática via Pix/Cartão</p>
                 </div>
                 <a href="https://link.mercadopago.com.br/zapcaderno" target="_blank" 
-                   class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition shadow-xl mb-6 text-center text-lg active:scale-95">
-                    LIBERAR MEU ACESSO
+                   class="block w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl mb-4 text-center">
+                    LIBERAR AGORA
                 </a>
-                <button onclick="verificarAcesso()" class="text-[10px] text-gray-400 hover:text-blue-600 font-black underline uppercase tracking-tighter transition">
-                    Já paguei? Sincronizar agora
-                </button>
+                <button onclick="validarTudo()" class="text-[10px] text-gray-400 underline uppercase font-bold">Já paguei? Verificar</button>
             </div>
         </div>
     </div>
 
     <div id="tela-liberada" class="min-h-screen bg-gray-50 flex-col">
-        <nav class="bg-white border-b px-6 py-5 flex justify-between items-center shadow-sm">
-            <h1 class="text-xl font-black text-blue-600 italic tracking-tighter">ZAPCADERNO PRO</h1>
-            <div class="flex items-center space-x-2">
-                <span class="h-2 w-2 bg-green-500 rounded-full"></span>
-                <span class="text-[10px] font-black text-green-600 uppercase">Acesso Ativo</span>
-            </div>
+        <nav class="bg-white border-b px-6 py-4 flex justify-between items-center shadow-sm">
+            <h1 class="text-xl font-black text-blue-600 italic">ZAPCADERNO</h1>
+            <span id="badge-status" class="text-[10px] font-black px-2 py-1 rounded-md uppercase"></span>
         </nav>
-        <main class="p-6">
-            <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Bem-vindo ao seu Micro-SaaS!</h2>
-                <div class="p-5 bg-blue-50 rounded-xl border border-blue-100 mb-6">
-                    <p class="text-blue-700 font-medium text-sm">Sua assinatura vitalícia foi detectada na planilha.</p>
-                </div>
-                <textarea class="w-full h-48 p-4 bg-gray-50 border rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-gray-700" placeholder="Escreva suas notas aqui..."></textarea>
-                <button class="w-full mt-4 bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-100">Salvar Alterações</button>
+        <main class="p-6 text-center">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+                <textarea id="nota" class="w-full h-64 p-4 bg-gray-50 border rounded-2xl outline-none" placeholder="Suas anotações premium..."></textarea>
+                <button onclick="alert('Salvo!')" class="w-full mt-4 bg-blue-600 text-white py-4 rounded-xl font-bold">Salvar Nota</button>
             </div>
         </main>
     </div>
 
     <script>
-        // Link da sua API que criamos no SheetDB
         const API_SHEETDB = 'https://sheetdb.io/api/v1/2f431iyij8cgi';
 
-        async function verificarAcesso() {
-            // Volta para a tela de carregamento enquanto consulta
+        async function validarTudo() {
             alternarTela('tela-carregamento');
 
+            // 1. CHECAR SE JÁ PAGOU (Prioridade máxima)
             try {
-                const response = await fetch(API_SHEETDB);
-                const dados = await response.json();
+                const res = await fetch(API_SHEETDB);
+                const dados = await res.json();
+                const pago = dados.some(i => String(i.status).toLowerCase() === 'approved');
 
-                // Procura por qualquer linha que tenha status 'approved'
-                // O Webhook do Mercado Pago enviará isso para a planilha automaticamente
-                const pagamentoConfirmado = dados.some(item => 
-                    String(item.status).toLowerCase() === 'approved' || 
-                    String(item.collection_status).toLowerCase() === 'approved'
-                );
-
-                if (pagamentoConfirmado) {
+                if (pago) {
+                    document.getElementById('badge-status').innerText = "ACESSO VITALÍCIO";
+                    document.getElementById('badge-status').className = "text-[10px] font-black px-2 py-1 rounded-md uppercase bg-green-100 text-green-700";
                     alternarTela('tela-liberada');
-                } else {
-                    alternarTela('tela-bloqueio');
+                    return;
                 }
-            } catch (error) {
-                console.error("Erro na API:", error);
+            } catch (e) { console.log("Erro na API"); }
+
+            // 2. LOGICA DOS 15 DIAS GRÁTIS
+            let dataCriacao = localStorage.getItem('zap_data_criacao');
+            const hoje = new Date();
+
+            if (!dataCriacao) {
+                // Novo usuário: marca a data de hoje
+                localStorage.setItem('zap_data_criacao', hoje.toISOString());
+                dataCriacao = hoje.toISOString();
+            }
+
+            const dataInicio = new Date(dataCriacao);
+            const diferencaDias = Math.floor((hoje - dataInicio) / (1000 * 60 * 60 * 24));
+
+            if (diferencaDias <= 15) {
+                // Ainda está no período grátis
+                const diasRestantes = 15 - diferencaDias;
+                document.getElementById('badge-status').innerText = `TESTE: ${diasRestantes} DIAS RESTANTES`;
+                document.getElementById('badge-status').className = "text-[10px] font-black px-2 py-1 rounded-md uppercase bg-blue-100 text-blue-700";
+                alternarTela('tela-liberada');
+            } else {
+                // Acabou o tempo e não pagou
                 alternarTela('tela-bloqueio');
             }
         }
 
-        // Função para trocar de tela suavemente
-        function alternarTela(idDesejado) {
-            const telas = ['tela-carregamento', 'tela-bloqueio', 'tela-liberada'];
-            telas.forEach(id => {
-                const el = document.getElementById(id);
-                if (id === idDesejado) {
-                    el.classList.add(id === 'tela-liberada' ? 'block-active' : 'flex-active');
-                } else {
-                    el.classList.remove('flex-active', 'block-active');
-                }
+        function alternarTela(id) {
+            ['tela-carregamento', 'tela-bloqueio', 'tela-liberada'].forEach(i => {
+                document.getElementById(i).style.display = (i === id) ? (i === 'tela-liberada' ? 'block' : 'flex') : 'none';
             });
         }
 
-        // Inicia a verificação assim que o site abre
-        window.onload = verificarAcesso;
+        window.onload = validarTudo;
     </script>
 </body>
 </html>
