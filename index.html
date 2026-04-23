@@ -14,22 +14,15 @@
     
     <style>
         :root { --primary: #4f46e5; --danger: #ef4444; --success: #10b981; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding-bottom: 110px; -webkit-tap-highlight-color: transparent; }
-        
-        .tab-content { display: none; padding: 20px; min-height: 80vh; }
-        .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding-bottom: 110px; }
+        .tab-content { display: none; padding: 20px; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 12px; }
         .card-atrasado { border-left: 6px solid var(--danger) !important; background: #fff1f2; }
-        .card-pago { border-left: 6px solid var(--success) !important; opacity: 0.8; }
-        
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; border: 1px solid #f1f5f9; }
-        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; outline: none; }
-        
-        input, textarea { border: 1px solid #cbd5e1; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; font-size: 16px; transition: 0.2s; }
-        input:focus { border-color: var(--primary); outline: none; ring: 2px solid rgba(79, 70, 229, 0.2); }
-        
+        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; }
+        input, textarea { border: 1px solid #cbd5e1; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; font-size: 16px; color: black; }
         #overlay { position: fixed; inset: 0; background: #0f172a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: white; text-align: center; }
     </style>
 </head>
@@ -37,25 +30,11 @@
 
     <div id="overlay" style="display:none;">
         <div id="login-form">
-            <h1 class="text-3xl font-black mb-1 italic text-indigo-400">ZAPCADERNO</h1>
-            <p class="text-[10px] uppercase tracking-widest mb-8 opacity-50 font-bold">Gerenciador Profissional</p>
-            <input type="email" id="l-email" placeholder="Seu e-mail" class="text-black">
-            <input type="password" id="l-senha" placeholder="Sua senha" class="text-black">
-            <button id="btnEntrar" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">ENTRAR</button>
+            <h1 class="text-3xl font-black mb-8 italic text-indigo-400">ZAPCADERNO</h1>
+            <input type="email" id="l-email" placeholder="E-mail">
+            <input type="password" id="l-senha" placeholder="Senha">
+            <button id="btnEntrar" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold">ENTRAR</button>
         </div>
         <div id="bloqueio-form" style="display:none;">
-            <i class="fas fa-crown text-yellow-400 text-6xl mb-6"></i>
-            <h2 class="text-2xl font-bold mb-2">Assinatura Expirada</h2>
-            <p class="text-gray-400 text-sm mb-8">O plano para <b id="user-email-info" class="text-white underline"></b> precisa ser renovado.</p>
-            <a href="https://mpago.la/2CGD9Ar" target="_blank" class="w-full bg-green-500 py-4 rounded-2xl font-bold block no-underline text-white shadow-xl mb-4">RENOVAR R$ 14,99</a>
-            <button onclick="location.reload()" class="opacity-40 text-xs font-bold uppercase border-none bg-transparent">Já paguei? Atualizar App</button>
-        </div>
-    </div>
-
-    <header class="bg-indigo-600 text-white p-6 pb-16 rounded-b-[40px] flex justify-between items-center shadow-md">
-        <div>
-            <h1 id="loja-nome" class="text-xl font-bold uppercase tracking-tight">ZAPCADERNO</h1>
-            <div class="flex items-center gap-1.5 opacity-70">
-                <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                <span class="text-[9px] font-bold uppercase tracking-widest">Sincronizado</span>
-            </div>
+            <i class="fas fa-crown text-yellow-400 text-5xl mb-4"></i>
+            <h
