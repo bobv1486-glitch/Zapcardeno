@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZapCaderno Ultra Pro</title>
+    <title>ZapCaderno Pro</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -13,28 +13,221 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --primary: #4f46e5; --danger: #ef4444; --success: #10b981; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding-bottom: 110px; }
-        .tab-content { display: none; padding: 20px; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 12px; }
-        .card-atrasado { border-left: 6px solid var(--danger) !important; background: #fff1f2; }
-        .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; border: 1px solid #f1f5f9; }
-        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; }
-        input, textarea { border: 1px solid #cbd5e1; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; font-size: 16px; color: black; }
-        #overlay { position: fixed; inset: 0; background: #0f172a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: white; text-align: center; }
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; padding-bottom: 110px; }
+        
+        .tab-content { display: none; padding: 20px; min-height: 80vh; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid #334155; margin-bottom: 12px; }
+        .card-pago { border-left: 6px solid #10b981; opacity: 0.7; }
+        
+        .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #1e293b; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; border: 1px solid #334155; z-index: 1000; }
+        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4); border: none; }
+        
+        input, textarea { background: #0f172a; border: 1px solid #334155; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; color: white; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary); }
+        
+        #overlay { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
     </style>
 </head>
 <body>
 
     <div id="overlay" style="display:none;">
-        <div id="login-form">
-            <h1 class="text-3xl font-black mb-8 italic text-indigo-400">ZAPCADERNO</h1>
-            <input type="email" id="l-email" placeholder="E-mail">
-            <input type="password" id="l-senha" placeholder="Senha">
-            <button id="btnEntrar" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold">ENTRAR</button>
+        <h1 class="text-3xl font-black mb-8 italic text-indigo-400">ZAPCADERNO</h1>
+        <input type="email" id="l-email" placeholder="E-mail">
+        <input type="password" id="l-senha" placeholder="Senha">
+        <button id="btnEntrar" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">ENTRAR</button>
+    </div>
+
+    <header class="bg-indigo-600 p-6 pb-16 rounded-b-[40px] flex justify-between items-center shadow-2xl">
+        <div>
+            <h1 id="header-loja" class="text-xl font-bold uppercase tracking-tight">MEU CADERNO</h1>
+            <p class="text-[10px] font-bold opacity-60 uppercase tracking-widest"><i class="fas fa-circle text-green-400"></i> Cloud Sinc</p>
         </div>
-        <div id="bloqueio-form" style="display:none;">
-            <i class="fas fa-crown text-yellow-400 text-5xl mb-4"></i>
-            <h
+        <button onclick="abrir('config')" class="bg-white bg-opacity-10 w-10 h-10 rounded-full border-none text-white"><i class="fas fa-cog"></i></button>
+    </header>
+
+    <main class="-mt-10">
+        <section id="dashboard" class="tab-content active">
+            <div class="card bg-gradient-to-br from-indigo-900 to-black border-none p-6 mb-6">
+                <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">Total Fiado</span>
+                <h2 id="total-txt" class="text-4xl font-black text-white">R$ 0,00</h2>
+            </div>
+            <div id="lista-vendas" class="space-y-3"></div>
+        </section>
+
+        <section id="historico" class="tab-content">
+            <h2 class="text-lg font-bold mb-4">Vendas Recebidas</h2>
+            <div id="lista-pagos" class="space-y-3"></div>
+        </section>
+
+        <section id="novo" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-6 text-center">Registrar Fiado</h2>
+                <input type="text" id="v-nome" placeholder="Cliente">
+                <input type="tel" id="v-whats" placeholder="WhatsApp">
+                <input type="text" id="v-item" placeholder="Item">
+                <input type="number" id="v-valor" placeholder="Valor R$">
+                <button id="btnSalvar" class="w-full bg-indigo-600 py-5 rounded-2xl font-bold shadow-lg mt-2">SALVAR NO BANCO</button>
+            </div>
+        </section>
+
+        <section id="orcamentos" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-4">Novo Orçamento</h2>
+                <input type="text" id="o-nome" placeholder="Cliente">
+                <input type="tel" id="o-whats" placeholder="WhatsApp">
+                <textarea id="o-desc" rows="3" placeholder="Descrição..."></textarea>
+                <input type="number" id="o-total" placeholder="Valor R$">
+                <button id="btnSalvarOrc" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">SALVAR ORÇAMENTO</button>
+            </div>
+            <div id="lista-orc" class="mt-4"></div>
+        </section>
+
+        <section id="config" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-4">Meu Perfil</h2>
+                <input type="text" id="c-loja" placeholder="Nome da Loja">
+                <input type="text" id="c-pix" placeholder="Chave PIX">
+                <button id="btnConfig" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">SALVAR AJUSTES</button>
+                <button onclick="auth.signOut()" class="w-full mt-12 text-red-400 font-bold bg-transparent">SAIR DA CONTA</button>
+            </div>
+        </section>
+    </main>
+
+    <nav class="nav-bar">
+        <button onclick="abrir('dashboard')" class="bg-transparent border-none text-indigo-400"><i class="fas fa-book text-xl"></i></button>
+        <button onclick="abrir('historico')" class="bg-transparent border-none text-gray-500"><i class="fas fa-check-double text-xl"></i></button>
+        <button onclick="abrir('novo')" class="btn-plus"><i class="fas fa-plus text-xl"></i></button>
+        <button onclick="abrir('orcamentos')" class="bg-transparent border-none text-gray-500"><i class="fas fa-file-invoice-dollar text-xl"></i></button>
+        <button onclick="abrir('config')" class="bg-transparent border-none text-gray-500"><i class="fas fa-user-cog text-xl"></i></button>
+    </nav>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
+            authDomain: "zapcaderno.firebaseapp.com",
+            projectId: "zapcaderno",
+            storageBucket: "zapcaderno.firebasestorage.app",
+            messagingSenderId: "446641643061",
+            appId: "1:446641643061:web:daf768922b53614f229b7c"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let configLoja = { loja: "ZAPCADERNO", pix: "" };
+
+        function abrir(id) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('overlay').style.display = 'none';
+                iniciarSincronismo(user.uid);
+            } else {
+                document.getElementById('overlay').style.display = 'flex';
+            }
+        });
+
+        function iniciarSincronismo(uid) {
+            // Sinc Configs
+            db.collection("configuracoes").doc(uid).onSnapshot(doc => {
+                if(doc.exists) {
+                    configLoja = doc.data();
+                    document.getElementById('header-loja').innerText = configLoja.loja;
+                    document.getElementById('c-loja').value = configLoja.loja;
+                    document.getElementById('c-pix').value = configGlobal.pix || '';
+                }
+            });
+
+            // Sinc Vendas
+            db.collection("vendas").where("uid", "==", uid).onSnapshot(snap => {
+                const listV = document.getElementById('lista-vendas');
+                const listP = document.getElementById('lista-pagos');
+                let total = 0;
+                listV.innerHTML = ''; listP.innerHTML = '';
+
+                snap.forEach(doc => {
+                    const v = doc.data();
+                    const val = parseFloat(v.valor || 0);
+                    const formatado = val.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+
+                    if(!v.pago) {
+                        total += val;
+                        listV.innerHTML += `
+                        <div class="card">
+                            <div class="flex justify-between items-center">
+                                <div><b>${v.nome || 'Cliente'}</b><p class="text-xs opacity-40">${v.item || 'Venda'}</p></div>
+                                <b class="text-indigo-400 text-lg">${formatado}</b>
+                            </div>
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="cobrar('${v.whatsapp}', ${val}, '${v.nome}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none">COBRAR</button>
+                                <button onclick="baixar('${doc.id}', true)" class="flex-1 bg-gray-700 p-2 rounded-xl font-bold border-none">PAGO</button>
+                                <button onclick="excluir('vendas','${doc.id}')" class="bg-red-900 px-3 rounded-xl border-none"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`;
+                    } else {
+                        listP.innerHTML += `<div class="card card-pago flex justify-between"><span><b>${v.nome}</b><br><small>${v.item}</small></span><b>${formatado}</b></div>`;
+                    }
+                });
+                document.getElementById('total-txt').innerText = total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            });
+
+            // Sinc Orçamentos
+            db.collection("orcamentos").where("uid", "==", uid).onSnapshot(snap => {
+                const listO = document.getElementById('lista-orc');
+                listO.innerHTML = '';
+                snap.forEach(doc => {
+                    const o = doc.data();
+                    listO.innerHTML += `<div class="card flex justify-between items-center"><div><b>${o.nome}</b><br><small class="opacity-50">${o.detalhes}</small></div><b>R$ ${o.valor}</b></div>`;
+                });
+            });
+        }
+
+        document.getElementById('btnSalvar').onclick = async () => {
+            const btn = document.getElementById('btnSalvar');
+            const dados = {
+                uid: auth.currentUser.uid,
+                nome: document.getElementById('v-nome').value,
+                whatsapp: document.getElementById('v-whats').value,
+                item: document.getElementById('v-item').value,
+                valor: parseFloat(document.getElementById('v-valor').value),
+                pago: false,
+                data: new Date().getTime()
+            };
+
+            if(!dados.nome || !dados.valor) return alert("Preencha Nome e Valor!");
+            
+            btn.innerText = "SALVANDO...";
+            await db.collection("vendas").add(dados);
+            btn.innerText = "SALVAR NO BANCO";
+            alert("Salvo com sucesso!");
+            abrir('dashboard');
+            document.getElementById('v-nome').value = ''; document.getElementById('v-valor').value = '';
+        };
+
+        window.cobrar = (tel, val, nome) => {
+            const m = `Olá ${nome}, lembrete da loja ${configLoja.loja}. Valor: R$ ${val}. Pix: ${configLoja.pix}`;
+            window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(m)}`);
+        };
+
+        window.baixar = (id, st) => db.collection("vendas").doc(id).update({pago: st});
+        window.excluir = (col, id) => confirm("Apagar?") && db.collection(col).doc(id).delete();
+
+        document.getElementById('btnEntrar').onclick = () => {
+            auth.signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-senha').value).catch(e => alert("Acesso Negado!"));
+        };
+
+        document.getElementById('btnConfig').onclick = () => {
+            db.collection("configuracoes").doc(auth.currentUser.uid).set({
+                loja: document.getElementById('c-loja').value.toUpperCase(),
+                pix: document.getElementById('c-pix').value
+            }).then(() => alert("Perfil Salvo!"));
+        };
+    </script>
+</body>
+</html>
