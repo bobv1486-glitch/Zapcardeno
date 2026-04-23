@@ -14,24 +14,21 @@
     
     <style>
         :root { --primary: #4f46e5; --danger: #ef4444; --success: #10b981; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding-bottom: 110px; -webkit-tap-highlight-color: transparent; }
         
-        /* Sistema de Abas */
-        .tab-content { display: none; padding: 20px; padding-bottom: 120px; }
-        .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content { display: none; padding: 20px; min-height: 80vh; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Estilização de Cards */
         .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 12px; }
         .card-atrasado { border-left: 6px solid var(--danger) !important; background: #fff1f2; }
         .card-pago { border-left: 6px solid var(--success) !important; opacity: 0.8; }
-
-        /* Botões e Inputs */
+        
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: white; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; border: 1px solid #f1f5f9; }
-        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); }
+        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); border: none; outline: none; }
         
         input, textarea { border: 1px solid #cbd5e1; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; font-size: 16px; transition: 0.2s; }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        input:focus { border-color: var(--primary); outline: none; ring: 2px solid rgba(79, 70, 229, 0.2); }
         
         #overlay { position: fixed; inset: 0; background: #0f172a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: white; text-align: center; }
     </style>
@@ -40,277 +37,25 @@
 
     <div id="overlay" style="display:none;">
         <div id="login-form">
-            <h1 class="text-3xl font-black mb-2 tracking-tighter italic text-indigo-400">ZAPCADERNO</h1>
-            <p class="text-gray-400 mb-8 text-sm uppercase tracking-widest">Controle Profissional</p>
-            <input type="email" id="l-email" placeholder="E-mail" class="text-black">
-            <input type="password" id="l-senha" placeholder="Senha" class="text-black">
-            <button id="btnEntrar" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-lg">ENTRAR NO SISTEMA</button>
+            <h1 class="text-3xl font-black mb-1 italic text-indigo-400">ZAPCADERNO</h1>
+            <p class="text-[10px] uppercase tracking-widest mb-8 opacity-50 font-bold">Gerenciador Profissional</p>
+            <input type="email" id="l-email" placeholder="Seu e-mail" class="text-black">
+            <input type="password" id="l-senha" placeholder="Sua senha" class="text-black">
+            <button id="btnEntrar" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">ENTRAR</button>
         </div>
         <div id="bloqueio-form" style="display:none;">
             <i class="fas fa-crown text-yellow-400 text-6xl mb-6"></i>
-            <h2 class="text-2xl font-bold mb-2">Assinatura Pendente</h2>
-            <p class="text-gray-400 text-sm mb-6">Sua licença para <b id="email-user-txt"></b> expirou.</p>
-            <a href="https://mpago.la/2CGD9Ar" target="_blank" class="w-full bg-green-500 py-4 rounded-2xl font-bold block no-underline text-white mb-4">PAGAR R$ 14,99</a>
-            <button onclick="location.reload()" class="opacity-50 text-xs uppercase font-bold">Já paguei? Atualizar</button>
+            <h2 class="text-2xl font-bold mb-2">Assinatura Expirada</h2>
+            <p class="text-gray-400 text-sm mb-8">O plano para <b id="user-email-info" class="text-white underline"></b> precisa ser renovado.</p>
+            <a href="https://mpago.la/2CGD9Ar" target="_blank" class="w-full bg-green-500 py-4 rounded-2xl font-bold block no-underline text-white shadow-xl mb-4">RENOVAR R$ 14,99</a>
+            <button onclick="location.reload()" class="opacity-40 text-xs font-bold uppercase border-none bg-transparent">Já paguei? Atualizar App</button>
         </div>
     </div>
 
-    <header class="bg-indigo-600 text-white p-6 pb-16 rounded-b-[40px] flex justify-between items-center shadow-lg">
+    <header class="bg-indigo-600 text-white p-6 pb-16 rounded-b-[40px] flex justify-between items-center shadow-md">
         <div>
-            <h1 id="loja-title" class="text-xl font-bold uppercase tracking-tight">Carregando...</h1>
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span id="status-tag" class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Sincronizado</span>
+            <h1 id="loja-nome" class="text-xl font-bold uppercase tracking-tight">ZAPCADERNO</h1>
+            <div class="flex items-center gap-1.5 opacity-70">
+                <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                <span class="text-[9px] font-bold uppercase tracking-widest">Sincronizado</span>
             </div>
-        </div>
-        <button onclick="abrir('config')" class="w-10 h-10 bg-white bg-opacity-10 rounded-full flex items-center justify-center border-none text-white">
-            <i class="fas fa-sliders-h"></i>
-        </button>
-    </header>
-
-    <main class="-mt-10">
-        <section id="dashboard" class="tab-content active">
-            <div class="card bg-indigo-900 border-none text-white p-6 mb-6">
-                <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">Pendente no Caderno</span>
-                <h2 id="total-pendente" class="text-4xl font-black">R$ 0,00</h2>
-            </div>
-            <div id="vendas-container" class="space-y-3"></div>
-        </section>
-
-        <section id="historico" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 px-2">Vendas Pagas</h2>
-            <div id="historico-container" class="space-y-3"></div>
-        </section>
-
-        <section id="novo" class="tab-content">
-            <div class="card">
-                <h2 class="text-xl font-bold mb-6 text-center">Cadastrar Venda</h2>
-                <input type="text" id="v-nome" placeholder="Nome do Cliente">
-                <input type="tel" id="v-whats" placeholder="WhatsApp (ex: 11999999999)">
-                <input type="text" id="v-item" placeholder="Item Vendido">
-                <input type="number" id="v-valor" placeholder="Valor total R$">
-                <label class="text-xs font-bold text-gray-400 ml-1">DATA DE VENCIMENTO</label>
-                <input type="date" id="v-venc">
-                <button id="btnSalvarVenda" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold shadow-xl mt-4">SALVAR AGORA</button>
-            </div>
-        </section>
-
-        <section id="orcamentos" class="tab-content">
-            <div class="card">
-                <h2 class="text-xl font-bold mb-4">Gerar Orçamento</h2>
-                <input type="text" id="o-nome" placeholder="Cliente">
-                <input type="tel" id="o-whats" placeholder="WhatsApp">
-                <textarea id="o-desc" rows="3" placeholder="Descrição do serviço/produtos..."></textarea>
-                <input type="number" id="o-total" placeholder="Valor Total R$">
-                <button id="btnSalvarOrc" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">GERAR E ENVIAR</button>
-            </div>
-            <div id="orc-container" class="mt-6"></div>
-        </section>
-
-        <section id="config" class="tab-content">
-            <div class="card">
-                <h2 class="text-lg font-bold mb-4">Ajustes do Perfil</h2>
-                <input type="text" id="c-loja" placeholder="Nome da Empresa">
-                <input type="text" id="c-pix" placeholder="Sua Chave PIX">
-                <button id="btnSaveConfig" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold">ATUALIZAR PERFIL</button>
-                <button onclick="firebase.auth().signOut()" class="w-full mt-12 text-red-500 font-bold bg-transparent">ENCERRAR SESSÃO</button>
-            </div>
-        </section>
-    </main>
-
-    <nav class="nav-bar">
-        <button onclick="abrir('dashboard')" id="nav-dashboard" class="text-indigo-600"><i class="fas fa-th-large text-xl"></i></button>
-        <button onclick="abrir('historico')" id="nav-historico" class="text-gray-400"><i class="fas fa-check-double text-xl"></i></button>
-        <button onclick="abrir('novo')" class="btn-plus"><i class="fas fa-plus text-xl"></i></button>
-        <button onclick="abrir('orcamentos')" id="nav-orcamentos" class="text-gray-400"><i class="fas fa-file-invoice text-xl"></i></button>
-        <button onclick="abrir('config')" id="nav-config" class="text-gray-400"><i class="fas fa-user-gear text-xl"></i></button>
-    </nav>
-
-    <script>
-        // 1. CONFIGURAÇÕES TÉCNICAS
-        const firebaseConfig = {
-            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
-            authDomain: "zapcaderno.firebaseapp.com",
-            projectId: "zapcaderno",
-            storageBucket: "zapcaderno.firebasestorage.app",
-            messagingSenderId: "446641643061",
-            appId: "1:446641643061:web:daf768922b53614f229b7c"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const API_PLANILHA = "https://sheetdb.io/api/v1/2f431iyij8cgi";
-        let userConfig = { loja: "ZAPCADERNO", pix: "" };
-
-        // 2. SISTEMA DE NAVEGAÇÃO
-        function abrir(aba) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(aba).classList.add('active');
-            document.querySelectorAll('.nav-bar button').forEach(b => {
-                if(!b.classList.contains('btn-plus')) b.classList.replace('text-indigo-600', 'text-gray-400');
-            });
-            document.getElementById('nav-' + aba)?.classList.replace('text-gray-400', 'text-indigo-600');
-        }
-
-        // 3. CONTROLE DE ACESSO
-        auth.onAuthStateChanged(async user => {
-            if (user) {
-                const overlay = document.getElementById('overlay');
-                document.getElementById('email-user-txt').innerText = user.email;
-                
-                // Checar pagamento e período de teste
-                const res = await fetch(`${API_PLANILHA}/search?email=${user.email}`);
-                const mp = await res.json();
-                const pago = mp.length > 0 && mp[mp.length-1].status.toLowerCase() === 'approved';
-                
-                let dataInstal = localStorage.getItem('zap_date') || new Date().getTime();
-                localStorage.setItem('zap_date', dataInstal);
-                const emTeste = (new Date().getTime() - dataInstal < (15 * 24 * 60 * 60 * 1000));
-
-                if (pago || emTeste) {
-                    overlay.style.display = 'none';
-                    // Carregar config da loja
-                    const doc = await db.collection("configuracoes").doc(user.uid).get();
-                    if(doc.exists()) {
-                        userConfig = doc.data();
-                        document.getElementById('loja-title').innerText = userConfig.loja;
-                        document.getElementById('c-loja').value = userConfig.loja;
-                        document.getElementById('c-pix').value = userConfig.pix;
-                    }
-                    rodarApp(user.uid);
-                } else {
-                    document.getElementById('login-form').style.display = 'none';
-                    document.getElementById('bloqueio-form').style.display = 'block';
-                    overlay.style.display = 'flex';
-                }
-            } else {
-                document.getElementById('overlay').style.display = 'flex';
-                document.getElementById('login-form').style.display = 'block';
-                document.getElementById('bloqueio-form').style.display = 'none';
-            }
-        });
-
-        // 4. LÓGICA PRINCIPAL (REAL-TIME)
-        function rodarApp(uid) {
-            const hj = new Date().toISOString().split('T')[0];
-
-            // Monitorar Vendas
-            db.collection("vendas").where("uid", "==", uid).orderBy("data", "desc").onSnapshot(snap => {
-                let pendenteTotal = 0;
-                const container = document.getElementById('vendas-container');
-                const historico = document.getElementById('historico-container');
-                container.innerHTML = ''; historico.innerHTML = '';
-
-                snap.forEach(doc => {
-                    const v = doc.data();
-                    const id = doc.id;
-                    const valorBrl = v.valor.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
-                    
-                    if(!v.pago) {
-                        pendenteTotal += v.valor;
-                        const isAtrasado = v.vencimento && v.vencimento < hj ? 'card-atrasado' : '';
-                        
-                        container.innerHTML += `
-                        <div class="card ${isAtrasado}">
-                            <div class="flex justify-between items-start">
-                                <div><b>${v.nome}</b><p class="text-[10px] opacity-50 uppercase">${v.item} ${v.vencimento ? '• Vence: '+v.vencimento : ''}</p></div>
-                                <b class="text-indigo-600">${valorBrl}</b>
-                            </div>
-                            <div class="flex gap-2 mt-4">
-                                <button onclick="cobrar('${v.whatsapp}', ${v.valor}, '${v.nome}')" class="flex-1 bg-green-500 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2 border-none active:scale-95 transition"><i class="fab fa-whatsapp"></i> COBRAR</button>
-                                <button onclick="statusVenda('${id}', true)" class="flex-1 bg-gray-100 text-gray-500 p-3 rounded-xl font-bold border-none">RECEBI</button>
-                                <button onclick="deletar('vendas', '${id}')" class="bg-red-50 text-red-400 p-3 rounded-xl border-none"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </div>`;
-                    } else {
-                        historico.innerHTML += `
-                        <div class="card card-pago">
-                            <div class="flex justify-between items-center">
-                                <span><b>${v.nome}</b> <small class="block text-[9px] opacity-50">${v.item}</small></span>
-                                <div class="text-right">
-                                    <b class="text-green-600 block">${valorBrl}</b>
-                                    <button onclick="statusVenda('${id}', false)" class="text-[9px] underline text-gray-400 bg-transparent border-none">Estornar</button>
-                                </div>
-                            </div>
-                        </div>`;
-                    }
-                });
-                document.getElementById('total-pendente').innerText = pendenteTotal.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
-            });
-
-            // Monitorar Orçamentos
-            db.collection("orcamentos").where("uid", "==", uid).onSnapshot(snap => {
-                const container = document.getElementById('orc-container');
-                container.innerHTML = '';
-                snap.forEach(doc => {
-                    const o = doc.data();
-                    container.innerHTML += `
-                    <div class="card border-l-4 border-yellow-400">
-                        <div class="flex justify-between items-start mb-2"><b>${o.nome}</b><b class="text-yellow-600">R$ ${o.valor.toFixed(2)}</b></div>
-                        <p class="text-xs opacity-60 mb-3">${o.detalhes}</p>
-                        <div class="flex gap-2">
-                            <button onclick="enviarOrc('${o.whatsapp}', ${o.valor}, '${o.detalhes}')" class="flex-1 bg-green-500 text-white p-2 rounded-lg font-bold border-none"><i class="fab fa-whatsapp"></i> ENVIAR</button>
-                            <button onclick="deletar('orcamentos', '${doc.id}')" class="bg-red-50 text-red-400 px-3 rounded-lg border-none"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>`;
-                });
-            });
-        }
-
-        // 5. FUNÇÕES DE OPERAÇÃO
-        window.cobrar = (tel, val, nome) => {
-            const link = `https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(`Olá *${nome}*! Segue o lembrete de pagamento da loja *${userConfig.loja}*.\n\n💰 *Valor:* R$ ${val.toFixed(2)}\n📍 *Pix:* ${userConfig.pix}`)}`;
-            window.open(link);
-        };
-
-        window.enviarOrc = (tel, val, det) => {
-            const link = `https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(`*ORÇAMENTO - ${userConfig.loja}*\n\n📝 *Serviço:* ${det}\n💰 *Valor:* R$ ${val.toFixed(2)}`)}`;
-            window.open(link);
-        };
-
-        window.statusVenda = (id, pago) => { db.collection("vendas").doc(id).update({pago: pago}); };
-        window.deletar = (col, id) => { if(confirm("Apagar permanentemente?")) db.collection(col).doc(id).delete(); };
-
-        // 6. CADASTROS
-        document.getElementById('btnSalvarVenda').onclick = async () => {
-            const v = {
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('v-nome').value,
-                whatsapp: document.getElementById('v-whats').value,
-                item: document.getElementById('v-item').value,
-                valor: parseFloat(document.getElementById('v-valor').value),
-                vencimento: document.getElementById('v-venc').value,
-                pago: false,
-                data: new Date().getTime()
-            };
-            if(!v.nome || !v.valor) return alert("Preencha Nome e Valor!");
-            await db.collection("vendas").add(v);
-            alert("Salvo!"); abrir('dashboard');
-            document.getElementById('v-nome').value = ''; document.getElementById('v-valor').value = '';
-        };
-
-        document.getElementById('btnSalvarOrc').onclick = async () => {
-            const o = {
-                uid: auth.currentUser.uid,
-                nome: document.getElementById('o-nome').value,
-                whatsapp: document.getElementById('o-whats').value,
-                detalhes: document.getElementById('o-desc').value,
-                valor: parseFloat(document.getElementById('o-total').value),
-                data: new Date().getTime()
-            };
-            await db.collection("orcamentos").add(o);
-            alert("Orçamento Guardado!"); abrir('orcamentos');
-        };
-
-        document.getElementById('btnSaveConfig').onclick = async () => {
-            const c = { loja: document.getElementById('c-loja').value.toUpperCase(), pix: document.getElementById('c-pix').value };
-            await db.collection("configuracoes").doc(auth.currentUser.uid).set(c);
-            alert("Perfil Atualizado!");
-        };
-
-        document.getElementById('btnEntrar').onclick = () => {
-            auth.signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-senha').value).catch(e => alert("Login inválido!"));
-        };
-    </script>
-</body>
-</html>
