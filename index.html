@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Meu Caderno Online</title>
+    <title>ZapCaderno</title>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // ⚠️ COLOQUE SUAS CONFIGURAÇÕES DO FIREBASE AQUI ⚠️
+        // CONFIGURAÇÃO CORRETA DO FIREBASE
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_PROJECT_ID.firebasestorage.app",
-            messagingSenderId: "SEU_SENDER_ID",
-            appId: "SEU_APP_ID"
+            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
+            authDomain: "zapcaderno.firebaseapp.com",
+            projectId: "zapcaderno",
+            storageBucket: "zapcaderno.firebasestorage.app",
+            messagingSenderId: "446641643061",
+            appId: "1:446641643061:web:daf768922b53614f229b7c",
+            measurementId: "G-98LXJNMRZ7"
         };
         
         const app = initializeApp(firebaseConfig);
@@ -31,14 +32,14 @@
         const telaCadastro = document.getElementById('telaCadastro');
         const telaApp = document.getElementById('telaApp');
         
-        // Elementos Login
+        // Login
         const loginEmail = document.getElementById('loginEmail');
         const loginSenha = document.getElementById('loginSenha');
         const btnLogin = document.getElementById('btnLogin');
         const erroLogin = document.getElementById('erroLogin');
         const linkCadastro = document.getElementById('linkCadastro');
         
-        // Elementos Cadastro
+        // Cadastro
         const cadastroEmail = document.getElementById('cadastroEmail');
         const cadastroSenha = document.getElementById('cadastroSenha');
         const cadastroConfirmar = document.getElementById('cadastroConfirmar');
@@ -46,35 +47,30 @@
         const erroCadastro = document.getElementById('erroCadastro');
         const linkLogin = document.getElementById('linkLogin');
         
-        // Elementos App
+        // App
         const btnLogout = document.getElementById('btnLogout');
         const totalDebito = document.getElementById('totalDebito');
         const listaVendas = document.getElementById('listaVendas');
         const btnNovaVenda = document.getElementById('btnNovaVenda');
         
-        // ========== FUNÇÃO PARA MOSTRAR TELAS ==========
         function mostrarTela(tela) {
             telaLogin.classList.add('hidden');
             telaCadastro.classList.add('hidden');
             telaApp.classList.add('hidden');
-            
             if (tela === 'login') telaLogin.classList.remove('hidden');
             if (tela === 'cadastro') telaCadastro.classList.remove('hidden');
             if (tela === 'app') telaApp.classList.remove('hidden');
         }
         
-        // ========== FUNÇÃO DE CADASTRO ==========
         async function cadastrarUsuario(email, senha, confirmar) {
             if (senha !== confirmar) {
                 erroCadastro.textContent = '❌ As senhas não coincidem';
                 return false;
             }
-            
             if (senha.length < 6) {
                 erroCadastro.textContent = '❌ A senha deve ter pelo menos 6 caracteres';
                 return false;
             }
-            
             erroCadastro.textContent = '';
             btnCadastrar.disabled = true;
             btnCadastrar.textContent = 'Cadastrando...';
@@ -84,11 +80,11 @@
                 return true;
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
-                    erroCadastro.textContent = '❌ Este email já está cadastrado. Faça login.';
+                    erroCadastro.textContent = '❌ Este email já está cadastrado';
                 } else if (error.code === 'auth/invalid-email') {
                     erroCadastro.textContent = '❌ Email inválido';
                 } else if (error.code === 'auth/operation-not-allowed') {
-                    erroCadastro.textContent = '❌ Cadastro desativado. Ative Email/Senha no Firebase Console.';
+                    erroCadastro.textContent = '❌ Cadastro desativado. Ative Email/Senha no Firebase.';
                 } else {
                     erroCadastro.textContent = '❌ Erro: ' + error.message;
                 }
@@ -98,7 +94,6 @@
             }
         }
         
-        // ========== FUNÇÃO DE LOGIN ==========
         async function fazerLogin(email, senha) {
             erroLogin.textContent = '';
             btnLogin.disabled = true;
@@ -109,13 +104,9 @@
                 return true;
             } catch (error) {
                 if (error.code === 'auth/user-not-found') {
-                    erroLogin.textContent = '❌ Usuário não encontrado. Faça o cadastro primeiro.';
+                    erroLogin.textContent = '❌ Usuário não encontrado. Cadastre-se primeiro.';
                 } else if (error.code === 'auth/wrong-password') {
                     erroLogin.textContent = '❌ Senha incorreta';
-                } else if (error.code === 'auth/invalid-email') {
-                    erroLogin.textContent = '❌ Email inválido';
-                } else if (error.code === 'auth/too-many-requests') {
-                    erroLogin.textContent = '❌ Muitas tentativas. Tente mais tarde.';
                 } else {
                     erroLogin.textContent = '❌ Erro: ' + error.message;
                 }
@@ -125,298 +116,108 @@
             }
         }
         
-        // ========== FUNÇÃO DE LOGOUT ==========
         async function fazerLogout() {
             await signOut(auth);
         }
         
-        // ========== FUNÇÕES DE VENDAS ==========
         async function carregarVendas() {
             if (!usuarioAtual) return;
-            
             try {
-                listaVendas.innerHTML = '<div class="loading">📱 Carregando vendas...</div>';
-                
+                listaVendas.innerHTML = '<div class="loading">Carregando...</div>';
                 const vendasRef = collection(db, 'vendas');
                 const q = query(vendasRef, where('userId', '==', usuarioAtual.uid), orderBy('data', 'desc'));
                 const querySnapshot = await getDocs(q);
                 
                 let total = 0;
-                
                 if (querySnapshot.empty) {
-                    listaVendas.innerHTML = '<div class="empty">📭 Nenhuma venda cadastrada</div>';
+                    listaVendas.innerHTML = '<div class="empty">Nenhuma venda cadastrada</div>';
                     totalDebito.textContent = 'R$ 0,00';
                     return;
                 }
                 
                 const vendasHtml = [];
                 querySnapshot.forEach((doc) => {
-                    const venda = { id: doc.id, ...doc.data() };
+                    const venda = doc.data();
                     total += venda.valor || 0;
-                    
-                    const dataFormatada = venda.data ? new Date(venda.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Sem data';
-                    const valorFormatado = (venda.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    
                     vendasHtml.push(`
-                        <div class="venda-card" data-id="${venda.id}">
-                            <div class="venda-info">
-                                <div class="venda-cliente">👤 ${escapeHtml(venda.cliente || 'Cliente')}</div>
-                                <div class="venda-data">📅 ${dataFormatada}</div>
-                            </div>
-                            <div class="venda-valor">💰 ${valorFormatado}</div>
-                            <button class="btn-deletar" data-id="${venda.id}">🗑️</button>
+                        <div class="venda-card">
+                            <div><strong>${venda.cliente || 'Cliente'}</strong><br><small>${venda.data ? new Date(venda.data.seconds*1000).toLocaleDateString() : 'Sem data'}</small></div>
+                            <div>R$ ${(venda.valor || 0).toFixed(2)}</div>
+                            <button class="btn-deletar" data-id="${doc.id}">🗑️</button>
                         </div>
                     `);
                 });
-                
                 listaVendas.innerHTML = vendasHtml.join('');
-                totalDebito.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                totalDebito.textContent = `R$ ${total.toFixed(2)}`;
                 
                 document.querySelectorAll('.btn-deletar').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        deletarVenda(btn.dataset.id);
-                    });
+                    btn.onclick = () => deletarVenda(btn.dataset.id);
                 });
-                
             } catch (error) {
-                console.error('Erro:', error);
-                listaVendas.innerHTML = '<div class="error">❌ Erro ao carregar vendas. Verifique sua internet.</div>';
+                listaVendas.innerHTML = '<div class="error">Erro ao carregar</div>';
             }
         }
         
         async function deletarVenda(id) {
-            if (!confirm('Tem certeza que deseja excluir esta venda?')) return;
-            try {
+            if (confirm('Excluir venda?')) {
                 await deleteDoc(doc(db, 'vendas', id));
                 carregarVendas();
-            } catch (error) {
-                alert('Erro ao deletar');
             }
         }
         
         async function adicionarVenda() {
             const cliente = prompt('Nome do cliente:');
             if (!cliente) return;
-            
-            let valor = prompt('Valor da venda (ex: 150.00):');
-            if (!valor) return;
-            
-            valor = parseFloat(valor.replace(',', '.'));
-            if (isNaN(valor)) {
-                alert('Valor inválido');
-                return;
-            }
-            
-            try {
-                await addDoc(collection(db, 'vendas'), {
-                    cliente: cliente,
-                    valor: valor,
-                    data: new Date(),
-                    userId: usuarioAtual.uid
-                });
-                carregarVendas();
-            } catch (error) {
-                alert('Erro ao adicionar venda');
-            }
+            let valor = parseFloat(prompt('Valor:'));
+            if (isNaN(valor)) return;
+            await addDoc(collection(db, 'vendas'), {
+                cliente, valor, data: new Date(), userId: usuarioAtual.uid
+            });
+            carregarVendas();
         }
         
-        // ========== EVENTOS ==========
-        btnLogin.addEventListener('click', () => {
-            fazerLogin(loginEmail.value.trim(), loginSenha.value);
-        });
+        btnLogin.onclick = () => fazerLogin(loginEmail.value.trim(), loginSenha.value);
+        btnCadastrar.onclick = () => cadastrarUsuario(cadastroEmail.value.trim(), cadastroSenha.value, cadastroConfirmar.value);
+        btnLogout.onclick = fazerLogout;
+        btnNovaVenda.onclick = adicionarVenda;
+        linkCadastro.onclick = (e) => { e.preventDefault(); mostrarTela('cadastro'); };
+        linkLogin.onclick = (e) => { e.preventDefault(); mostrarTela('login'); };
         
-        btnCadastrar.addEventListener('click', () => {
-            cadastrarUsuario(cadastroEmail.value.trim(), cadastroSenha.value, cadastroConfirmar.value);
-        });
-        
-        btnLogout.addEventListener('click', fazerLogout);
-        btnNovaVenda.addEventListener('click', adicionarVenda);
-        
-        linkCadastro.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarTela('cadastro');
-        });
-        
-        linkLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            mostrarTela('login');
-        });
-        
-        // Monitorar estado do usuário
         onAuthStateChanged(auth, (user) => {
             usuarioAtual = user;
-            
             if (user) {
                 mostrarTela('app');
                 carregarVendas();
             } else {
                 mostrarTela('login');
-                loginEmail.value = '';
-                loginSenha.value = '';
-                btnLogin.disabled = false;
-                btnLogin.textContent = 'Entrar';
             }
         });
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
     </script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
+        body { font-family: system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); min-height: 100vh; padding: 20px; }
         .container { max-width: 500px; margin: 0 auto; }
-        
-        .tela {
-            background: white;
-            border-radius: 24px;
-            padding: 32px 24px;
-            min-height: 80vh;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
+        .tela { background: white; border-radius: 24px; padding: 32px 24px; min-height: 80vh; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         .hidden { display: none; }
-        
-        h1 {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .subtitulo {
-            text-align: center;
-            color: #666;
-            margin-bottom: 32px;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        button {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
+        h1 { text-align: center; font-size: 28px; margin-bottom: 8px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitulo { text-align: center; color: #666; margin-bottom: 32px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group input { width: 100%; padding: 16px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; }
+        .input-group input:focus { outline: none; border-color: #667eea; }
+        button { width: 100%; padding: 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
         button:active { transform: scale(0.98); }
-        button:disabled { opacity: 0.7; }
-        
-        .erro {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 16px;
-            font-size: 14px;
-        }
-        
-        .link {
-            text-align: center;
-            margin-top: 24px;
-            color: #666;
-        }
-        
-        .link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        /* App */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        
-        .total-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 16px;
-            padding: 20px;
-            color: white;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
+        .erro { color: #e74c3c; text-align: center; margin-top: 16px; font-size: 14px; }
+        .link { text-align: center; margin-top: 24px; }
+        .link a { color: #667eea; text-decoration: none; }
+        .total-card { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; padding: 20px; color: white; text-align: center; margin-bottom: 24px; }
         .total-card h2 { font-size: 32px; margin-top: 8px; }
-        
-        .vendas-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .btn-novo {
-            width: 44px;
-            height: 44px;
-            border-radius: 22px;
-            font-size: 24px;
-        }
-        
+        .vendas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .btn-novo { width: 44px; height: 44px; border-radius: 22px; font-size: 24px; padding: 0; }
         .lista-vendas { max-height: 55vh; overflow-y: auto; }
-        
-        .venda-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .venda-info { flex: 1; }
-        .venda-cliente { font-weight: bold; margin-bottom: 4px; }
-        .venda-data { font-size: 12px; color: #666; }
-        .venda-valor { font-weight: bold; color: #27ae60; }
-        .btn-deletar {
-            width: auto;
-            background: none;
-            font-size: 20px;
-            padding: 8px;
-        }
-        
-        .loading, .empty, .error {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
+        .venda-card { background: #f8f9fa; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-deletar { width: auto; background: none; color: #e74c3c; font-size: 20px; padding: 8px; margin: 0; }
+        .loading, .empty, .error { text-align: center; padding: 40px; color: #666; }
         .error { color: #e74c3c; }
     </style>
 </head>
@@ -424,67 +225,36 @@
     <div class="container">
         <!-- TELA DE LOGIN -->
         <div id="telaLogin" class="tela">
-            <h1>📓 Meu Caderno</h1>
+            <h1>📓 ZapCaderno</h1>
             <div class="subtitulo">Online</div>
-            
-            <div class="input-group">
-                <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
-            </div>
-            <div class="input-group">
-                <input type="password" id="loginSenha" placeholder="Senha" autocomplete="current-password">
-            </div>
-            
+            <div class="input-group"><input type="email" id="loginEmail" placeholder="Email"></div>
+            <div class="input-group"><input type="password" id="loginSenha" placeholder="Senha"></div>
             <button id="btnLogin">Entrar</button>
             <div id="erroLogin" class="erro"></div>
-            
-            <div class="link">
-                Não tem uma conta? <a href="#" id="linkCadastro">Cadastre-se</a>
-            </div>
+            <div class="link">Não tem conta? <a href="#" id="linkCadastro">Cadastre-se</a></div>
         </div>
         
-        <!-- TELA DE CADASTRO (NOVA!) -->
+        <!-- TELA DE CADASTRO -->
         <div id="telaCadastro" class="tela hidden">
             <h1>📝 Criar Conta</h1>
-            <div class="subtitulo">Comece agora mesmo</div>
-            
-            <div class="input-group">
-                <input type="email" id="cadastroEmail" placeholder="Seu melhor email">
-            </div>
-            <div class="input-group">
-                <input type="password" id="cadastroSenha" placeholder="Senha (mínimo 6 caracteres)">
-            </div>
-            <div class="input-group">
-                <input type="password" id="cadastroConfirmar" placeholder="Confirmar senha">
-            </div>
-            
+            <div class="subtitulo">Comece agora</div>
+            <div class="input-group"><input type="email" id="cadastroEmail" placeholder="Email"></div>
+            <div class="input-group"><input type="password" id="cadastroSenha" placeholder="Senha (mínimo 6 caracteres)"></div>
+            <div class="input-group"><input type="password" id="cadastroConfirmar" placeholder="Confirmar senha"></div>
             <button id="btnCadastrar">Cadastrar</button>
             <div id="erroCadastro" class="erro"></div>
-            
-            <div class="link">
-                Já tem conta? <a href="#" id="linkLogin">Faça login</a>
-            </div>
+            <div class="link">Já tem conta? <a href="#" id="linkLogin">Faça login</a></div>
         </div>
         
         <!-- TELA DO APP -->
         <div id="telaApp" class="tela hidden">
-            <div class="app-header">
-                <h1>📓 Meu Caderno</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h1 style="margin:0">📓 ZapCaderno</h1>
                 <button id="btnLogout" style="width: auto; padding: 8px 16px;">🚪 Sair</button>
             </div>
-            
-            <div class="total-card">
-                <span>TOTAL EM DÉBITO</span>
-                <h2 id="totalDebito">R$ 0,00</h2>
-            </div>
-            
-            <div class="vendas-header">
-                <h3>📋 Últimas Vendas</h3>
-                <button id="btnNovaVenda" class="btn-novo">+</button>
-            </div>
-            
-            <div id="listaVendas" class="lista-vendas">
-                <div class="loading">Carregando...</div>
-            </div>
+            <div class="total-card"><span>TOTAL EM DÉBITO</span><h2 id="totalDebito">R$ 0,00</h2></div>
+            <div class="vendas-header"><h3>📋 Últimas Vendas</h3><button id="btnNovaVenda" class="btn-novo">+</button></div>
+            <div id="listaVendas" class="lista-vendas"><div class="loading">Carregando...</div></div>
         </div>
     </div>
 </body>
