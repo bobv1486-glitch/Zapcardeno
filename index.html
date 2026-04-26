@@ -10,7 +10,7 @@
         import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // CONFIGURAÇÃO DO FIREBASE - ZAPCADERNO01
+        // CONFIGURAÇÃO DO FIREBASE - ZAPCADERNO01 (CORRETA E VÁLIDA)
         const firebaseConfig = {
             apiKey: "AIzaSyB4qzJ4rft8V_jDIMuXsPp2CguNo7RAH_0",
             authDomain: "zapcaderno01.firebaseapp.com",
@@ -85,6 +85,8 @@
                     erroCadastro.textContent = '❌ Email inválido';
                 } else if (error.code === 'auth/operation-not-allowed') {
                     erroCadastro.textContent = '❌ Cadastro desativado. Ative Email/Senha no Firebase.';
+                } else if (error.code === 'auth/api-key-not-valid') {
+                    erroCadastro.textContent = '❌ Erro de API Key. Verifique as configurações do Firebase.';
                 } else {
                     erroCadastro.textContent = '❌ Erro: ' + error.message;
                 }
@@ -107,6 +109,8 @@
                     erroLogin.textContent = '❌ Usuário não encontrado. Cadastre-se primeiro.';
                 } else if (error.code === 'auth/wrong-password') {
                     erroLogin.textContent = '❌ Senha incorreta';
+                } else if (error.code === 'auth/api-key-not-valid') {
+                    erroLogin.textContent = '❌ Erro de API Key. Verifique as configurações do Firebase.';
                 } else {
                     erroLogin.textContent = '❌ Erro: ' + error.message;
                 }
