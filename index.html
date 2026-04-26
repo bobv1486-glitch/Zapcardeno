@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>ZapCaderno</title>
+    <title>ZapCaderno - Seu Caderno Online</title>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // CONFIGURAÇÃO CORRETA DO FIREBASE
+        // CONFIGURAÇÃO DO FIREBASE - ZAPCADERNO01
         const firebaseConfig = {
-            apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
-            authDomain: "zapcaderno.firebaseapp.com",
-            projectId: "zapcaderno",
-            storageBucket: "zapcaderno.firebasestorage.app",
-            messagingSenderId: "446641643061",
-            appId: "1:446641643061:web:daf768922b53614f229b7c",
-            measurementId: "G-98LXJNMRZ7"
+            apiKey: "AIzaSyB4qzJ4rft8V_jDIMuXsPp2CguNo7RAH_0",
+            authDomain: "zapcaderno01.firebaseapp.com",
+            projectId: "zapcaderno01",
+            storageBucket: "zapcaderno01.firebasestorage.app",
+            messagingSenderId: "853039336870",
+            appId: "1:853039336870:web:d710e8f8f006cd40d3d367"
         };
         
+        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -123,14 +123,14 @@
         async function carregarVendas() {
             if (!usuarioAtual) return;
             try {
-                listaVendas.innerHTML = '<div class="loading">Carregando...</div>';
+                listaVendas.innerHTML = '<div class="loading">📱 Carregando vendas...</div>';
                 const vendasRef = collection(db, 'vendas');
                 const q = query(vendasRef, where('userId', '==', usuarioAtual.uid), orderBy('data', 'desc'));
                 const querySnapshot = await getDocs(q);
                 
                 let total = 0;
                 if (querySnapshot.empty) {
-                    listaVendas.innerHTML = '<div class="empty">Nenhuma venda cadastrada</div>';
+                    listaVendas.innerHTML = '<div class="empty">📭 Nenhuma venda cadastrada</div>';
                     totalDebito.textContent = 'R$ 0,00';
                     return;
                 }
@@ -139,10 +139,14 @@
                 querySnapshot.forEach((doc) => {
                     const venda = doc.data();
                     total += venda.valor || 0;
+                    const dataVenda = venda.data ? new Date(venda.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Sem data';
                     vendasHtml.push(`
                         <div class="venda-card">
-                            <div><strong>${venda.cliente || 'Cliente'}</strong><br><small>${venda.data ? new Date(venda.data.seconds*1000).toLocaleDateString() : 'Sem data'}</small></div>
-                            <div>R$ ${(venda.valor || 0).toFixed(2)}</div>
+                            <div class="venda-info">
+                                <div class="venda-cliente">👤 ${escapeHtml(venda.cliente || 'Cliente')}</div>
+                                <div class="venda-data">📅 ${dataVenda}</div>
+                            </div>
+                            <div class="venda-valor">💰 R$ ${(venda.valor || 0).toFixed(2)}</div>
                             <button class="btn-deletar" data-id="${doc.id}">🗑️</button>
                         </div>
                     `);
@@ -154,28 +158,55 @@
                     btn.onclick = () => deletarVenda(btn.dataset.id);
                 });
             } catch (error) {
-                listaVendas.innerHTML = '<div class="error">Erro ao carregar</div>';
+                console.error('Erro ao carregar:', error);
+                listaVendas.innerHTML = '<div class="error">❌ Erro ao carregar vendas. Verifique sua internet.</div>';
             }
         }
         
         async function deletarVenda(id) {
-            if (confirm('Excluir venda?')) {
-                await deleteDoc(doc(db, 'vendas', id));
-                carregarVendas();
+            if (confirm('🗑️ Tem certeza que deseja excluir esta venda?')) {
+                try {
+                    await deleteDoc(doc(db, 'vendas', id));
+                    carregarVendas();
+                } catch (error) {
+                    alert('Erro ao excluir venda');
+                }
             }
         }
         
         async function adicionarVenda() {
-            const cliente = prompt('Nome do cliente:');
+            const cliente = prompt('👤 Nome do cliente:');
             if (!cliente) return;
-            let valor = parseFloat(prompt('Valor:'));
-            if (isNaN(valor)) return;
-            await addDoc(collection(db, 'vendas'), {
-                cliente, valor, data: new Date(), userId: usuarioAtual.uid
-            });
-            carregarVendas();
+            
+            let valor = prompt('💰 Valor da venda (ex: 150.00):');
+            if (!valor) return;
+            
+            valor = parseFloat(valor.replace(',', '.'));
+            if (isNaN(valor)) {
+                alert('❌ Valor inválido');
+                return;
+            }
+            
+            try {
+                await addDoc(collection(db, 'vendas'), {
+                    cliente: cliente,
+                    valor: valor,
+                    data: new Date(),
+                    userId: usuarioAtual.uid
+                });
+                carregarVendas();
+            } catch (error) {
+                alert('❌ Erro ao adicionar venda');
+            }
         }
         
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Eventos
         btnLogin.onclick = () => fazerLogin(loginEmail.value.trim(), loginSenha.value);
         btnCadastrar.onclick = () => cadastrarUsuario(cadastroEmail.value.trim(), cadastroSenha.value, cadastroConfirmar.value);
         btnLogout.onclick = fazerLogout;
@@ -183,6 +214,14 @@
         linkCadastro.onclick = (e) => { e.preventDefault(); mostrarTela('cadastro'); };
         linkLogin.onclick = (e) => { e.preventDefault(); mostrarTela('login'); };
         
+        // Permitir login com Enter
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !telaLogin.classList.contains('hidden')) {
+                btnLogin.click();
+            }
+        });
+        
+        // Monitorar estado do usuário
         onAuthStateChanged(auth, (user) => {
             usuarioAtual = user;
             if (user) {
@@ -190,35 +229,258 @@
                 carregarVendas();
             } else {
                 mostrarTela('login');
+                loginEmail.value = '';
+                loginSenha.value = '';
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'Entrar';
             }
         });
     </script>
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); min-height: 100vh; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        .tela { background: white; border-radius: 24px; padding: 32px 24px; min-height: 80vh; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .hidden { display: none; }
-        h1 { text-align: center; font-size: 28px; margin-bottom: 8px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .subtitulo { text-align: center; color: #666; margin-bottom: 32px; }
-        .input-group { margin-bottom: 20px; }
-        .input-group input { width: 100%; padding: 16px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; }
-        .input-group input:focus { outline: none; border-color: #667eea; }
-        button { width: 100%; padding: 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        button:active { transform: scale(0.98); }
-        .erro { color: #e74c3c; text-align: center; margin-top: 16px; font-size: 14px; }
-        .link { text-align: center; margin-top: 24px; }
-        .link a { color: #667eea; text-decoration: none; }
-        .total-card { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; padding: 20px; color: white; text-align: center; margin-bottom: 24px; }
-        .total-card h2 { font-size: 32px; margin-top: 8px; }
-        .vendas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .btn-novo { width: 44px; height: 44px; border-radius: 22px; font-size: 24px; padding: 0; }
-        .lista-vendas { max-height: 55vh; overflow-y: auto; }
-        .venda-card { background: #f8f9fa; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-deletar { width: auto; background: none; color: #e74c3c; font-size: 20px; padding: 8px; margin: 0; }
-        .loading, .empty, .error { text-align: center; padding: 40px; color: #666; }
-        .error { color: #e74c3c; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .tela {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 24px;
+            min-height: 80vh;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitulo {
+            text-align: center;
+            color: #666;
+            margin-bottom: 32px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            transform: none;
+        }
+        
+        .erro {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        
+        .link {
+            text-align: center;
+            margin-top: 24px;
+            color: #666;
+        }
+        
+        .link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* Estilos do App */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .app-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .total-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .total-card span {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .total-card h2 {
+            font-size: 36px;
+            margin-top: 8px;
+        }
+        
+        .vendas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .vendas-header h3 {
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .btn-novo {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            font-size: 24px;
+            padding: 0;
+        }
+        
+        .lista-vendas {
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        
+        .venda-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+        
+        .venda-card:active {
+            background: #e9ecef;
+        }
+        
+        .venda-info {
+            flex: 1;
+        }
+        
+        .venda-cliente {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .venda-data {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .venda-valor {
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 16px;
+        }
+        
+        .btn-deletar {
+            width: auto;
+            background: none;
+            color: #e74c3c;
+            font-size: 20px;
+            padding: 8px;
+            margin: 0;
+        }
+        
+        .btn-deletar:active {
+            transform: scale(1.1);
+            background: none;
+        }
+        
+        .loading, .empty, .error {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            color: #e74c3c;
+        }
+        
+        /* Scrollbar personalizada */
+        .lista-vendas::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .lista-vendas::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .lista-vendas::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -226,35 +488,66 @@
         <!-- TELA DE LOGIN -->
         <div id="telaLogin" class="tela">
             <h1>📓 ZapCaderno</h1>
-            <div class="subtitulo">Online</div>
-            <div class="input-group"><input type="email" id="loginEmail" placeholder="Email"></div>
-            <div class="input-group"><input type="password" id="loginSenha" placeholder="Senha"></div>
+            <div class="subtitulo">Seu caderno online</div>
+            
+            <div class="input-group">
+                <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+            </div>
+            <div class="input-group">
+                <input type="password" id="loginSenha" placeholder="Senha" autocomplete="current-password">
+            </div>
+            
             <button id="btnLogin">Entrar</button>
             <div id="erroLogin" class="erro"></div>
-            <div class="link">Não tem conta? <a href="#" id="linkCadastro">Cadastre-se</a></div>
+            
+            <div class="link">
+                Não tem uma conta? <a href="#" id="linkCadastro">Cadastre-se</a>
+            </div>
         </div>
         
         <!-- TELA DE CADASTRO -->
         <div id="telaCadastro" class="tela hidden">
             <h1>📝 Criar Conta</h1>
-            <div class="subtitulo">Comece agora</div>
-            <div class="input-group"><input type="email" id="cadastroEmail" placeholder="Email"></div>
-            <div class="input-group"><input type="password" id="cadastroSenha" placeholder="Senha (mínimo 6 caracteres)"></div>
-            <div class="input-group"><input type="password" id="cadastroConfirmar" placeholder="Confirmar senha"></div>
+            <div class="subtitulo">Comece agora gratuitamente</div>
+            
+            <div class="input-group">
+                <input type="email" id="cadastroEmail" placeholder="Seu melhor email">
+            </div>
+            <div class="input-group">
+                <input type="password" id="cadastroSenha" placeholder="Senha (mínimo 6 caracteres)">
+            </div>
+            <div class="input-group">
+                <input type="password" id="cadastroConfirmar" placeholder="Confirmar senha">
+            </div>
+            
             <button id="btnCadastrar">Cadastrar</button>
             <div id="erroCadastro" class="erro"></div>
-            <div class="link">Já tem conta? <a href="#" id="linkLogin">Faça login</a></div>
+            
+            <div class="link">
+                Já tem conta? <a href="#" id="linkLogin">Faça login</a>
+            </div>
         </div>
         
         <!-- TELA DO APP -->
         <div id="telaApp" class="tela hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h1 style="margin:0">📓 ZapCaderno</h1>
+            <div class="app-header">
+                <h1>📓 ZapCaderno</h1>
                 <button id="btnLogout" style="width: auto; padding: 8px 16px;">🚪 Sair</button>
             </div>
-            <div class="total-card"><span>TOTAL EM DÉBITO</span><h2 id="totalDebito">R$ 0,00</h2></div>
-            <div class="vendas-header"><h3>📋 Últimas Vendas</h3><button id="btnNovaVenda" class="btn-novo">+</button></div>
-            <div id="listaVendas" class="lista-vendas"><div class="loading">Carregando...</div></div>
+            
+            <div class="total-card">
+                <span>TOTAL EM DÉBITO</span>
+                <h2 id="totalDebito">R$ 0,00</h2>
+            </div>
+            
+            <div class="vendas-header">
+                <h3>📋 Últimas Vendas</h3>
+                <button id="btnNovaVenda" class="btn-novo">+</button>
+            </div>
+            
+            <div id="listaVendas" class="lista-vendas">
+                <div class="loading">📱 Carregando...</div>
+            </div>
         </div>
     </div>
 </body>
