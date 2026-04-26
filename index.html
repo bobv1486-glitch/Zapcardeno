@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>ZapCaderno - Seu Caderno Online</title>
+    <title>ZapCaderno - Completo</title>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // CONFIGURAÇÃO DO FIREBASE - ZAPCADERNO01 (CORRETA E VÁLIDA)
+        // CONFIGURAÇÃO DO FIREBASE - ZAPCADERNO01
         const firebaseConfig = {
             apiKey: "AIzaSyB4qzJ4rft8V_jDIMuXsPp2CguNo7RAH_0",
             authDomain: "zapcaderno01.firebaseapp.com",
@@ -20,12 +20,12 @@
             appId: "1:853039336870:web:d710e8f8f006cd40d3d367"
         };
         
-        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         
         let usuarioAtual = null;
+        let abaAtual = 'vendas';
         
         // Elementos das telas
         const telaLogin = document.getElementById('telaLogin');
@@ -50,8 +50,14 @@
         // App
         const btnLogout = document.getElementById('btnLogout');
         const totalDebito = document.getElementById('totalDebito');
-        const listaVendas = document.getElementById('listaVendas');
-        const btnNovaVenda = document.getElementById('btnNovaVenda');
+        const nomeUsuario = document.getElementById('nomeUsuario');
+        const conteudoPrincipal = document.getElementById('conteudoPrincipal');
+        
+        // Abas
+        const tabVendas = document.getElementById('tabVendas');
+        const tabHistorico = document.getElementById('tabHistorico');
+        const tabOrcamentos = document.getElementById('tabOrcamentos');
+        const tabPerfil = document.getElementById('tabPerfil');
         
         function mostrarTela(tela) {
             telaLogin.classList.add('hidden');
@@ -60,6 +66,350 @@
             if (tela === 'login') telaLogin.classList.remove('hidden');
             if (tela === 'cadastro') telaCadastro.classList.remove('hidden');
             if (tela === 'app') telaApp.classList.remove('hidden');
+        }
+        
+        function ativarAba(aba) {
+            abaAtual = aba;
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+            if (aba === 'vendas') tabVendas.classList.add('active');
+            if (aba === 'historico') tabHistorico.classList.add('active');
+            if (aba === 'orcamentos') tabOrcamentos.classList.add('active');
+            if (aba === 'perfil') tabPerfil.classList.add('active');
+            carregarConteudoAba();
+        }
+        
+        async function carregarConteudoAba() {
+            if (!usuarioAtual) return;
+            
+            if (abaAtual === 'vendas') {
+                await carregarVendas();
+            } else if (abaAtual === 'historico') {
+                await carregarHistorico();
+            } else if (abaAtual === 'orcamentos') {
+                await carregarOrcamentos();
+            } else if (abaAtual === 'perfil') {
+                await carregarPerfil();
+            }
+        }
+        
+        async function carregarVendas() {
+            try {
+                conteudoPrincipal.innerHTML = '<div class="loading">📱 Carregando vendas...</div>';
+                
+                const vendasRef = collection(db, 'vendas');
+                const q = query(vendasRef, where('userId', '==', usuarioAtual.uid), orderBy('data', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                let total = 0;
+                if (querySnapshot.empty) {
+                    conteudoPrincipal.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <div class="empty-text">Nenhuma venda cadastrada</div>
+                            <button class="btn-empty" id="btnPrimeiraVenda">+ Adicionar primeira venda</button>
+                        </div>
+                    `;
+                    totalDebito.textContent = 'R$ 0,00';
+                    document.getElementById('btnPrimeiraVenda')?.addEventListener('click', adicionarVenda);
+                    return;
+                }
+                
+                let vendasHtml = '<div class="vendas-lista">';
+                querySnapshot.forEach((doc) => {
+                    const venda = doc.data();
+                    total += venda.valor || 0;
+                    const dataVenda = venda.data ? new Date(venda.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Sem data';
+                    vendasHtml += `
+                        <div class="venda-card">
+                            <div class="venda-card-left">
+                                <div class="venda-cliente">👤 ${escapeHtml(venda.cliente || 'Cliente')}</div>
+                                <div class="venda-data">📅 ${dataVenda}</div>
+                            </div>
+                            <div class="venda-card-right">
+                                <div class="venda-valor">💰 R$ ${(venda.valor || 0).toFixed(2)}</div>
+                                <button class="btn-deletar" data-id="${doc.id}">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                vendasHtml += '</div>';
+                vendasHtml += `<button class="btn-flutuante" id="btnNovaVenda">+ Nova Venda</button>`;
+                
+                conteudoPrincipal.innerHTML = vendasHtml;
+                totalDebito.textContent = `R$ ${total.toFixed(2)}`;
+                
+                document.querySelectorAll('.btn-deletar').forEach(btn => {
+                    btn.onclick = () => deletarVenda(btn.dataset.id);
+                });
+                document.getElementById('btnNovaVenda')?.addEventListener('click', adicionarVenda);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                conteudoPrincipal.innerHTML = '<div class="error">❌ Erro ao carregar vendas. Verifique sua internet.</div>';
+            }
+        }
+        
+        async function carregarHistorico() {
+            try {
+                conteudoPrincipal.innerHTML = '<div class="loading">📜 Carregando histórico...</div>';
+                
+                const historicoRef = collection(db, 'historico');
+                const q = query(historicoRef, where('userId', '==', usuarioAtual.uid), orderBy('data', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    conteudoPrincipal.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📜</div>
+                            <div class="empty-text">Nenhum registro no histórico</div>
+                            <div class="empty-sub">Suas atividades aparecerão aqui</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let historicoHtml = '<div class="historico-lista">';
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const dataItem = item.data ? new Date(item.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Sem data';
+                    historicoHtml += `
+                        <div class="historico-item">
+                            <div class="historico-icon">${item.tipo === 'venda' ? '💰' : '📝'}</div>
+                            <div class="historico-info">
+                                <div class="historico-desc">${escapeHtml(item.descricao || 'Atividade')}</div>
+                                <div class="historico-data">${dataItem}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                historicoHtml += '</div>';
+                conteudoPrincipal.innerHTML = historicoHtml;
+                
+            } catch (error) {
+                conteudoPrincipal.innerHTML = '<div class="error">❌ Erro ao carregar histórico</div>';
+            }
+        }
+        
+        async function carregarOrcamentos() {
+            try {
+                conteudoPrincipal.innerHTML = '<div class="loading">📊 Carregando orçamentos...</div>';
+                
+                const orcamentosRef = collection(db, 'orcamentos');
+                const q = query(orcamentosRef, where('userId', '==', usuarioAtual.uid), orderBy('data', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    conteudoPrincipal.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📊</div>
+                            <div class="empty-text">Nenhum orçamento criado</div>
+                            <button class="btn-empty" id="btnNovoOrcamento">+ Criar orçamento</button>
+                        </div>
+                    `;
+                    document.getElementById('btnNovoOrcamento')?.addEventListener('click', criarOrcamento);
+                    return;
+                }
+                
+                let orcamentosHtml = '<div class="orcamentos-lista">';
+                querySnapshot.forEach((doc) => {
+                    const orc = doc.data();
+                    const dataOrc = orc.data ? new Date(orc.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Sem data';
+                    orcamentosHtml += `
+                        <div class="orcamento-card">
+                            <div class="orcamento-cliente">👤 ${escapeHtml(orc.cliente || 'Cliente')}</div>
+                            <div class="orcamento-detalhes">
+                                <span>💰 R$ ${(orc.valor || 0).toFixed(2)}</span>
+                                <span class="orcamento-status ${orc.status || 'pendente'}">${orc.status || 'Pendente'}</span>
+                            </div>
+                            <div class="orcamento-data">📅 ${dataOrc}</div>
+                            <div class="orcamento-actions">
+                                <button class="btn-aprovar" data-id="${doc.id}">✅ Aprovar</button>
+                                <button class="btn-recusar" data-id="${doc.id}">❌ Recusar</button>
+                                <button class="btn-deletar-orc" data-id="${doc.id}">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                orcamentosHtml += '</div>';
+                orcamentosHtml += `<button class="btn-flutuante" id="btnNovoOrcamento">+ Novo Orçamento</button>`;
+                
+                conteudoPrincipal.innerHTML = orcamentosHtml;
+                
+                document.querySelectorAll('.btn-aprovar').forEach(btn => {
+                    btn.onclick = () => aprovarOrcamento(btn.dataset.id);
+                });
+                document.querySelectorAll('.btn-recusar').forEach(btn => {
+                    btn.onclick = () => recusarOrcamento(btn.dataset.id);
+                });
+                document.querySelectorAll('.btn-deletar-orc').forEach(btn => {
+                    btn.onclick = () => deletarOrcamento(btn.dataset.id);
+                });
+                document.getElementById('btnNovoOrcamento')?.addEventListener('click', criarOrcamento);
+                
+            } catch (error) {
+                conteudoPrincipal.innerHTML = '<div class="error">❌ Erro ao carregar orçamentos</div>';
+            }
+        }
+        
+        async function carregarPerfil() {
+            const user = auth.currentUser;
+            conteudoPrincipal.innerHTML = `
+                <div class="perfil-container">
+                    <div class="perfil-avatar">👤</div>
+                    <div class="perfil-info">
+                        <div class="perfil-email">📧 ${user?.email || 'Email não cadastrado'}</div>
+                        <div class="perfil-id">🆔 ID: ${user?.uid?.substring(0, 15)}...</div>
+                        <div class="perfil-criado">📅 Criado em: ${new Date(user?.metadata?.creationTime).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                    <div class="perfil-stats">
+                        <div class="stat-card">
+                            <div class="stat-valor" id="totalVendas">-</div>
+                            <div class="stat-label">Total em Vendas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-valor" id="totalOrcamentos">-</div>
+                            <div class="stat-label">Orçamentos</div>
+                        </div>
+                    </div>
+                    <button class="btn-atualizar" id="btnAtualizarDados">🔄 Atualizar Dados</button>
+                </div>
+            `;
+            
+            document.getElementById('btnAtualizarDados')?.addEventListener('click', () => {
+                carregarVendas();
+                carregarOrcamentos();
+                alert('Dados atualizados!');
+            });
+            
+            await carregarStatsPerfil();
+        }
+        
+        async function carregarStatsPerfil() {
+            try {
+                const vendasSnapshot = await getDocs(query(collection(db, 'vendas'), where('userId', '==', usuarioAtual.uid)));
+                let totalVendas = 0;
+                vendasSnapshot.forEach(doc => totalVendas += doc.data().valor || 0);
+                
+                const orcSnapshot = await getDocs(query(collection(db, 'orcamentos'), where('userId', '==', usuarioAtual.uid)));
+                
+                document.getElementById('totalVendas').textContent = `R$ ${totalVendas.toFixed(2)}`;
+                document.getElementById('totalOrcamentos').textContent = orcSnapshot.size;
+            } catch (error) {
+                console.error('Erro stats:', error);
+            }
+        }
+        
+        async function adicionarVenda() {
+            const cliente = prompt('👤 Nome do cliente:');
+            if (!cliente) return;
+            
+            let valor = prompt('💰 Valor da venda (ex: 150.00):');
+            if (!valor) return;
+            
+            valor = parseFloat(valor.replace(',', '.'));
+            if (isNaN(valor)) {
+                alert('❌ Valor inválido');
+                return;
+            }
+            
+            try {
+                await addDoc(collection(db, 'vendas'), {
+                    cliente: cliente,
+                    valor: valor,
+                    data: new Date(),
+                    userId: usuarioAtual.uid
+                });
+                
+                await addDoc(collection(db, 'historico'), {
+                    tipo: 'venda',
+                    descricao: `Venda criada para ${cliente} no valor de R$ ${valor.toFixed(2)}`,
+                    data: new Date(),
+                    userId: usuarioAtual.uid
+                });
+                
+                carregarVendas();
+                alert('✅ Venda adicionada com sucesso!');
+            } catch (error) {
+                alert('❌ Erro ao adicionar venda');
+            }
+        }
+        
+        async function deletarVenda(id) {
+            if (confirm('🗑️ Excluir esta venda permanentemente?')) {
+                try {
+                    await deleteDoc(doc(db, 'vendas', id));
+                    carregarVendas();
+                    alert('✅ Venda excluída!');
+                } catch (error) {
+                    alert('Erro ao excluir');
+                }
+            }
+        }
+        
+        async function criarOrcamento() {
+            const cliente = prompt('👤 Nome do cliente:');
+            if (!cliente) return;
+            
+            let valor = prompt('💰 Valor do orçamento:');
+            if (!valor) return;
+            valor = parseFloat(valor.replace(',', '.'));
+            if (isNaN(valor)) return;
+            
+            try {
+                await addDoc(collection(db, 'orcamentos'), {
+                    cliente: cliente,
+                    valor: valor,
+                    status: 'pendente',
+                    data: new Date(),
+                    userId: usuarioAtual.uid
+                });
+                
+                carregarOrcamentos();
+                alert('✅ Orçamento criado!');
+            } catch (error) {
+                alert('Erro ao criar orçamento');
+            }
+        }
+        
+        async function aprovarOrcamento(id) {
+            if (confirm('Aprovar este orçamento e converter em venda?')) {
+                try {
+                    const orcDoc = await getDocs(query(collection(db, 'orcamentos'), where('userId', '==', usuarioAtual.uid)));
+                    let orcamento = null;
+                    orcDoc.forEach(doc => {
+                        if (doc.id === id) orcamento = { id: doc.id, ...doc.data() };
+                    });
+                    
+                    if (orcamento) {
+                        await addDoc(collection(db, 'vendas'), {
+                            cliente: orcamento.cliente,
+                            valor: orcamento.valor,
+                            data: new Date(),
+                            userId: usuarioAtual.uid
+                        });
+                        await deleteDoc(doc(db, 'orcamentos', id));
+                        carregarOrcamentos();
+                        alert('✅ Orçamento convertido em venda!');
+                    }
+                } catch (error) {
+                    alert('Erro ao aprovar');
+                }
+            }
+        }
+        
+        async function recusarOrcamento(id) {
+            if (confirm('Recusar este orçamento?')) {
+                await deleteDoc(doc(db, 'orcamentos', id));
+                carregarOrcamentos();
+                alert('Orçamento recusado');
+            }
+        }
+        
+        async function deletarOrcamento(id) {
+            if (confirm('Excluir orçamento?')) {
+                await deleteDoc(doc(db, 'orcamentos', id));
+                carregarOrcamentos();
+            }
         }
         
         async function cadastrarUsuario(email, senha, confirmar) {
@@ -85,8 +435,6 @@
                     erroCadastro.textContent = '❌ Email inválido';
                 } else if (error.code === 'auth/operation-not-allowed') {
                     erroCadastro.textContent = '❌ Cadastro desativado. Ative Email/Senha no Firebase.';
-                } else if (error.code === 'auth/api-key-not-valid') {
-                    erroCadastro.textContent = '❌ Erro de API Key. Verifique as configurações do Firebase.';
                 } else {
                     erroCadastro.textContent = '❌ Erro: ' + error.message;
                 }
@@ -109,8 +457,6 @@
                     erroLogin.textContent = '❌ Usuário não encontrado. Cadastre-se primeiro.';
                 } else if (error.code === 'auth/wrong-password') {
                     erroLogin.textContent = '❌ Senha incorreta';
-                } else if (error.code === 'auth/api-key-not-valid') {
-                    erroLogin.textContent = '❌ Erro de API Key. Verifique as configurações do Firebase.';
                 } else {
                     erroLogin.textContent = '❌ Erro: ' + error.message;
                 }
@@ -124,86 +470,6 @@
             await signOut(auth);
         }
         
-        async function carregarVendas() {
-            if (!usuarioAtual) return;
-            try {
-                listaVendas.innerHTML = '<div class="loading">📱 Carregando vendas...</div>';
-                const vendasRef = collection(db, 'vendas');
-                const q = query(vendasRef, where('userId', '==', usuarioAtual.uid), orderBy('data', 'desc'));
-                const querySnapshot = await getDocs(q);
-                
-                let total = 0;
-                if (querySnapshot.empty) {
-                    listaVendas.innerHTML = '<div class="empty">📭 Nenhuma venda cadastrada</div>';
-                    totalDebito.textContent = 'R$ 0,00';
-                    return;
-                }
-                
-                const vendasHtml = [];
-                querySnapshot.forEach((doc) => {
-                    const venda = doc.data();
-                    total += venda.valor || 0;
-                    const dataVenda = venda.data ? new Date(venda.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Sem data';
-                    vendasHtml.push(`
-                        <div class="venda-card">
-                            <div class="venda-info">
-                                <div class="venda-cliente">👤 ${escapeHtml(venda.cliente || 'Cliente')}</div>
-                                <div class="venda-data">📅 ${dataVenda}</div>
-                            </div>
-                            <div class="venda-valor">💰 R$ ${(venda.valor || 0).toFixed(2)}</div>
-                            <button class="btn-deletar" data-id="${doc.id}">🗑️</button>
-                        </div>
-                    `);
-                });
-                listaVendas.innerHTML = vendasHtml.join('');
-                totalDebito.textContent = `R$ ${total.toFixed(2)}`;
-                
-                document.querySelectorAll('.btn-deletar').forEach(btn => {
-                    btn.onclick = () => deletarVenda(btn.dataset.id);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar:', error);
-                listaVendas.innerHTML = '<div class="error">❌ Erro ao carregar vendas. Verifique sua internet.</div>';
-            }
-        }
-        
-        async function deletarVenda(id) {
-            if (confirm('🗑️ Tem certeza que deseja excluir esta venda?')) {
-                try {
-                    await deleteDoc(doc(db, 'vendas', id));
-                    carregarVendas();
-                } catch (error) {
-                    alert('Erro ao excluir venda');
-                }
-            }
-        }
-        
-        async function adicionarVenda() {
-            const cliente = prompt('👤 Nome do cliente:');
-            if (!cliente) return;
-            
-            let valor = prompt('💰 Valor da venda (ex: 150.00):');
-            if (!valor) return;
-            
-            valor = parseFloat(valor.replace(',', '.'));
-            if (isNaN(valor)) {
-                alert('❌ Valor inválido');
-                return;
-            }
-            
-            try {
-                await addDoc(collection(db, 'vendas'), {
-                    cliente: cliente,
-                    valor: valor,
-                    data: new Date(),
-                    userId: usuarioAtual.uid
-                });
-                carregarVendas();
-            } catch (error) {
-                alert('❌ Erro ao adicionar venda');
-            }
-        }
-        
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -214,23 +480,26 @@
         btnLogin.onclick = () => fazerLogin(loginEmail.value.trim(), loginSenha.value);
         btnCadastrar.onclick = () => cadastrarUsuario(cadastroEmail.value.trim(), cadastroSenha.value, cadastroConfirmar.value);
         btnLogout.onclick = fazerLogout;
-        btnNovaVenda.onclick = adicionarVenda;
         linkCadastro.onclick = (e) => { e.preventDefault(); mostrarTela('cadastro'); };
-        linkLogin.onclick = (e) => { e.preventDefault(); mostrarTela('login'); };
+        linkLogin.onclick = (e) { e.preventDefault(); mostrarTela('login'); };
         
-        // Permitir login com Enter
+        tabVendas.onclick = () => ativarAba('vendas');
+        tabHistorico.onclick = () => ativarAba('historico');
+        tabOrcamentos.onclick = () => ativarAba('orcamentos');
+        tabPerfil.onclick = () => ativarAba('perfil');
+        
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !telaLogin.classList.contains('hidden')) {
                 btnLogin.click();
             }
         });
         
-        // Monitorar estado do usuário
         onAuthStateChanged(auth, (user) => {
             usuarioAtual = user;
             if (user) {
                 mostrarTela('app');
-                carregarVendas();
+                nomeUsuario.textContent = user.email?.split('@')[0] || 'Usuário';
+                ativarAba('vendas');
             } else {
                 mostrarTela('login');
                 loginEmail.value = '';
@@ -242,11 +511,7 @@
     </script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -255,61 +520,40 @@
             padding: 20px;
         }
         
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
+        .container { max-width: 500px; margin: 0 auto; }
         
         .tela {
             background: white;
             border-radius: 24px;
-            padding: 32px 24px;
-            min-height: 80vh;
+            padding: 24px;
+            min-height: 85vh;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: fadeIn 0.3s ease;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
         
         h1 {
             text-align: center;
-            font-size: 32px;
-            margin-bottom: 8px;
+            font-size: 28px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
         }
         
-        .subtitulo {
-            text-align: center;
-            color: #666;
-            margin-bottom: 32px;
-        }
+        .subtitulo { text-align: center; color: #666; margin-bottom: 32px; }
         
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
+        .input-group { margin-bottom: 20px; }
         .input-group input {
             width: 100%;
             padding: 16px;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-size: 16px;
-            transition: all 0.3s;
         }
-        
         .input-group input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         button {
@@ -322,94 +566,69 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
         }
+        button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.7; }
         
-        button:active {
-            transform: scale(0.98);
-        }
+        .erro { color: #e74c3c; text-align: center; margin-top: 16px; font-size: 14px; }
+        .link { text-align: center; margin-top: 24px; }
+        .link a { color: #667eea; text-decoration: none; font-weight: bold; }
         
-        button:disabled {
-            opacity: 0.7;
-            transform: none;
-        }
-        
-        .erro {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 16px;
-            font-size: 14px;
-        }
-        
-        .link {
-            text-align: center;
-            margin-top: 24px;
-            color: #666;
-        }
-        
-        .link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        /* Estilos do App */
+        /* App Header */
         .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .app-header h1 { margin: 0; font-size: 22px; }
+        .btn-sair {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #e74c3c;
         }
         
-        .app-header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-        
+        /* Total Card */
         .total-card {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 16px;
-            padding: 24px;
+            padding: 20px;
             color: white;
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
+        .total-card span { font-size: 14px; opacity: 0.9; }
+        .total-card h2 { font-size: 32px; margin-top: 8px; }
         
-        .total-card span {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .total-card h2 {
-            font-size: 36px;
-            margin-top: 8px;
-        }
-        
-        .vendas-header {
+        /* Tabs */
+        .tab-nav {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
+            justify-content: space-around;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #666;
+        }
+        .tab-item.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
         }
         
-        .vendas-header h3 {
-            color: #333;
-            font-size: 18px;
-        }
-        
-        .btn-novo {
-            width: 48px;
-            height: 48px;
-            border-radius: 24px;
-            font-size: 24px;
-            padding: 0;
-        }
-        
-        .lista-vendas {
-            max-height: 55vh;
-            overflow-y: auto;
-        }
-        
+        /* Vendas */
+        .vendas-lista { max-height: 50vh; overflow-y: auto; }
         .venda-card {
             background: #f8f9fa;
             border-radius: 12px;
@@ -418,73 +637,136 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            transition: background 0.2s;
         }
-        
-        .venda-card:active {
-            background: #e9ecef;
-        }
-        
-        .venda-info {
-            flex: 1;
-        }
-        
-        .venda-cliente {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        
-        .venda-data {
-            font-size: 11px;
-            color: #666;
-        }
-        
-        .venda-valor {
-            font-weight: bold;
-            color: #27ae60;
-            font-size: 16px;
-        }
-        
+        .venda-cliente { font-weight: bold; margin-bottom: 4px; }
+        .venda-data { font-size: 11px; color: #666; }
+        .venda-valor { font-weight: bold; color: #27ae60; }
         .btn-deletar {
             width: auto;
             background: none;
             color: #e74c3c;
             font-size: 20px;
             padding: 8px;
-            margin: 0;
         }
         
-        .btn-deletar:active {
-            transform: scale(1.1);
-            background: none;
+        /* Orçamentos */
+        .orcamento-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .orcamento-cliente { font-weight: bold; margin-bottom: 8px; }
+        .orcamento-detalhes {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .orcamento-status {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .orcamento-status.pendente { background: #ffc107; color: #333; }
+        .orcamento-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .orcamento-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+        }
+        .btn-aprovar { background: #27ae60; }
+        .btn-recusar { background: #e74c3c; }
+        
+        /* Histórico */
+        .historico-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .historico-icon { font-size: 24px; }
+        .historico-info { flex: 1; }
+        .historico-desc { font-weight: 500; margin-bottom: 4px; }
+        .historico-data { font-size: 11px; color: #666; }
+        
+        /* Perfil */
+        .perfil-container { text-align: center; }
+        .perfil-avatar {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .perfil-info {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .perfil-email, .perfil-id, .perfil-criado {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .perfil-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-valor { font-size: 20px; font-weight: bold; }
+        .stat-label { font-size: 12px; margin-top: 4px; opacity: 0.9; }
+        .btn-atualizar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin-top: 20px;
         }
         
-        .loading, .empty, .error {
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .empty-icon { font-size: 64px; margin-bottom: 16px; }
+        .empty-text { font-size: 18px; color: #333; margin-bottom: 8px; }
+        .empty-sub { font-size: 14px; color: #666; }
+        
+        /* Botão Flutuante */
+        .btn-flutuante {
+            position: fixed;
+            bottom: 90px;
+            right: calc(50% - 200px);
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            padding: 0;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .btn-empty {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin-top: 20px;
+            width: auto;
+            padding: 12px 24px;
+        }
+        
+        .loading, .error {
             text-align: center;
             padding: 40px;
             color: #666;
         }
-        
-        .error {
-            color: #e74c3c;
-        }
-        
-        /* Scrollbar personalizada */
-        .lista-vendas::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .lista-vendas::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        .lista-vendas::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
+        .error { color: #e74c3c; }
     </style>
 </head>
 <body>
@@ -495,30 +777,30 @@
             <div class="subtitulo">Seu caderno online</div>
             
             <div class="input-group">
-                <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+                <input type="email" id="loginEmail" placeholder="Email">
             </div>
             <div class="input-group">
-                <input type="password" id="loginSenha" placeholder="Senha" autocomplete="current-password">
+                <input type="password" id="loginSenha" placeholder="Senha">
             </div>
             
             <button id="btnLogin">Entrar</button>
             <div id="erroLogin" class="erro"></div>
             
             <div class="link">
-                Não tem uma conta? <a href="#" id="linkCadastro">Cadastre-se</a>
+                Não tem conta? <a href="#" id="linkCadastro">Cadastre-se</a>
             </div>
         </div>
         
         <!-- TELA DE CADASTRO -->
         <div id="telaCadastro" class="tela hidden">
             <h1>📝 Criar Conta</h1>
-            <div class="subtitulo">Comece agora gratuitamente</div>
+            <div class="subtitulo">Comece agora</div>
             
             <div class="input-group">
-                <input type="email" id="cadastroEmail" placeholder="Seu melhor email">
+                <input type="email" id="cadastroEmail" placeholder="Email">
             </div>
             <div class="input-group">
-                <input type="password" id="cadastroSenha" placeholder="Senha (mínimo 6 caracteres)">
+                <input type="password" id="cadastroSenha" placeholder="Senha (6+ caracteres)">
             </div>
             <div class="input-group">
                 <input type="password" id="cadastroConfirmar" placeholder="Confirmar senha">
@@ -536,7 +818,7 @@
         <div id="telaApp" class="tela hidden">
             <div class="app-header">
                 <h1>📓 ZapCaderno</h1>
-                <button id="btnLogout" style="width: auto; padding: 8px 16px;">🚪 Sair</button>
+                <button id="btnLogout" class="btn-sair">🚪 Sair</button>
             </div>
             
             <div class="total-card">
@@ -544,15 +826,12 @@
                 <h2 id="totalDebito">R$ 0,00</h2>
             </div>
             
-            <div class="vendas-header">
-                <h3>📋 Últimas Vendas</h3>
-                <button id="btnNovaVenda" class="btn-novo">+</button>
+            <div class="tab-nav">
+                <div class="tab-item" id="tabVendas">💰 Vendas</div>
+                <div class="tab-item" id="tabHistorico">📜 Histórico</div>
+                <div class="tab-item" id="tabOrcamentos">📊 Orçamentos</div>
+                <div class="tab-item" id="tabPerfil">👤 Perfil</div>
             </div>
             
-            <div id="listaVendas" class="lista-vendas">
-                <div class="loading">📱 Carregando...</div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+            <div id="conteudoPrincipal">
+                <div class="loading">Carregando...</div
