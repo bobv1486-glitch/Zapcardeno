@@ -1,16 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Teste Firebase</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <title>Teste Firebase - ZapCaderno</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0f172a;
+            color: white;
+        }
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+    </style>
 </head>
 <body>
-    <h1>Teste de Conexão</h1>
-    <div id="status">Testando...</div>
-    
+    <h1>🔧 Teste de Conexão Firebase</h1>
+    <div class="card" id="status">
+        Carregando Firebase...
+    </div>
+
     <script>
+        // Configuração do Firebase (MESMA do seu app)
         const firebaseConfig = {
             apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
             authDomain: "zapcaderno.firebaseapp.com",
@@ -20,38 +51,94 @@
             appId: "1:446641643061:web:daf768922b53614f229b7c"
         };
         
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         
-        document.getElementById('status').innerHTML = "Firebase carregado!<br>";
+        const statusDiv = document.getElementById('status');
         
-        // Verificar autenticação
+        // Mostrar mensagem
+        function addStatus(msg, tipo = 'info') {
+            const p = document.createElement('p');
+            p.innerHTML = msg;
+            p.className = tipo === 'error' ? 'error' : tipo === 'success' ? 'success' : '';
+            statusDiv.appendChild(p);
+        }
+        
+        addStatus('✅ Firebase carregado com sucesso!', 'success');
+        
+        // Verificar estado de autenticação
         auth.onAuthStateChanged(user => {
             if(user) {
-                document.getElementById('status').innerHTML += "✅ Usuário logado: " + user.email + "<br>";
+                addStatus(`✅ Usuário logado: ${user.email}`, 'success');
+                addStatus('🔄 Testando conexão com Firestore...');
                 
                 // Testar leitura do Firestore
                 db.collection("vendas").limit(1).get()
                     .then(() => {
-                        document.getElementById('status').innerHTML += "✅ Firestore: Conexão OK!";
+                        addStatus('✅ Firestore: Leitura OK!', 'success');
+                        addStatus('🎉 Tudo funcionando! Seu app vai funcionar normalmente.', 'success');
                     })
                     .catch(err => {
-                        document.getElementById('status').innerHTML += "❌ Firestore: " + err.message;
+                        addStatus(`❌ Erro no Firestore: ${err.message}`, 'error');
+                        addStatus('🔧 Isso normalmente é resolvido configurando as REGRAS do Firestore.', 'error');
                     });
             } else {
-                document.getElementById('status').innerHTML += "⚠️ Ninguém logado. Faça login!<br>";
-                document.getElementById('status').innerHTML += '<input type="email" id="email" placeholder="Email"><br>';
-                document.getElementById('status').innerHTML += '<input type="password" id="senha" placeholder="Senha"><br>';
-                document.getElementById('status').innerHTML += '<button onclick="logar()">Login</button>';
+                addStatus('⚠️ Ninguém está logado', 'error');
+                addStatus('📱 Por favor, faça login com sua conta do ZapCaderno:');
+                
+                // Criar formulário de login
+                const inputEmail = document.createElement('input');
+                inputEmail.type = 'email';
+                inputEmail.placeholder = 'Seu e-mail';
+                inputEmail.id = 'email';
+                
+                const inputSenha = document.createElement('input');
+                inputSenha.type = 'password';
+                inputSenha.placeholder = 'Sua senha';
+                inputSenha.id = 'senha';
+                
+                const btnLogin = document.createElement('button');
+                btnLogin.textContent = 'Fazer Login';
+                btnLogin.onclick = () => {
+                    const email = document.getElementById('email').value;
+                    const senha = document.getElementById('senha').value;
+                    auth.signInWithEmailAndPassword(email, senha)
+                        .then(() => addStatus('✅ Login realizado!', 'success'))
+                        .catch(err => addStatus(`❌ Erro: ${err.message}`, 'error'));
+                };
+                
+                statusDiv.appendChild(inputEmail);
+                statusDiv.appendChild(inputSenha);
+                statusDiv.appendChild(btnLogin);
             }
         });
         
-        function logar() {
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-            auth.signInWithEmailAndPassword(email, senha);
-        }
+        // Botão para criar conta (opcional)
+        setTimeout(() => {
+            if(!auth.currentUser) {
+                const btnCriar = document.createElement('button');
+                btnCriar.textContent = 'Criar nova conta';
+                btnCriar.style.background = '#334155';
+                btnCriar.onclick = () => {
+                    const email = document.getElementById('email')?.value;
+                    const senha = document.getElementById('senha')?.value;
+                    if(email && senha) {
+                        auth.createUserWithEmailAndPassword(email, senha)
+                            .then(() => addStatus('✅ Conta criada e logado!', 'success'))
+                            .catch(err => addStatus(`❌ Erro: ${err.message}`, 'error'));
+                    } else {
+                        addStatus('⚠️ Digite e-mail e senha primeiro!', 'error');
+                    }
+                };
+                statusDiv.appendChild(btnCriar);
+            }
+        }, 500);
     </script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 </body>
 </html>
