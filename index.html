@@ -20,9 +20,18 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card { background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid #334155; margin-bottom: 12px; }
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #1e293b; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; border: 1px solid #334155; z-index: 1000; }
-        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: none; }
+        .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: none; cursor: pointer; }
         input, textarea { background: #0f172a; border: 1px solid #334155; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; color: white; font-size: 16px; }
+        input:focus, textarea:focus { outline: none; border-color: var(--primary); }
         #overlay { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        button { cursor: pointer; transition: all 0.2s ease; }
+        button:active { transform: scale(0.98); }
+        .btn-cobrar { background: #10b981; }
+        .btn-cobrar:hover { background: #059669; }
+        .btn-pago { background: #475569; }
+        .btn-pago:hover { background: #334155; }
+        .btn-excluir { background: #991b1b; }
+        .btn-excluir:hover { background: #7f1d1d; }
     </style>
 </head>
 <body>
@@ -61,7 +70,7 @@
             <div class="card">
                 <h2 class="text-lg font-bold mb-6 text-center text-indigo-400 uppercase">Novo Registro</h2>
                 <input type="text" id="v-nome" placeholder="Nome do Cliente">
-                <input type="tel" id="v-whats" placeholder="WhatsApp">
+                <input type="tel" id="v-whats" placeholder="WhatsApp (ex: 11999999999)">
                 <input type="text" id="v-item" placeholder="O que vendeu?">
                 <input type="number" id="v-valor" placeholder="Valor R$">
                 <button id="btnSalvar" class="w-full bg-indigo-600 py-4 rounded-xl font-bold mt-2">SALVAR AGORA</button>
@@ -70,12 +79,12 @@
 
         <section id="orcamentos" class="tab-content">
             <div class="card">
-                <h2 class="text-lg font-bold mb-4 uppercase">Orçamentos</h2>
+                <h2 class="text-lg font-bold mb-4 uppercase">Novo Orçamento</h2>
                 <input type="text" id="o-nome" placeholder="Cliente">
-                <input type="tel" id="o-whats" placeholder="WhatsApp">
+                <input type="tel" id="o-whats" placeholder="WhatsApp (ex: 11999999999)">
                 <textarea id="o-desc" rows="3" placeholder="Descrição do serviço..."></textarea>
                 <input type="number" id="o-total" placeholder="Total R$">
-                <button id="btnSalvarOrc" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">REGISTRAR</button>
+                <button id="btnSalvarOrc" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">REGISTRAR ORÇAMENTO</button>
             </div>
             <div id="lista-orc" class="mt-4"></div>
         </section>
@@ -86,7 +95,7 @@
                 <input type="text" id="c-loja" placeholder="Nome da Loja">
                 <input type="text" id="c-pix" placeholder="Chave PIX">
                 <button id="btnConfig" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">SALVAR DADOS</button>
-                <button onclick="auth.signOut()" class="w-full mt-10 text-red-400 font-bold bg-transparent">Sair da Conta</button>
+                <button id="btnSair" class="w-full mt-10 text-red-400 font-bold bg-transparent">Sair da Conta</button>
             </div>
         </section>
     </main>
@@ -119,7 +128,10 @@
             document.querySelectorAll('.nav-bar button').forEach(b => {
                 if(!b.classList.contains('btn-plus')) b.classList.replace('text-indigo-400', 'text-gray-500');
             });
-            document.getElementById('btn-'+id)?.classList.replace('text-gray-500', 'text-indigo-400');
+            const btnCorrespondente = document.getElementById('btn-'+id);
+            if(btnCorrespondente && !btnCorrespondente.classList.contains('btn-plus')) {
+                btnCorrespondente.classList.replace('text-gray-500', 'text-indigo-400');
+            }
         }
 
         auth.onAuthStateChanged(user => {
@@ -142,14 +154,14 @@
                 }
             });
 
-            // Sincronizar Vendas (Aqui estava o erro do 'não aparecer')
+            // Sincronizar Vendas
             db.collection("vendas").where("uid", "==", uid).onSnapshot(snap => {
                 const listV = document.getElementById('lista-vendas');
                 const listP = document.getElementById('lista-pagos');
                 let total = 0;
-                listV.innerHTML = ''; listP.innerHTML = '';
+                listV.innerHTML = ''; 
+                listP.innerHTML = '';
 
-                // Organizar por data manual para não depender de índices do Firebase
                 const docs = [];
                 snap.forEach(d => docs.push({id: d.id, ...d.data()}));
                 docs.sort((a,b) => b.data - a.data);
@@ -161,77 +173,224 @@
                         listV.innerHTML += `
                         <div class="card">
                             <div class="flex justify-between items-center">
-                                <div><b>${v.nome}</b><p class="text-xs opacity-40">${v.item}</p></div>
-                                <b class="text-indigo-400 text-lg">R$ ${val.toFixed(2)}</b>
+                                <div>
+                                    <b class="text-lg">${v.nome}</b>
+                                    <p class="text-xs opacity-40 mt-1">${v.item || 'Sem descrição'}</p>
+                                    ${v.whatsapp ? `<p class="text-xs opacity-40 mt-1"><i class="fab fa-whatsapp"></i> ${v.whatsapp}</p>` : ''}
+                                </div>
+                                <b class="text-indigo-400 text-xl">R$ ${val.toFixed(2)}</b>
                             </div>
                             <div class="flex gap-2 mt-4">
-                                <button onclick="cobrar('${v.whatsapp}', ${val}, '${v.nome}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none text-white">COBRAR</button>
-                                <button onclick="baixar('${v.id}', true)" class="flex-1 bg-gray-700 p-2 rounded-xl font-bold border-none text-white">PAGO</button>
-                                <button onclick="excluir('vendas','${v.id}')" class="bg-red-900 px-3 rounded-xl border-none text-white"><i class="fas fa-trash"></i></button>
+                                <button onclick="cobrar('${v.whatsapp || ''}', ${val}, '${v.nome.replace(/'/g, "\\'")}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none text-white hover:bg-green-700">COBRAR</button>
+                                <button onclick="baixar('${v.id}', true)" class="flex-1 bg-gray-700 p-2 rounded-xl font-bold border-none text-white hover:bg-gray-600">PAGO</button>
+                                <button onclick="excluir('vendas','${v.id}')" class="bg-red-900 px-3 rounded-xl border-none text-white hover:bg-red-800"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>`;
                     } else {
-                        listP.innerHTML += `<div class="card flex justify-between"><span><b>${v.nome}</b></span><b>R$ ${val.toFixed(2)}</b></div>`;
+                        listP.innerHTML += `
+                        <div class="card flex justify-between items-center">
+                            <div>
+                                <b>${v.nome}</b>
+                                ${v.item ? `<p class="text-xs opacity-40">${v.item}</p>` : ''}
+                            </div>
+                            <b class="text-green-400">R$ ${val.toFixed(2)}</b>
+                        </div>`;
                     }
                 });
-                document.getElementById('total-txt').innerText = total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+                document.getElementById('total-txt').innerHTML = total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+                
+                if(docs.filter(v => !v.pago).length === 0) {
+                    listV.innerHTML = '<div class="card text-center opacity-50">Nenhuma venda pendente ✨</div>';
+                }
+                if(docs.filter(v => v.pago).length === 0) {
+                    listP.innerHTML = '<div class="card text-center opacity-50">Nenhum pagamento registrado 📝</div>';
+                }
             });
 
-            // Orçamentos
+            // Sincronizar Orçamentos
             db.collection("orcamentos").where("uid", "==", uid).onSnapshot(snap => {
                 const listO = document.getElementById('lista-orc');
                 listO.innerHTML = '';
-                snap.forEach(doc => {
-                    const o = doc.data();
-                    listO.innerHTML += `<div class="card flex justify-between"><div><b>${o.nome}</b><br><small class="opacity-50">${o.detalhes}</small></div><b>R$ ${o.valor}</b></div>`;
+                const docs = [];
+                snap.forEach(doc => docs.push({id: doc.id, ...doc.data()}));
+                docs.sort((a,b) => b.data - a.data);
+                
+                if(docs.length === 0) {
+                    listO.innerHTML = '<div class="card text-center opacity-50">Nenhum orçamento cadastrado 📄</div>';
+                    return;
+                }
+                
+                docs.forEach(o => {
+                    const val = parseFloat(o.valor || 0);
+                    listO.innerHTML += `
+                    <div class="card">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <b class="text-lg">${o.nome}</b>
+                                ${o.whats ? `<p class="text-xs opacity-50 mt-1"><i class="fab fa-whatsapp"></i> ${o.whats}</p>` : ''}
+                                <p class="text-sm mt-2 opacity-70">${o.detalhes || 'Sem descrição'}</p>
+                            </div>
+                            <b class="text-indigo-400 text-xl ml-3">R$ ${val.toFixed(2)}</b>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="cobrarOrc('${o.whats || ''}', ${val}, '${o.nome.replace(/'/g, "\\'")}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none text-white hover:bg-green-700">COBRAR</button>
+                            <button onclick="excluir('orcamentos','${o.id}')" class="bg-red-900 px-3 rounded-xl border-none text-white hover:bg-red-800"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
                 });
             });
         }
 
+        // Salvar nova venda
         document.getElementById('btnSalvar').onclick = async () => {
-            const v = {
+            const nome = document.getElementById('v-nome').value;
+            const valor = parseFloat(document.getElementById('v-valor').value);
+            
+            if(!nome || isNaN(valor) || valor <= 0) {
+                alert("Preencha Nome e Valor válido!");
+                return;
+            }
+            
+            const venda = {
                 uid: auth.currentUser.uid,
-                nome: document.getElementById('v-nome').value,
+                nome: nome,
                 whatsapp: document.getElementById('v-whats').value,
                 item: document.getElementById('v-item').value,
-                valor: parseFloat(document.getElementById('v-valor').value),
+                valor: valor,
                 pago: false,
                 data: new Date().getTime()
             };
-            if(!v.nome || isNaN(v.valor)) return alert("Preencha Nome e Valor!");
-            await db.collection("vendas").add(v);
-            alert("Salvo!");
-            document.getElementById('v-nome').value = ''; document.getElementById('v-valor').value = '';
+            
+            await db.collection("vendas").add(venda);
+            alert("✅ Venda salva com sucesso!");
+            document.getElementById('v-nome').value = '';
+            document.getElementById('v-whats').value = '';
+            document.getElementById('v-item').value = '';
+            document.getElementById('v-valor').value = '';
             abrir('dashboard');
         };
 
+        // Salvar orçamento
+        document.getElementById('btnSalvarOrc').onclick = async () => {
+            const nome = document.getElementById('o-nome').value;
+            const valor = parseFloat(document.getElementById('o-total').value);
+            
+            if(!nome || isNaN(valor) || valor <= 0) {
+                alert("Preencha Nome e Valor válido!");
+                return;
+            }
+            
+            const orcamento = {
+                uid: auth.currentUser.uid,
+                nome: nome,
+                whats: document.getElementById('o-whats').value,
+                detalhes: document.getElementById('o-desc').value,
+                valor: valor,
+                data: new Date().getTime()
+            };
+            
+            await db.collection("orcamentos").add(orcamento);
+            alert("✅ Orçamento salvo com sucesso!");
+            document.getElementById('o-nome').value = '';
+            document.getElementById('o-whats').value = '';
+            document.getElementById('o-desc').value = '';
+            document.getElementById('o-total').value = '';
+            abrir('orcamentos');
+        };
+
+        // Funções globais
         window.cobrar = (tel, val, nome) => {
-            const m = `Olá ${nome}, lembrete da loja ${configLoja.loja}. Valor: R$ ${val.toFixed(2)}. Chave Pix: ${configLoja.pix}`;
-            window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(m)}`);
+            if(!tel) {
+                alert("⚠️ Cliente não tem WhatsApp cadastrado!");
+                return;
+            }
+            const mensagem = `Olá ${nome}, lembrete da loja ${configLoja.loja || 'ZAPCADERNO'}. Valor pendente: R$ ${val.toFixed(2)}. Chave Pix: ${configLoja.pix || 'não cadastrada'}`;
+            const numero = tel.replace(/\D/g,'');
+            window.open(`https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`, '_blank');
+        };
+        
+        window.cobrarOrc = (tel, val, nome) => {
+            if(!tel) {
+                alert("⚠️ Cliente não tem WhatsApp cadastrado!");
+                return;
+            }
+            const mensagem = `Olá ${nome}, conforme nosso orçamento, o valor ficou em R$ ${val.toFixed(2)}. Chave Pix: ${configLoja.pix || 'não cadastrada'}`;
+            const numero = tel.replace(/\D/g,'');
+            window.open(`https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`, '_blank');
         };
 
-        window.baixar = (id, st) => db.collection("vendas").doc(id).update({pago: st});
-        window.excluir = (col, id) => confirm("Apagar?") && db.collection(col).doc(id).delete();
-
-        document.getElementById('btnConfig').onclick = () => {
-            db.collection("configuracoes").doc(auth.currentUser.uid).set({
-                loja: document.getElementById('c-loja').value.toUpperCase(),
-                pix: document.getElementById('c-pix').value
-            }).then(() => alert("Perfil Atualizado!"));
+        window.baixar = async (id, pago) => {
+            await db.collection("vendas").doc(id).update({pago: pago});
+            alert("✅ Registro marcado como pago!");
+        };
+        
+        window.excluir = async (colecao, id) => {
+            if(confirm("⚠️ Tem certeza que deseja excluir永久emente este registro?")) {
+                await db.collection(colecao).doc(id).delete();
+                alert("🗑️ Registro excluído com sucesso!");
+            }
         };
 
-        document.getElementById('btnEntrar').onclick = () => {
-            auth.signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-senha').value).catch(e => alert("Erro ao entrar."));
+        // Configurações
+        document.getElementById('btnConfig').onclick = async () => {
+            const loja = document.getElementById('c-loja').value.toUpperCase();
+            const pix = document.getElementById('c-pix').value;
+            
+            if(!loja) {
+                alert("Digite o nome da sua loja!");
+                return;
+            }
+            
+            await db.collection("configuracoes").doc(auth.currentUser.uid).set({
+                loja: loja,
+                pix: pix
+            });
+            alert("✅ Perfil atualizado com sucesso!");
+        };
+        
+        document.getElementById('btnSair').onclick = () => {
+            auth.signOut();
+            alert("👋 Você saiu da conta");
         };
 
-        document.getElementById('btnCadastrar').onclick = () => {
+        // Autenticação
+        document.getElementById('btnEntrar').onclick = async () => {
             const email = document.getElementById('l-email').value;
             const senha = document.getElementById('l-senha').value;
-            auth.createUserWithEmailAndPassword(email, senha).then(cred => {
-                db.collection("configuracoes").doc(cred.user.uid).set({ loja: "MINHA LOJA", pix: "" });
-            }).catch(e => alert(e.message));
+            
+            if(!email || !senha) {
+                alert("Preencha e-mail e senha!");
+                return;
+            }
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, senha);
+                alert("✅ Login realizado com sucesso!");
+            } catch(e) {
+                alert("❌ Erro ao entrar: " + (e.message.includes('user-not-found') ? 'Usuário não encontrado' : 'Senha incorreta'));
+            }
+        };
+
+        document.getElementById('btnCadastrar').onclick = async () => {
+            const email = document.getElementById('l-email').value;
+            const senha = document.getElementById('l-senha').value;
+            
+            if(!email || !senha || senha.length < 6) {
+                alert("Preencha e-mail e senha (mínimo 6 caracteres)!");
+                return;
+            }
+            
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, senha);
+                await db.collection("configuracoes").doc(cred.user.uid).set({ 
+                    loja: "MINHA LOJA", 
+                    pix: "" 
+                });
+                alert("✅ Conta criada com sucesso!");
+            } catch(e) {
+                alert("❌ Erro ao criar conta: " + (e.message.includes('email-already') ? 'E-mail já cadastrado' : e.message));
+            }
         };
     </script>
 </body>
 </html>
- Ache os erros !!!
