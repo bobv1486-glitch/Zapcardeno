@@ -23,16 +23,18 @@
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #1e293b; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; border: 1px solid #334155; z-index: 1000; background: rgba(30,41,59,0.95); backdrop-filter: blur(10px); }
         .btn-plus { background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-top: -45px; border: none; cursor: pointer; transition: transform 0.2s; }
         .btn-plus:active { transform: scale(0.95); }
-        input, textarea, select { background: #0f172a; border: 1px solid #334155; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; color: white; font-size: 16px; transition: border 0.2s; }
+        input, textarea { background: #0f172a; border: 1px solid #334155; width: 100%; padding: 14px; border-radius: 14px; margin-bottom: 10px; color: white; font-size: 16px; transition: border 0.2s; }
         input:focus, textarea:focus { outline: none; border-color: var(--primary); }
         button { cursor: pointer; transition: all 0.2s ease; }
         button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
         #overlay { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 100px; left: 20px; right: 20px; background: #1e293b; padding: 12px; border-radius: 12px; text-align: center; z-index: 10001; animation: slideUp 0.3s ease; border-left: 4px solid var(--primary); }
+        .toast { position: fixed; bottom: 100px; left: 20px; right: 20px; background: #1e293b; padding: 12px; border-radius: 12px; text-align: center; z-index: 10001; animation: slideUp 0.3s ease; border-left: 4px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @media (max-width: 400px) { .nav-bar button i { font-size: 1rem; } .card { padding: 12px; } .text-4xl { font-size: 1.8rem; } }
+        .text-success { color: #10b981; }
+        .text-error { color: #ef4444; }
+        .bg-success { background: #10b981; }
+        .bg-error { background: #ef4444; }
     </style>
 </head>
 <body>
@@ -57,6 +59,7 @@
     </header>
 
     <main class="-mt-10">
+        <!-- DASHBOARD - VENDAS PENDENTES -->
         <section id="dashboard" class="tab-content active">
             <div class="card bg-gradient-to-br from-indigo-900 to-black border-none p-6 mb-6">
                 <span class="text-[10px] font-bold opacity-50 uppercase">Total em Débito</span>
@@ -65,11 +68,13 @@
             <div id="lista-vendas" class="space-y-3"></div>
         </section>
 
+        <!-- HISTÓRICO - PAGAMENTOS RECEBIDOS -->
         <section id="historico" class="tab-content">
             <h2 class="text-lg font-bold mb-4">📋 Pagamentos Recebidos</h2>
             <div id="lista-pagos" class="space-y-3"></div>
         </section>
 
+        <!-- NOVA VENDA -->
         <section id="novo" class="tab-content">
             <div class="card">
                 <h2 class="text-lg font-bold mb-6 text-center text-indigo-400 uppercase">➕ Novo Registro</h2>
@@ -81,6 +86,7 @@
             </div>
         </section>
 
+        <!-- ORÇAMENTOS -->
         <section id="orcamentos" class="tab-content">
             <div class="card">
                 <h2 class="text-lg font-bold mb-4 uppercase">📄 Novo Orçamento</h2>
@@ -93,6 +99,7 @@
             <div id="lista-orc" class="mt-4"></div>
         </section>
 
+        <!-- CONFIGURAÇÕES -->
         <section id="config" class="tab-content">
             <div class="card">
                 <h2 class="text-lg font-bold mb-4">⚙️ Meu Perfil</h2>
@@ -104,6 +111,7 @@
         </section>
     </main>
 
+    <!-- MENU DE NAVEGAÇÃO -->
     <nav class="nav-bar">
         <button onclick="abrir('dashboard')" id="btn-dashboard" class="bg-transparent border-none text-indigo-400 transition"><i class="fas fa-book text-xl"></i><span class="text-xs block">Vendas</span></button>
         <button onclick="abrir('historico')" id="btn-historico" class="bg-transparent border-none text-gray-500 transition"><i class="fas fa-history text-xl"></i><span class="text-xs block">Histórico</span></button>
@@ -113,7 +121,7 @@
     </nav>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE
+        // ==================== CONFIGURAÇÃO DO FIREBASE ====================
         const firebaseConfig = {
             apiKey: "AIzaSyASmjopW-EUIpZUsVFESFwMvpUZTMcdvMU",
             authDomain: "zapcaderno.firebaseapp.com",
@@ -132,19 +140,23 @@
         let configLoja = { loja: "ZAPCADERNO", pix: "" };
         let currentToast = null;
         
-        // FUNÇÃO PARA EXIBIR TOAST (notificações elegantes)
+        // ==================== FUNÇÕES AUXILIARES ====================
+        
+        // Exibir notificações toast
         function showToast(mensagem, tipo = 'info') {
             if(currentToast) currentToast.remove();
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.style.borderLeftColor = tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#6366f1';
+            if(tipo === 'success') toast.style.borderLeftColor = '#10b981';
+            else if(tipo === 'error') toast.style.borderLeftColor = '#ef4444';
+            else toast.style.borderLeftColor = '#6366f1';
             toast.innerHTML = `<span>${mensagem}</span>`;
             document.body.appendChild(toast);
             currentToast = toast;
             setTimeout(() => { if(toast) toast.remove(); if(currentToast === toast) currentToast = null; }, 3000);
         }
         
-        // FUNÇÃO DE SEGURANÇA - Prevenir XSS
+        // Proteção contra XSS (injeção de código)
         function escapeHtml(texto) {
             if(!texto) return '';
             const div = document.createElement('div');
@@ -152,7 +164,7 @@
             return div.innerHTML;
         }
         
-        // FUNÇÃO PARA VALIDAR WHATSAPP
+        // Validar número de WhatsApp
         function validarWhatsapp(numero) {
             if(!numero) return false;
             let clean = numero.replace(/\D/g, '');
@@ -167,7 +179,7 @@
             return clean;
         }
         
-        // FUNÇÃO ABRIR ABA
+        // Abrir abas do menu
         function abrir(id) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             const target = document.getElementById(id);
@@ -187,24 +199,115 @@
             }
         }
         
-        // VERIFICAR AUTENTICAÇÃO
+        // ==================== AUTENTICAÇÃO ====================
+        
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('overlay').style.display = 'none';
                 iniciarApp(user.uid);
             } else {
                 document.getElementById('overlay').style.display = 'flex';
-                // Limpar campos de login
                 document.getElementById('l-email').value = '';
                 document.getElementById('l-senha').value = '';
             }
         });
         
-        // FUNÇÃO PRINCIPAL DO APP
+        // LOGIN
+        document.getElementById('btnEntrar').onclick = async () => {
+            if(auth.currentUser) {
+                showToast("⚠️ Você já está logado!", "error");
+                return;
+            }
+            
+            const email = document.getElementById('l-email').value.trim();
+            const senha = document.getElementById('l-senha').value;
+            
+            if(!email || !senha) {
+                showToast("❌ Preencha e-mail e senha!", "error");
+                return;
+            }
+            
+            const btn = document.getElementById('btnEntrar');
+            const txtOriginal = btn.innerText;
+            btn.innerText = "🔄 Entrando...";
+            btn.disabled = true;
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, senha);
+                showToast("✅ Login realizado com sucesso!", "success");
+                document.getElementById('l-email').value = '';
+                document.getElementById('l-senha').value = '';
+            } catch(e) {
+                let msg = "❌ Erro ao entrar: ";
+                if(e.code === 'auth/user-not-found') msg += "Usuário não encontrado";
+                else if(e.code === 'auth/wrong-password') msg += "Senha incorreta";
+                else if(e.code === 'auth/invalid-email') msg += "E-mail inválido";
+                else if(e.code === 'auth/too-many-requests') msg += "Muitas tentativas. Tente depois";
+                else msg += e.message;
+                showToast(msg, "error");
+            } finally {
+                btn.innerText = txtOriginal;
+                btn.disabled = false;
+            }
+        };
+        
+        // CADASTRO
+        document.getElementById('btnCadastrar').onclick = async () => {
+            if(auth.currentUser) {
+                showToast("⚠️ Você já está logado! Saia antes de criar nova conta.", "error");
+                return;
+            }
+            
+            const email = document.getElementById('l-email').value.trim();
+            const senha = document.getElementById('l-senha').value;
+            
+            if(!email || !senha) {
+                showToast("❌ Preencha e-mail e senha!", "error");
+                return;
+            }
+            if(senha.length < 6) {
+                showToast("❌ A senha deve ter no mínimo 6 caracteres!", "error");
+                return;
+            }
+            if(!email.includes('@') || !email.includes('.')) {
+                showToast("❌ Digite um e-mail válido!", "error");
+                return;
+            }
+            
+            const btn = document.getElementById('btnCadastrar');
+            const txtOriginal = btn.innerText;
+            btn.innerText = "🔄 Criando conta...";
+            btn.disabled = true;
+            
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, senha);
+                await db.collection("configuracoes").doc(cred.user.uid).set({ 
+                    loja: "MINHA LOJA", 
+                    pix: "",
+                    criadoEm: Date.now()
+                });
+                showToast("✅ Conta criada com sucesso! Bem-vindo!", "success");
+                document.getElementById('l-email').value = '';
+                document.getElementById('l-senha').value = '';
+            } catch(e) {
+                let msg = "❌ Erro ao criar conta: ";
+                if(e.code === 'auth/email-already-in-use') msg += "E-mail já cadastrado";
+                else if(e.code === 'auth/invalid-email') msg += "E-mail inválido";
+                else if(e.code === 'auth/weak-password') msg += "Senha muito fraca";
+                else msg += e.message;
+                showToast(msg, "error");
+            } finally {
+                btn.innerText = txtOriginal;
+                btn.disabled = false;
+            }
+        };
+        
+        // ==================== FUNÇÃO PRINCIPAL DO APP ====================
+        
         function iniciarApp(uid) {
             if(!uid) return;
             
-            // Sincronizar Configurações
+            // CONFIGURAÇÕES
             db.collection("configuracoes").doc(uid).onSnapshot(doc => {
                 if(doc.exists) {
                     configLoja = doc.data();
@@ -212,7 +315,6 @@
                     document.getElementById('c-loja').value = configLoja.loja || "";
                     document.getElementById('c-pix').value = configLoja.pix || "";
                 } else {
-                    // Criar configuração inicial se não existir
                     db.collection("configuracoes").doc(uid).set({ loja: "MINHA LOJA", pix: "", criadoEm: Date.now() }).catch(e => console.error);
                 }
             }, error => {
@@ -220,7 +322,7 @@
                 showToast("Erro ao carregar configurações", "error");
             });
             
-            // Sincronizar Vendas (limitado a 500 registros por performance)
+            // VENDAS (PENDENTES E PAGAS)
             db.collection("vendas").where("uid", "==", uid).orderBy("data", "desc").limit(500).onSnapshot(snap => {
                 const listV = document.getElementById('lista-vendas');
                 const listP = document.getElementById('lista-pagos');
@@ -245,6 +347,8 @@
                         const nomeSeguro = escapeHtml(v.nome);
                         const itemSeguro = escapeHtml(v.item || 'Sem descrição');
                         const whatsRaw = v.whatsapp || '';
+                        const hasWhats = whatsRaw && validarWhatsapp(whatsRaw);
+                        
                         listV.innerHTML += `
                         <div class="card">
                             <div class="flex justify-between items-center">
@@ -256,7 +360,7 @@
                                 <b class="text-indigo-400 text-xl ml-2">R$ ${val.toFixed(2)}</b>
                             </div>
                             <div class="flex gap-2 mt-4">
-                                <button onclick="cobrar('${escapeHtml(whatsRaw)}', ${val}, '${nomeSeguro}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none text-white hover:bg-green-700 transition" ${!whatsRaw ? 'disabled' : ''}>📱 COBRAR</button>
+                                <button onclick="cobrar('${escapeHtml(whatsRaw)}', ${val}, '${nomeSeguro}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none text-white hover:bg-green-700 transition" ${!hasWhats ? 'disabled style="opacity:0.5"' : ''}>📱 COBRAR</button>
                                 <button onclick="baixar('${v.id}', true)" class="flex-1 bg-gray-700 p-2 rounded-xl font-bold border-none text-white hover:bg-gray-600 transition">💰 PAGO</button>
                                 <button onclick="excluir('vendas','${v.id}')" class="bg-red-900 px-3 rounded-xl border-none text-white hover:bg-red-800 transition"><i class="fas fa-trash"></i></button>
                             </div>
@@ -275,7 +379,7 @@
                 
                 document.getElementById('total-txt').innerHTML = total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
                 
-                if(docs.filter(v => !v.pago).length === 0) {
+                if(docs.filter(v => !v.pago).length === 0 && docs.length > 0) {
                     listV.innerHTML = '<div class="card text-center opacity-50">🎉 Todas as vendas estão pagas!</div>';
                 }
                 if(docs.filter(v => v.pago).length === 0 && docs.length > 0) {
@@ -287,7 +391,7 @@
                 showToast("Erro ao sincronizar vendas", "error");
             });
             
-            // Sincronizar Orçamentos (limitado a 200)
+            // ORÇAMENTOS
             db.collection("orcamentos").where("uid", "==", uid).orderBy("data", "desc").limit(200).onSnapshot(snap => {
                 const listO = document.getElementById('lista-orc');
                 listO.innerHTML = '';
@@ -304,6 +408,8 @@
                     const nomeSeguro = escapeHtml(o.nome);
                     const detalhesSeguro = escapeHtml(o.detalhes || 'Sem descrição');
                     const whatsRaw = o.whats || '';
+                    const hasWhats = whatsRaw && validarWhatsapp(whatsRaw);
+                    
                     listO.innerHTML += `
                     <div class="card">
                         <div class="flex justify-between items-start mb-3">
@@ -315,7 +421,7 @@
                             <b class="text-indigo-400 text-xl ml-3">R$ ${val.toFixed(2)}</b>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="cobrarOrc('${escapeHtml(whatsRaw)}', ${val}, '${nomeSeguro}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none text-white hover:bg-green-700 transition" ${!whatsRaw ? 'disabled' : ''}>📱 COBRAR</button>
+                            <button onclick="cobrarOrc('${escapeHtml(whatsRaw)}', ${val}, '${nomeSeguro}')" class="flex-1 bg-green-600 p-2 rounded-xl font-bold border-none text-white hover:bg-green-700 transition" ${!hasWhats ? 'disabled style="opacity:0.5"' : ''}>📱 COBRAR</button>
                             <button onclick="excluir('orcamentos','${o.id}')" class="bg-red-900 px-3 rounded-xl border-none text-white hover:bg-red-800 transition flex-1"><i class="fas fa-trash"></i> EXCLUIR</button>
                         </div>
                     </div>`;
@@ -326,15 +432,12 @@
             });
         }
         
-        // FUNÇÕES GLOBAIS
+        // ==================== FUNÇÕES GLOBAIS ====================
         
+        // Cobrar venda via WhatsApp
         window.cobrar = (tel, val, nome) => {
-            if(!tel || tel === 'null' || tel === 'undefined') {
-                showToast("⚠️ Cliente não tem WhatsApp cadastrado!", "error");
-                return;
-            }
-            if(!validarWhatsapp(tel)) {
-                showToast("⚠️ Número de WhatsApp inválido! Use DDD + número (ex: 11999999999)", "error");
+            if(!tel || tel === 'null' || tel === 'undefined' || !validarWhatsapp(tel)) {
+                showToast("⚠️ Número de WhatsApp inválido! Use DDD + 9 + número (ex: 11999999999)", "error");
                 return;
             }
             const numero = formatarWhatsapp(tel);
@@ -343,13 +446,10 @@
             showToast("📱 Abrindo WhatsApp...", "success");
         };
         
+        // Cobrar orçamento via WhatsApp
         window.cobrarOrc = (tel, val, nome) => {
-            if(!tel || tel === 'null' || tel === 'undefined') {
-                showToast("⚠️ Cliente não tem WhatsApp cadastrado!", "error");
-                return;
-            }
-            if(!validarWhatsapp(tel)) {
-                showToast("⚠️ Número de WhatsApp inválido! Use DDD + número (ex: 11999999999)", "error");
+            if(!tel || tel === 'null' || tel === 'undefined' || !validarWhatsapp(tel)) {
+                showToast("⚠️ Número de WhatsApp inválido! Use DDD + 9 + número (ex: 11999999999)", "error");
                 return;
             }
             const numero = formatarWhatsapp(tel);
@@ -358,6 +458,7 @@
             showToast("📱 Abrindo WhatsApp...", "success");
         };
         
+        // Marcar venda como paga
         window.baixar = async (id, pago) => {
             if(!auth.currentUser) return showToast("Faça login novamente", "error");
             try {
@@ -368,6 +469,7 @@
             }
         };
         
+        // Excluir registro
         window.excluir = async (colecao, id) => {
             if(!auth.currentUser) return showToast("Faça login novamente", "error");
             if(confirm("⚠️ Tem certeza que deseja excluir permanentemente este registro?\n\nEsta ação NÃO pode ser desfeita!")) {
@@ -380,7 +482,9 @@
             }
         };
         
-        // BOTÃO SALVAR VENDA
+        // ==================== BOTÕES DO APP ====================
+        
+        // SALVAR VENDA
         let salvandoVenda = false;
         document.getElementById('btnSalvar').onclick = async () => {
             if(salvandoVenda) return;
@@ -435,7 +539,7 @@
             }
         };
         
-        // BOTÃO SALVAR ORÇAMENTO
+        // SALVAR ORÇAMENTO
         let salvandoOrc = false;
         document.getElementById('btnSalvarOrc').onclick = async () => {
             if(salvandoOrc) return;
@@ -489,7 +593,7 @@
             }
         };
         
-        // BOTÃO CONFIGURAÇÕES
+        // SALVAR CONFIGURAÇÕES
         document.getElementById('btnConfig').onclick = async () => {
             if(!auth.currentUser) return showToast("Faça login novamente", "error");
             
@@ -521,7 +625,7 @@
             }
         };
         
-        // BOTÃO SAIR
+        // SAIR DA CONTA
         document.getElementById('btnSair').onclick = async () => {
             if(confirm("Tem certeza que deseja sair da conta?")) {
                 try {
@@ -533,98 +637,8 @@
             }
         };
         
-        // AUTENTICAÇÃO - LOGIN
-        document.getElementById('btnEntrar').onclick = async () => {
-            if(auth.currentUser) {
-                showToast("⚠️ Você já está logado!", "error");
-                return;
-            }
-            
-            const email = document.getElementById('l-email').value.trim();
-            const senha = document.getElementById('l-senha').value;
-            
-            if(!email || !senha) {
-                showToast("❌ Preencha e-mail e senha!", "error");
-                return;
-            }
-            
-            const btn = document.getElementById('btnEntrar');
-            const txtOriginal = btn.innerText;
-            btn.innerText = "🔄 Entrando...";
-            btn.disabled = true;
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, senha);
-                showToast("✅ Login realizado com sucesso!", "success");
-                document.getElementById('l-email').value = '';
-                document.getElementById('l-senha').value = '';
-            } catch(e) {
-                let msg = "❌ Erro ao entrar: ";
-                if(e.code === 'auth/user-not-found') msg += "Usuário não encontrado";
-                else if(e.code === 'auth/wrong-password') msg += "Senha incorreta";
-                else if(e.code === 'auth/invalid-email') msg += "E-mail inválido";
-                else if(e.code === 'auth/too-many-requests') msg += "Muitas tentativas. Tente depois";
-                else msg += e.message;
-                showToast(msg, "error");
-            } finally {
-                btn.innerText = txtOriginal;
-                btn.disabled = false;
-            }
-        };
-        
-        // AUTENTICAÇÃO - CADASTRO
-        document.getElementById('btnCadastrar').onclick = async () => {
-            if(auth.currentUser) {
-                showToast("⚠️ Você já está logado! Saia antes de criar nova conta.", "error");
-                return;
-            }
-            
-            const email = document.getElementById('l-email').value.trim();
-            const senha = document.getElementById('l-senha').value;
-            
-            if(!email || !senha) {
-                showToast("❌ Preencha e-mail e senha!", "error");
-                return;
-            }
-            if(senha.length < 6) {
-                showToast("❌ A senha deve ter no mínimo 6 caracteres!", "error");
-                return;
-            }
-            if(!email.includes('@') || !email.includes('.')) {
-                showToast("❌ Digite um e-mail válido!", "error");
-                return;
-            }
-            
-            const btn = document.getElementById('btnCadastrar');
-            const txtOriginal = btn.innerText;
-            btn.innerText = "🔄 Criando conta...";
-            btn.disabled = true;
-            
-            try {
-                const cred = await auth.createUserWithEmailAndPassword(email, senha);
-                await db.collection("configuracoes").doc(cred.user.uid).set({ 
-                    loja: "MINHA LOJA", 
-                    pix: "",
-                    criadoEm: Date.now()
-                });
-                showToast("✅ Conta criada com sucesso! Bem-vindo!", "success");
-                document.getElementById('l-email').value = '';
-                document.getElementById('l-senha').value = '';
-            } catch(e) {
-                let msg = "❌ Erro ao criar conta: ";
-                if(e.code === 'auth/email-already-in-use') msg += "E-mail já cadastrado";
-                else if(e.code === 'auth/invalid-email') msg += "E-mail inválido";
-                else if(e.code === 'auth/weak-password') msg += "Senha muito fraca";
-                else msg += e.message;
-                showToast(msg, "error");
-            } finally {
-                btn.innerText = txtOriginal;
-                btn.disabled = false;
-            }
-        };
-        
-        // PREVENIR SUBMIT EM FORMS
-        document.querySelectorAll('input').forEach(input => {
+        // PREVENIR SUBMIT EM FORMS (Enter não envia)
+        document.querySelectorAll('input, textarea').forEach(input => {
             input.addEventListener('keypress', (e) => {
                 if(e.key === 'Enter') e.preventDefault();
             });
